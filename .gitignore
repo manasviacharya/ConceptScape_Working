@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data and Outputs (Uncomment if you want to push these to GitHub)
+# documents/
+# output/
+# data/
+
+# IDE files
+.vscode/
+.idea/
