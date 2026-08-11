@@ -42,10 +42,21 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump({"concepts": all_concepts}, f, indent=2, ensure_ascii=False)
         
-    logging.info("\nCONCEPT EXTRACTION COMPLETE")
+    # Count concepts by resource type
+    pdf_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "pdf")
+    ppt_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "ppt")
+    image_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "image")
+
+    logging.info("\n==================================================")
+    logging.info("INGESTION + CONCEPT EXTRACTION COMPLETE")
+    logging.info("==================================================")
     logging.info(f"Subject: {ingestion_data.get('subject_id')}")
-    logging.info(f"Concept mentions extracted: {len(all_concepts)}")
-    logging.info(f"Output saved to: {OUTPUT_FILE}")
+    logging.info("\nConcept mentions extracted by source type:")
+    logging.info(f"  PDF: {pdf_concepts}")
+    logging.info(f"  PPT: {ppt_concepts}")
+    logging.info(f"  Images: {image_concepts}")
+    logging.info(f"  Total: {len(all_concepts)}")
+    logging.info(f"\nOutput saved to: {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

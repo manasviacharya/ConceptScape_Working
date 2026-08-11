@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict, Any, Optional
 
 @dataclass
 class ContentChunk:
@@ -7,6 +7,7 @@ class ContentChunk:
     location_type: str
     location_number: int
     text: str
+    ocr_regions: Optional[List[Dict[str, Any]]] = None
 
 @dataclass
 class IngestedResource:

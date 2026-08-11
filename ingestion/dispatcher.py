@@ -6,17 +6,20 @@ from datetime import datetime
 from ingestion.base_parser import BaseParser
 from ingestion.pdf_parser import PDFParser
 from ingestion.ppt_parser import PPTParser
+from ingestion.image_parser import ImageParser
 from ingestion.models import IngestionResult, IngestedResource
 
 class IngestionDispatcher:
     def __init__(self):
         self.parsers: List[BaseParser] = [
             PDFParser(),
-            PPTParser()
+            PPTParser(),
+            ImageParser()
             # Register future parsers here
         ]
         self.pdf_count = 0
         self.ppt_count = 0
+        self.image_count = 0
 
     def _generate_resource_id(self, filepath: Path) -> str:
         ext = filepath.suffix.lower()
@@ -26,6 +29,9 @@ class IngestionDispatcher:
         elif ext in [".ppt", ".pptx"]:
             self.ppt_count += 1
             return f"ppt_{self.ppt_count:03d}"
+        elif ext in ImageParser.SUPPORTED_EXTENSIONS:
+            self.image_count += 1
+            return f"image_{self.image_count:03d}"
         return "unknown_000"
 
     def run(self, documents_dir: str, subject_id: str) -> IngestionResult:

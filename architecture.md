@@ -8,28 +8,24 @@ This documentation outlines the current implementation of the **Resource Ingesti
 ## Current Pipeline
 
 ```text
-documents/ (PDF, PPT)
-     │
-     ▼
-1. INGESTION LAYER
-   (run_ingestion.py)
-   - Parses files via PyMuPDF and python-pptx
-   - Preserves page/slide boundaries
-   - Normalizes to a Common Structured Representation
-     │
-     ▼
-   output/ingestion_result.json
-     │
-     ▼
-2. EXTRACTION LAYER
-   (run_extraction.py)
-   - Chunks ingested content
-   - Uses Groq (llama-3.3-70b-versatile) to extract concepts
-   - Extracts Definition, Keywords, Relationships
-   - Attaches strict Source Provenance metadata
-     │
-     ▼
-   data/extracted_concepts.json
+PDF (PyMuPDF)
+ │
+ ▼
+Structured text ──────────┐
+                          │
+PPT (python-pptx)         │
+ │                        │
+ ▼                        │
+Structured text ──────────┼──→ Gemini 2.5 Flash
+                          │        │
+Image (EasyOCR)           │        ▼
+ │                        │   Concept Extraction
+ ▼                        │        │
+Structured OCR text ──────┘        ▼
+                              Concept Mentions
+                                   │
+                                   ▼
+                              data/extracted_concepts.json
 ```
 
 ## Module Architecture
@@ -38,11 +34,12 @@ documents/ (PDF, PPT)
 * **`base_parser.py`**: Abstract interface for parsers (`can_handle`, `parse`).
 * **`pdf_parser.py`**: Implementation for parsing PDFs using `PyMuPDF`.
 * **`ppt_parser.py`**: Implementation for parsing PPT/PPTX using `python-pptx`.
+* **`image_parser.py`**: Implementation for parsing images (`.png`, `.jpg`, `.jpeg`, `.webp`) using `EasyOCR`. Includes OpenCV (`cv2`) preprocessing (BGR loading, 1200px resizing, and CLAHE contrast normalization) to handle high-resolution photos reliably. Outputs compact `[x1, y1, x2, y2]` bounding boxes in original image coordinates and filters noise using a confidence threshold.
 * **`dispatcher.py`**: Scans the input directory and automatically routes files to the correct parser.
 * **`models.py`**: Dataclasses for `IngestedResource` and `ContentChunk`.
 
 ### 2. Extraction (`extraction/`)
-* **`extractor.py`**: Main logic that takes chunks of text, interfaces with the Groq API for LLM inference, and maps the response into our required schema.
+* **`extractor.py`**: Main logic that takes chunks of text, interfaces with Gemini 2.5 Flash via `google-genai` SDK, and maps the response into our required schema.
 * **`models.py`**: Pydantic models (`ExtractedConcept`, `Relationship`, `ExtractionResult`) used to enforce strict JSON schemas on the LLM output.
 
 ## Future Stages (Planned)

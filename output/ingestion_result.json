@@ -2,178 +2,260 @@
   "subject_id": "subject_001",
   "resources": [
     {
-      "resource_id": "pdf_001",
-      "resource_type": "pdf",
-      "filename": "AI_Lecture 1.pdf",
+      "resource_id": "image_001",
+      "resource_type": "image",
+      "filename": "gradient_descent.png",
       "subject_id": "subject_001",
       "content": [
         {
-          "content_id": "pdf_001_page_1",
-          "location_type": "page",
+          "content_id": "image_001_image_1",
+          "location_type": "image",
           "location_number": 1,
-          "text": "INTRODUCTION TO \nARTIFICIAL \nINTELLIGENCE\nBy\nDr. Poulami Das"
-        },
-        {
-          "content_id": "pdf_001_page_2",
-          "location_type": "page",
-          "location_number": 2,
-          "text": "Goals of the Course"
-        },
-        {
-          "content_id": "pdf_001_page_3",
-          "location_type": "page",
-          "location_number": 3,
-          "text": "Some Fundamental Questions"
-        },
-        {
-          "content_id": "pdf_001_page_4",
-          "location_type": "page",
-          "location_number": 4,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_5",
-          "location_type": "page",
-          "location_number": 5,
-          "text": "Artificial Intelligence - Definition\n• Artificial\nIntelligence\nis\nan\narea\nof\nComputer Science that emphasizes the\ncreation of intelligent machines that work\nand react like humans.\n• Artificial\nIntelligence\nis\nintelligence\nexhibited by machines, rather than the\nhumans or animals."
-        },
-        {
-          "content_id": "pdf_001_page_6",
-          "location_type": "page",
-          "location_number": 6,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_7",
-          "location_type": "page",
-          "location_number": 7,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_8",
-          "location_type": "page",
-          "location_number": 8,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_9",
-          "location_type": "page",
-          "location_number": 9,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_10",
-          "location_type": "page",
-          "location_number": 10,
-          "text": "Applications of Artificial Intelligence"
-        },
-        {
-          "content_id": "pdf_001_page_11",
-          "location_type": "page",
-          "location_number": 11,
-          "text": "In Agriculture\nA firm called Blue River Technology has created a robot\nknown as See & Spray. It uses object detection like\ncomputer vision technologies to control and spray\nweedicide on cotton plants.\nAnother firm PEAT is developing an application known\nas Plantix which checks defects and nutrient deficiencies\nin the soil and abnormalities in plants using images."
-        },
-        {
-          "content_id": "pdf_001_page_12",
-          "location_type": "page",
-          "location_number": 12,
-          "text": "In Gaming\nThere is a tremendous application of AI in the\ngaming\nindustry.\nThere\nis\na\nfirm\ncalled\nDeepMind, which has developed a game that\ndefeated Chess champ Garry Kasparov.\nAnother example is the First Encounter Assault\nRecon, which is a first person shooter video\ngame.\n“I always say I was the first knowledge worker whose job \nwas threatened by a machine” – Garry Kasparov"
-        },
-        {
-          "content_id": "pdf_001_page_13",
-          "location_type": "page",
-          "location_number": 13,
-          "text": "In Space Exploration\nAI is used extensively in space exploration. Space\nexploration is used to analyze lots of data.\nAstronomers used AI to sift through lots of data\nfrom the Kepler telescope for identifying a solar\nplanet system.\nAnother instance of AI being used is Mars 2020\nRover. It is also known as AEGIS and is already on\nMARS. The rover is used to target cameras for\nperforming investigations on MARS."
-        },
-        {
-          "content_id": "pdf_001_page_14",
-          "location_type": "page",
-          "location_number": 14,
-          "text": "AI is instrumental in the case of self driving\nvehicles. Firms like Waymo are deploying\ntheir AI based public ride hailing service. The\nAI system collects data from cameras, GPS,\nvehicles radar, and cloud services to produce\ncontrol signals which operate the vehicle.\nAnother example is Tesla’s self driving car. AI\nis\nused\nto\nimplement\nimage\ndetection,\ncomputer vision and deep learning for making\ncars which automatically drive and check\nobjects.\nIn Self-driving vehicles"
-        },
-        {
-          "content_id": "pdf_001_page_15",
-          "location_type": "page",
-          "location_number": 15,
-          "text": "Teacher and AI collaboration.\nDifferentiated and individualized learning.\nUniversal access for all students.\nSupport outside the classroom.\nIn Education"
-        },
-        {
-          "content_id": "pdf_001_page_16",
-          "location_type": "page",
-          "location_number": 16,
-          "text": "•Chatbots, virtual assistants, and business \nintelligence bots\n•Targeted online advertising\n•Predictive analytics\n•Voice recognition\n•Pattern recognition using Clustering\n•Recommendation using Clustering\nIn Business"
-        },
-        {
-          "content_id": "pdf_001_page_17",
-          "location_type": "page",
-          "location_number": 17,
-          "text": "In Healthcare\nTelemedicine.\nNanorobots for operations.\nMedical chatbots.\nImage Processing for detection of diseases.\nMedical data analysis for prediction.\nAutomated prescription reading app."
-        },
-        {
-          "content_id": "pdf_001_page_18",
-          "location_type": "page",
-          "location_number": 18,
-          "text": "In Everyday Life"
-        },
-        {
-          "content_id": "pdf_001_page_19",
-          "location_type": "page",
-          "location_number": 19,
-          "text": "Smart homes, Smart hotels, Smart Industries -\nSmart Cities"
-        },
-        {
-          "content_id": "pdf_001_page_20",
-          "location_type": "page",
-          "location_number": 20,
-          "text": "“The\ncoming\nera\nof\nArtificial\nIntelligence will not be the era of\nwar,\nbut\nbe\nthe\nera\nof\ndeep\ncompassion, non-violence, and love.”\n- Amit Ray, Pioneer of Compassionate AI Movement"
-        },
-        {
-          "content_id": "pdf_001_page_21",
-          "location_type": "page",
-          "location_number": 21,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_22",
-          "location_type": "page",
-          "location_number": 22,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_23",
-          "location_type": "page",
-          "location_number": 23,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_24",
-          "location_type": "page",
-          "location_number": 24,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_25",
-          "location_type": "page",
-          "location_number": 25,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_26",
-          "location_type": "page",
-          "location_number": 26,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_27",
-          "location_type": "page",
-          "location_number": 27,
-          "text": ""
-        },
-        {
-          "content_id": "pdf_001_page_28",
-          "location_type": "page",
-          "location_number": 28,
-          "text": "THANK YOU"
+          "text": "Gradientdesentoptimization\nGradientdasentisa\nDtimization\nOrthm Used\nlcestunction\nLearning\nPate determines the stepsize ateach Iterationwhile moving\ntoraamo\nMm\nLccs Function measures howv far estimated valuesare trom actualvalues\nGlobal Minimum represents the state with the loivest pocsible Iccs",
+          "ocr_regions": [
+            {
+              "text": "Gradientdesentoptimization",
+              "confidence": 0.2957,
+              "bounding_box": [
+                [
+                  50,
+                  42
+                ],
+                [
+                  192,
+                  42
+                ],
+                [
+                  192,
+                  50
+                ],
+                [
+                  50,
+                  50
+                ]
+              ]
+            },
+            {
+              "text": "Gradientdasentisa",
+              "confidence": 0.2475,
+              "bounding_box": [
+                [
+                  50,
+                  102
+                ],
+                [
+                  146,
+                  102
+                ],
+                [
+                  146,
+                  110
+                ],
+                [
+                  50,
+                  110
+                ]
+              ]
+            },
+            {
+              "text": "Dtimization",
+              "confidence": 0.6339,
+              "bounding_box": [
+                [
+                  162,
+                  102
+                ],
+                [
+                  214,
+                  102
+                ],
+                [
+                  214,
+                  110
+                ],
+                [
+                  162,
+                  110
+                ]
+              ]
+            },
+            {
+              "text": "Orthm Used",
+              "confidence": 0.2891,
+              "bounding_box": [
+                [
+                  230,
+                  102
+                ],
+                [
+                  286,
+                  102
+                ],
+                [
+                  286,
+                  110
+                ],
+                [
+                  230,
+                  110
+                ]
+              ]
+            },
+            {
+              "text": "lcestunction",
+              "confidence": 0.5079,
+              "bounding_box": [
+                [
+                  352,
+                  102
+                ],
+                [
+                  412,
+                  102
+                ],
+                [
+                  412,
+                  110
+                ],
+                [
+                  352,
+                  110
+                ]
+              ]
+            },
+            {
+              "text": "Learning",
+              "confidence": 0.9836,
+              "bounding_box": [
+                [
+                  48,
+                  160
+                ],
+                [
+                  93,
+                  160
+                ],
+                [
+                  93,
+                  173
+                ],
+                [
+                  48,
+                  173
+                ]
+              ]
+            },
+            {
+              "text": "Pate determines the stepsize ateach Iterationwhile moving",
+              "confidence": 0.8692,
+              "bounding_box": [
+                [
+                  95,
+                  161
+                ],
+                [
+                  373,
+                  161
+                ],
+                [
+                  373,
+                  173
+                ],
+                [
+                  95,
+                  173
+                ]
+              ]
+            },
+            {
+              "text": "toraamo",
+              "confidence": 0.0615,
+              "bounding_box": [
+                [
+                  376,
+                  162
+                ],
+                [
+                  406,
+                  162
+                ],
+                [
+                  406,
+                  170
+                ],
+                [
+                  376,
+                  170
+                ]
+              ]
+            },
+            {
+              "text": "Mm",
+              "confidence": 0.0823,
+              "bounding_box": [
+                [
+                  416,
+                  164
+                ],
+                [
+                  464,
+                  164
+                ],
+                [
+                  464,
+                  170
+                ],
+                [
+                  416,
+                  170
+                ]
+              ]
+            },
+            {
+              "text": "Lccs Function measures howv far estimated valuesare trom actualvalues",
+              "confidence": 0.4005,
+              "bounding_box": [
+                [
+                  49,
+                  221
+                ],
+                [
+                  378,
+                  221
+                ],
+                [
+                  378,
+                  233
+                ],
+                [
+                  49,
+                  233
+                ]
+              ]
+            },
+            {
+              "text": "Global Minimum represents the state with the loivest pocsible Iccs",
+              "confidence": 0.6117,
+              "bounding_box": [
+                [
+                  49,
+                  279
+                ],
+                [
+                  351,
+                  279
+                ],
+                [
+                  351,
+                  295
+                ],
+                [
+                  49,
+                  295
+                ]
+              ]
+            }
+          ]
         }
       ]
     },
@@ -187,52 +269,1638 @@
           "content_id": "ppt_001_slide_1",
           "location_type": "slide",
           "location_number": 1,
-          "text": "Means to Overcome Barriers\n(Conflict Management)"
+          "text": "Means to Overcome Barriers\n(Conflict Management)",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_2",
           "location_type": "slide",
           "location_number": 2,
-          "text": "Conflict Management\n   What do you understand by the term conflict?"
+          "text": "Conflict Management\n   What do you understand by the term conflict?",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_3",
           "location_type": "slide",
           "location_number": 3,
-          "text": "Benefits of having a conflict:\nIf managed properly conflicts can lead to positive outcome.\nHelps to analyze goals in real-time\nCreates dialogue\nFosters creative solutions\nConflict helps to overcome individual psychological barriers by forcing people out of their traditional mode of thinking.\nHigher decision quality especially when the resistance is strong\n\n    Without conflict organizations and employees stagnate"
+          "text": "Benefits of having a conflict:\nIf managed properly conflicts can lead to positive outcome.\nHelps to analyze goals in real-time\nCreates dialogue\nFosters creative solutions\nConflict helps to overcome individual psychological barriers by forcing people out of their traditional mode of thinking.\nHigher decision quality especially when the resistance is strong\n\n    Without conflict organizations and employees stagnate",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_4",
           "location_type": "slide",
           "location_number": 4,
-          "text": "Types of Conflict:\nInterpersonal\nOrganizational\nTechnical\nNational and International"
+          "text": "Types of Conflict:\nInterpersonal\nOrganizational\nTechnical\nNational and International",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_5",
           "location_type": "slide",
           "location_number": 5,
-          "text": "Conflict resolution Strategies:\nAvoiding\nAccommodating\nCompromising\nForcing\nProblem solving- Negotiating"
+          "text": "Conflict resolution Strategies:\nAvoiding\nAccommodating\nCompromising\nForcing\nProblem solving- Negotiating",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_6",
           "location_type": "slide",
           "location_number": 6,
-          "text": "Negotiating as the best strategy:\n\n\nCooperation is better than Competition\nParties can be trusted (Communication Pyramid)\nDifferences can be minimized\nMutually acceptable solution can be found"
+          "text": "Negotiating as the best strategy:\n\n\nCooperation is better than Competition\nParties can be trusted (Communication Pyramid)\nDifferences can be minimized\nMutually acceptable solution can be found",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_7",
           "location_type": "slide",
           "location_number": 7,
-          "text": "Communication Pyramid"
+          "text": "Communication Pyramid",
+          "ocr_regions": null
         },
         {
           "content_id": "ppt_001_slide_8",
           "location_type": "slide",
           "location_number": 8,
-          "text": "https://www.ted.com/talks/guy_winch_why_we_all_need_to_practice_emotional_first_aid?language=en"
+          "text": "https://www.ted.com/talks/guy_winch_why_we_all_need_to_practice_emotional_first_aid?language=en",
+          "ocr_regions": null
+        }
+      ]
+    },
+    {
+      "resource_id": "image_002",
+      "resource_type": "image",
+      "filename": "Hill Climbing.jpg",
+      "subject_id": "subject_001",
+      "content": [
+        {
+          "content_id": "image_002_image_1",
+          "location_type": "image",
+          "location_number": 1,
+          "text": "SlFr\nHR CLmEi3t\nAan-(Loxte4 E'\nspbrocck\nNoback A4ck\nBYAde Z6e\nIH Tate\n2\n45E5\n46\nAdEio n\nJE\nord\nOT _\n#er\n9(Q_\n90\n2F }\n0\n25046n3\n8EH\nseeaE\n~tFA\n0\n6feraadoc\nExalste + 2\n1evy #ae\n7 344 +en\n9L\n~{bebtere #han_~A-e\nCMUU-t\nHate\n42-\nCvUQ71\n~bodes\nLl4iy\nLocl Maina\nPAFewERET4:\nRiste\n(ove t\n0h aose\ndr cln\nGuueld\nCook\nneVO\n+EF\nTowo\n7tt",
+          "ocr_regions": [
+            {
+              "text": "SlFr",
+              "confidence": 0.0465,
+              "bounding_box": [
+                [
+                  351,
+                  133
+                ],
+                [
+                  711,
+                  133
+                ],
+                [
+                  711,
+                  290
+                ],
+                [
+                  351,
+                  290
+                ]
+              ]
+            },
+            {
+              "text": "HR CLmEi3t",
+              "confidence": 0.0434,
+              "bounding_box": [
+                [
+                  753,
+                  132
+                ],
+                [
+                  1414,
+                  132
+                ],
+                [
+                  1414,
+                  267
+                ],
+                [
+                  753,
+                  267
+                ]
+              ]
+            },
+            {
+              "text": "Aan-(Loxte4 E'",
+              "confidence": 0.0022,
+              "bounding_box": [
+                [
+                  1433,
+                  127
+                ],
+                [
+                  2694,
+                  127
+                ],
+                [
+                  2694,
+                  312
+                ],
+                [
+                  1433,
+                  312
+                ]
+              ]
+            },
+            {
+              "text": "spbrocck",
+              "confidence": 0.0646,
+              "bounding_box": [
+                [
+                  2461,
+                  250
+                ],
+                [
+                  2809,
+                  250
+                ],
+                [
+                  2809,
+                  364
+                ],
+                [
+                  2461,
+                  364
+                ]
+              ]
+            },
+            {
+              "text": "Noback A4ck",
+              "confidence": 0.5646,
+              "bounding_box": [
+                [
+                  2114,
+                  345
+                ],
+                [
+                  2737,
+                  345
+                ],
+                [
+                  2737,
+                  434
+                ],
+                [
+                  2114,
+                  434
+                ]
+              ]
+            },
+            {
+              "text": "BYAde Z6e",
+              "confidence": 0.1263,
+              "bounding_box": [
+                [
+                  463,
+                  389
+                ],
+                [
+                  1230,
+                  389
+                ],
+                [
+                  1230,
+                  527
+                ],
+                [
+                  463,
+                  527
+                ]
+              ]
+            },
+            {
+              "text": "IH Tate",
+              "confidence": 0.0612,
+              "bounding_box": [
+                [
+                  1283,
+                  386
+                ],
+                [
+                  1950,
+                  386
+                ],
+                [
+                  1950,
+                  530
+                ],
+                [
+                  1283,
+                  530
+                ]
+              ]
+            },
+            {
+              "text": "2",
+              "confidence": 1.0,
+              "bounding_box": [
+                [
+                  371,
+                  621
+                ],
+                [
+                  450,
+                  621
+                ],
+                [
+                  450,
+                  697
+                ],
+                [
+                  371,
+                  697
+                ]
+              ]
+            },
+            {
+              "text": "45E5",
+              "confidence": 0.1936,
+              "bounding_box": [
+                [
+                  1053,
+                  583
+                ],
+                [
+                  1375,
+                  583
+                ],
+                [
+                  1375,
+                  720
+                ],
+                [
+                  1053,
+                  720
+                ]
+              ]
+            },
+            {
+              "text": "46",
+              "confidence": 0.8639,
+              "bounding_box": [
+                [
+                  1705,
+                  617
+                ],
+                [
+                  1837,
+                  617
+                ],
+                [
+                  1837,
+                  707
+                ],
+                [
+                  1705,
+                  707
+                ]
+              ]
+            },
+            {
+              "text": "AdEio n",
+              "confidence": 0.0866,
+              "bounding_box": [
+                [
+                  1814,
+                  578
+                ],
+                [
+                  2148,
+                  578
+                ],
+                [
+                  2148,
+                  722
+                ],
+                [
+                  1814,
+                  722
+                ]
+              ]
+            },
+            {
+              "text": "JE",
+              "confidence": 0.4889,
+              "bounding_box": [
+                [
+                  2182,
+                  646
+                ],
+                [
+                  2300,
+                  646
+                ],
+                [
+                  2300,
+                  726
+                ],
+                [
+                  2182,
+                  726
+                ]
+              ]
+            },
+            {
+              "text": "ord",
+              "confidence": 0.6541,
+              "bounding_box": [
+                [
+                  2315,
+                  583
+                ],
+                [
+                  2636,
+                  583
+                ],
+                [
+                  2636,
+                  729
+                ],
+                [
+                  2315,
+                  729
+                ]
+              ]
+            },
+            {
+              "text": "OT _",
+              "confidence": 0.4101,
+              "bounding_box": [
+                [
+                  552,
+                  731
+                ],
+                [
+                  721,
+                  731
+                ],
+                [
+                  721,
+                  807
+                ],
+                [
+                  552,
+                  807
+                ]
+              ]
+            },
+            {
+              "text": "#er",
+              "confidence": 0.7467,
+              "bounding_box": [
+                [
+                  759,
+                  698
+                ],
+                [
+                  1101,
+                  698
+                ],
+                [
+                  1101,
+                  815
+                ],
+                [
+                  759,
+                  815
+                ]
+              ]
+            },
+            {
+              "text": "9(Q_",
+              "confidence": 0.2102,
+              "bounding_box": [
+                [
+                  1146,
+                  733
+                ],
+                [
+                  1349,
+                  733
+                ],
+                [
+                  1349,
+                  817
+                ],
+                [
+                  1146,
+                  817
+                ]
+              ]
+            },
+            {
+              "text": "90",
+              "confidence": 0.252,
+              "bounding_box": [
+                [
+                  1391,
+                  757
+                ],
+                [
+                  1504,
+                  757
+                ],
+                [
+                  1504,
+                  813
+                ],
+                [
+                  1391,
+                  813
+                ]
+              ]
+            },
+            {
+              "text": "2F }",
+              "confidence": 0.1126,
+              "bounding_box": [
+                [
+                  1553,
+                  719
+                ],
+                [
+                  2043,
+                  719
+                ],
+                [
+                  2043,
+                  821
+                ],
+                [
+                  1553,
+                  821
+                ]
+              ]
+            },
+            {
+              "text": "0",
+              "confidence": 0.4826,
+              "bounding_box": [
+                [
+                  2119,
+                  740
+                ],
+                [
+                  2184,
+                  740
+                ],
+                [
+                  2184,
+                  821
+                ],
+                [
+                  2119,
+                  821
+                ]
+              ]
+            },
+            {
+              "text": "25046n3",
+              "confidence": 0.0533,
+              "bounding_box": [
+                [
+                  2226,
+                  705
+                ],
+                [
+                  2640,
+                  705
+                ],
+                [
+                  2640,
+                  827
+                ],
+                [
+                  2226,
+                  827
+                ]
+              ]
+            },
+            {
+              "text": "8EH",
+              "confidence": 0.0931,
+              "bounding_box": [
+                [
+                  796,
+                  806
+                ],
+                [
+                  1085,
+                  806
+                ],
+                [
+                  1085,
+                  931
+                ],
+                [
+                  796,
+                  931
+                ]
+              ]
+            },
+            {
+              "text": "seeaE",
+              "confidence": 0.0776,
+              "bounding_box": [
+                [
+                  618,
+                  964
+                ],
+                [
+                  965,
+                  964
+                ],
+                [
+                  965,
+                  1125
+                ],
+                [
+                  618,
+                  1125
+                ]
+              ]
+            },
+            {
+              "text": "~tFA",
+              "confidence": 0.1364,
+              "bounding_box": [
+                [
+                  1178,
+                  989
+                ],
+                [
+                  1535,
+                  989
+                ],
+                [
+                  1535,
+                  1138
+                ],
+                [
+                  1178,
+                  1138
+                ]
+              ]
+            },
+            {
+              "text": "0",
+              "confidence": 0.3917,
+              "bounding_box": [
+                [
+                  1583,
+                  1036
+                ],
+                [
+                  1645,
+                  1036
+                ],
+                [
+                  1645,
+                  1092
+                ],
+                [
+                  1583,
+                  1092
+                ]
+              ]
+            },
+            {
+              "text": "6feraadoc",
+              "confidence": 0.1532,
+              "bounding_box": [
+                [
+                  1998,
+                  990
+                ],
+                [
+                  2491,
+                  990
+                ],
+                [
+                  2491,
+                  1127
+                ],
+                [
+                  1998,
+                  1127
+                ]
+              ]
+            },
+            {
+              "text": "Exalste + 2",
+              "confidence": 0.1965,
+              "bounding_box": [
+                [
+                  622,
+                  1118
+                ],
+                [
+                  1383,
+                  1118
+                ],
+                [
+                  1383,
+                  1251
+                ],
+                [
+                  622,
+                  1251
+                ]
+              ]
+            },
+            {
+              "text": "1evy #ae",
+              "confidence": 0.2213,
+              "bounding_box": [
+                [
+                  1405,
+                  1104
+                ],
+                [
+                  2019,
+                  1104
+                ],
+                [
+                  2019,
+                  1242
+                ],
+                [
+                  1405,
+                  1242
+                ]
+              ]
+            },
+            {
+              "text": "7 344 +en",
+              "confidence": 0.0681,
+              "bounding_box": [
+                [
+                  722,
+                  1216
+                ],
+                [
+                  1521,
+                  1216
+                ],
+                [
+                  1521,
+                  1412
+                ],
+                [
+                  722,
+                  1412
+                ]
+              ]
+            },
+            {
+              "text": "9L",
+              "confidence": 0.168,
+              "bounding_box": [
+                [
+                  1565,
+                  1245
+                ],
+                [
+                  1801,
+                  1245
+                ],
+                [
+                  1801,
+                  1353
+                ],
+                [
+                  1565,
+                  1353
+                ]
+              ]
+            },
+            {
+              "text": "~{bebtere #han_~A-e",
+              "confidence": 0.0343,
+              "bounding_box": [
+                [
+                  611,
+                  1361
+                ],
+                [
+                  1790,
+                  1361
+                ],
+                [
+                  1790,
+                  1520
+                ],
+                [
+                  611,
+                  1520
+                ]
+              ]
+            },
+            {
+              "text": "CMUU-t",
+              "confidence": 0.1682,
+              "bounding_box": [
+                [
+                  1827,
+                  1357
+                ],
+                [
+                  2281,
+                  1357
+                ],
+                [
+                  2281,
+                  1468
+                ],
+                [
+                  1827,
+                  1468
+                ]
+              ]
+            },
+            {
+              "text": "Hate",
+              "confidence": 0.2493,
+              "bounding_box": [
+                [
+                  2275,
+                  1311
+                ],
+                [
+                  2674,
+                  1311
+                ],
+                [
+                  2674,
+                  1486
+                ],
+                [
+                  2275,
+                  1486
+                ]
+              ]
+            },
+            {
+              "text": "42-",
+              "confidence": 0.6956,
+              "bounding_box": [
+                [
+                  651,
+                  1531
+                ],
+                [
+                  990,
+                  1531
+                ],
+                [
+                  990,
+                  1627
+                ],
+                [
+                  651,
+                  1627
+                ]
+              ]
+            },
+            {
+              "text": "CvUQ71",
+              "confidence": 0.0503,
+              "bounding_box": [
+                [
+                  1712,
+                  1507
+                ],
+                [
+                  2188,
+                  1507
+                ],
+                [
+                  2188,
+                  1618
+                ],
+                [
+                  1712,
+                  1618
+                ]
+              ]
+            },
+            {
+              "text": "~bodes",
+              "confidence": 0.2278,
+              "bounding_box": [
+                [
+                  2194,
+                  1458
+                ],
+                [
+                  2637,
+                  1458
+                ],
+                [
+                  2637,
+                  1655
+                ],
+                [
+                  2194,
+                  1655
+                ]
+              ]
+            },
+            {
+              "text": "Ll4iy",
+              "confidence": 0.1392,
+              "bounding_box": [
+                [
+                  363,
+                  1754
+                ],
+                [
+                  1059,
+                  1754
+                ],
+                [
+                  1059,
+                  1926
+                ],
+                [
+                  363,
+                  1926
+                ]
+              ]
+            },
+            {
+              "text": "Locl Maina",
+              "confidence": 0.3239,
+              "bounding_box": [
+                [
+                  572,
+                  1993
+                ],
+                [
+                  1386,
+                  1993
+                ],
+                [
+                  1386,
+                  2133
+                ],
+                [
+                  572,
+                  2133
+                ]
+              ]
+            },
+            {
+              "text": "PAFewERET4:",
+              "confidence": 0.0943,
+              "bounding_box": [
+                [
+                  383,
+                  2802
+                ],
+                [
+                  1639,
+                  2802
+                ],
+                [
+                  1639,
+                  2987
+                ],
+                [
+                  383,
+                  2987
+                ]
+              ]
+            },
+            {
+              "text": "Riste",
+              "confidence": 0.1836,
+              "bounding_box": [
+                [
+                  415,
+                  3205
+                ],
+                [
+                  886,
+                  3205
+                ],
+                [
+                  886,
+                  3418
+                ],
+                [
+                  415,
+                  3418
+                ]
+              ]
+            },
+            {
+              "text": "(ove t",
+              "confidence": 0.1241,
+              "bounding_box": [
+                [
+                  2020,
+                  3398
+                ],
+                [
+                  2722,
+                  3398
+                ],
+                [
+                  2722,
+                  3619
+                ],
+                [
+                  2020,
+                  3619
+                ]
+              ]
+            },
+            {
+              "text": "0h aose",
+              "confidence": 0.1603,
+              "bounding_box": [
+                [
+                  2356,
+                  3584
+                ],
+                [
+                  2827,
+                  3584
+                ],
+                [
+                  2827,
+                  3731
+                ],
+                [
+                  2356,
+                  3731
+                ]
+              ]
+            },
+            {
+              "text": "dr cln",
+              "confidence": 0.2245,
+              "bounding_box": [
+                [
+                  2368,
+                  3726
+                ],
+                [
+                  2918,
+                  3726
+                ],
+                [
+                  2918,
+                  3864
+                ],
+                [
+                  2368,
+                  3864
+                ]
+              ]
+            },
+            {
+              "text": "Guueld",
+              "confidence": 0.1367,
+              "bounding_box": [
+                [
+                  2109,
+                  189
+                ],
+                [
+                  2475,
+                  263
+                ],
+                [
+                  2440,
+                  392
+                ],
+                [
+                  2075,
+                  318
+                ]
+              ]
+            },
+            {
+              "text": "Cook",
+              "confidence": 0.3342,
+              "bounding_box": [
+                [
+                  531,
+                  597
+                ],
+                [
+                  759,
+                  627
+                ],
+                [
+                  741,
+                  729
+                ],
+                [
+                  512,
+                  699
+                ]
+              ]
+            },
+            {
+              "text": "neVO",
+              "confidence": 0.1225,
+              "bounding_box": [
+                [
+                  1697,
+                  1028
+                ],
+                [
+                  1977,
+                  1003
+                ],
+                [
+                  1979,
+                  1102
+                ],
+                [
+                  1699,
+                  1127
+                ]
+              ]
+            },
+            {
+              "text": "+EF",
+              "confidence": 0.0906,
+              "bounding_box": [
+                [
+                  1020,
+                  1496
+                ],
+                [
+                  1365,
+                  1541
+                ],
+                [
+                  1342,
+                  1660
+                ],
+                [
+                  998,
+                  1615
+                ]
+              ]
+            },
+            {
+              "text": "Towo",
+              "confidence": 0.1834,
+              "bounding_box": [
+                [
+                  1400,
+                  1540
+                ],
+                [
+                  1694,
+                  1515
+                ],
+                [
+                  1696,
+                  1633
+                ],
+                [
+                  1401,
+                  1658
+                ]
+              ]
+            },
+            {
+              "text": "7tt",
+              "confidence": 0.1729,
+              "bounding_box": [
+                [
+                  1828,
+                  2940
+                ],
+                [
+                  2006,
+                  2928
+                ],
+                [
+                  2006,
+                  3025
+                ],
+                [
+                  1828,
+                  3036
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource_id": "image_003",
+      "resource_type": "image",
+      "filename": "GA Flowchart.jpg",
+      "subject_id": "subject_001",
+      "content": [
+        {
+          "content_id": "image_003_image_1",
+          "location_type": "image",
+          "location_number": 1,
+          "text": "@eneLic\nAqouEs\nToiEi_EE AE}\n@lculae 6i5negt\nSeLec+i6\nGro $ & over\nMuLaliov\n40\nSFoPcrtex\n~xaatchex\n9 es\nFErmnal <o8Atox)\n0 T",
+          "ocr_regions": [
+            {
+              "text": "@eneLic",
+              "confidence": 0.5063,
+              "bounding_box": [
+                [
+                  175,
+                  280
+                ],
+                [
+                  764,
+                  280
+                ],
+                [
+                  764,
+                  445
+                ],
+                [
+                  175,
+                  445
+                ]
+              ]
+            },
+            {
+              "text": "AqouEs",
+              "confidence": 0.0376,
+              "bounding_box": [
+                [
+                  823,
+                  236
+                ],
+                [
+                  1628,
+                  236
+                ],
+                [
+                  1628,
+                  516
+                ],
+                [
+                  823,
+                  516
+                ]
+              ]
+            },
+            {
+              "text": "ToiEi_EE AE}",
+              "confidence": 0.0375,
+              "bounding_box": [
+                [
+                  1037,
+                  666
+                ],
+                [
+                  2096,
+                  666
+                ],
+                [
+                  2096,
+                  841
+                ],
+                [
+                  1037,
+                  841
+                ]
+              ]
+            },
+            {
+              "text": "@lculae 6i5negt",
+              "confidence": 0.0831,
+              "bounding_box": [
+                [
+                  1046,
+                  969
+                ],
+                [
+                  2149,
+                  969
+                ],
+                [
+                  2149,
+                  1125
+                ],
+                [
+                  1046,
+                  1125
+                ]
+              ]
+            },
+            {
+              "text": "SeLec+i6",
+              "confidence": 0.5592,
+              "bounding_box": [
+                [
+                  1184,
+                  1252
+                ],
+                [
+                  1984,
+                  1252
+                ],
+                [
+                  1984,
+                  1391
+                ],
+                [
+                  1184,
+                  1391
+                ]
+              ]
+            },
+            {
+              "text": "Gro $ & over",
+              "confidence": 0.4217,
+              "bounding_box": [
+                [
+                  1173,
+                  1566
+                ],
+                [
+                  2123,
+                  1566
+                ],
+                [
+                  2123,
+                  1699
+                ],
+                [
+                  1173,
+                  1699
+                ]
+              ]
+            },
+            {
+              "text": "MuLaliov",
+              "confidence": 0.1961,
+              "bounding_box": [
+                [
+                  1229,
+                  1855
+                ],
+                [
+                  1973,
+                  1855
+                ],
+                [
+                  1973,
+                  1984
+                ],
+                [
+                  1229,
+                  1984
+                ]
+              ]
+            },
+            {
+              "text": "40",
+              "confidence": 0.3757,
+              "bounding_box": [
+                [
+                  1088,
+                  2243
+                ],
+                [
+                  1266,
+                  2243
+                ],
+                [
+                  1266,
+                  2322
+                ],
+                [
+                  1088,
+                  2322
+                ]
+              ]
+            },
+            {
+              "text": "SFoPcrtex",
+              "confidence": 0.2621,
+              "bounding_box": [
+                [
+                  1365,
+                  2312
+                ],
+                [
+                  2030,
+                  2312
+                ],
+                [
+                  2030,
+                  2446
+                ],
+                [
+                  1365,
+                  2446
+                ]
+              ]
+            },
+            {
+              "text": "~xaatchex",
+              "confidence": 0.2127,
+              "bounding_box": [
+                [
+                  1428,
+                  2420
+                ],
+                [
+                  1838,
+                  2420
+                ],
+                [
+                  1838,
+                  2523
+                ],
+                [
+                  1428,
+                  2523
+                ]
+              ]
+            },
+            {
+              "text": "9 es",
+              "confidence": 0.2664,
+              "bounding_box": [
+                [
+                  1703,
+                  2638
+                ],
+                [
+                  2001,
+                  2638
+                ],
+                [
+                  2001,
+                  2786
+                ],
+                [
+                  1703,
+                  2786
+                ]
+              ]
+            },
+            {
+              "text": "FErmnal <o8Atox)",
+              "confidence": 0.0595,
+              "bounding_box": [
+                [
+                  1372,
+                  2777
+                ],
+                [
+                  2682,
+                  2777
+                ],
+                [
+                  2682,
+                  3002
+                ],
+                [
+                  1372,
+                  3002
+                ]
+              ]
+            },
+            {
+              "text": "0 T",
+              "confidence": 0.9172,
+              "bounding_box": [
+                [
+                  2092,
+                  731
+                ],
+                [
+                  2258,
+                  753
+                ],
+                [
+                  2242,
+                  837
+                ],
+                [
+                  2076,
+                  815
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource_id": "pdf_001",
+      "resource_type": "pdf",
+      "filename": "AI_Lecture 1.pdf",
+      "subject_id": "subject_001",
+      "content": [
+        {
+          "content_id": "pdf_001_page_1",
+          "location_type": "page",
+          "location_number": 1,
+          "text": "INTRODUCTION TO \nARTIFICIAL \nINTELLIGENCE\nBy\nDr. Poulami Das",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_2",
+          "location_type": "page",
+          "location_number": 2,
+          "text": "Goals of the Course",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_3",
+          "location_type": "page",
+          "location_number": 3,
+          "text": "Some Fundamental Questions",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_4",
+          "location_type": "page",
+          "location_number": 4,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_5",
+          "location_type": "page",
+          "location_number": 5,
+          "text": "Artificial Intelligence - Definition\n• Artificial\nIntelligence\nis\nan\narea\nof\nComputer Science that emphasizes the\ncreation of intelligent machines that work\nand react like humans.\n• Artificial\nIntelligence\nis\nintelligence\nexhibited by machines, rather than the\nhumans or animals.",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_6",
+          "location_type": "page",
+          "location_number": 6,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_7",
+          "location_type": "page",
+          "location_number": 7,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_8",
+          "location_type": "page",
+          "location_number": 8,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_9",
+          "location_type": "page",
+          "location_number": 9,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_10",
+          "location_type": "page",
+          "location_number": 10,
+          "text": "Applications of Artificial Intelligence",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_11",
+          "location_type": "page",
+          "location_number": 11,
+          "text": "In Agriculture\nA firm called Blue River Technology has created a robot\nknown as See & Spray. It uses object detection like\ncomputer vision technologies to control and spray\nweedicide on cotton plants.\nAnother firm PEAT is developing an application known\nas Plantix which checks defects and nutrient deficiencies\nin the soil and abnormalities in plants using images.",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_12",
+          "location_type": "page",
+          "location_number": 12,
+          "text": "In Gaming\nThere is a tremendous application of AI in the\ngaming\nindustry.\nThere\nis\na\nfirm\ncalled\nDeepMind, which has developed a game that\ndefeated Chess champ Garry Kasparov.\nAnother example is the First Encounter Assault\nRecon, which is a first person shooter video\ngame.\n“I always say I was the first knowledge worker whose job \nwas threatened by a machine” – Garry Kasparov",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_13",
+          "location_type": "page",
+          "location_number": 13,
+          "text": "In Space Exploration\nAI is used extensively in space exploration. Space\nexploration is used to analyze lots of data.\nAstronomers used AI to sift through lots of data\nfrom the Kepler telescope for identifying a solar\nplanet system.\nAnother instance of AI being used is Mars 2020\nRover. It is also known as AEGIS and is already on\nMARS. The rover is used to target cameras for\nperforming investigations on MARS.",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_14",
+          "location_type": "page",
+          "location_number": 14,
+          "text": "AI is instrumental in the case of self driving\nvehicles. Firms like Waymo are deploying\ntheir AI based public ride hailing service. The\nAI system collects data from cameras, GPS,\nvehicles radar, and cloud services to produce\ncontrol signals which operate the vehicle.\nAnother example is Tesla’s self driving car. AI\nis\nused\nto\nimplement\nimage\ndetection,\ncomputer vision and deep learning for making\ncars which automatically drive and check\nobjects.\nIn Self-driving vehicles",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_15",
+          "location_type": "page",
+          "location_number": 15,
+          "text": "Teacher and AI collaboration.\nDifferentiated and individualized learning.\nUniversal access for all students.\nSupport outside the classroom.\nIn Education",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_16",
+          "location_type": "page",
+          "location_number": 16,
+          "text": "•Chatbots, virtual assistants, and business \nintelligence bots\n•Targeted online advertising\n•Predictive analytics\n•Voice recognition\n•Pattern recognition using Clustering\n•Recommendation using Clustering\nIn Business",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_17",
+          "location_type": "page",
+          "location_number": 17,
+          "text": "In Healthcare\nTelemedicine.\nNanorobots for operations.\nMedical chatbots.\nImage Processing for detection of diseases.\nMedical data analysis for prediction.\nAutomated prescription reading app.",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_18",
+          "location_type": "page",
+          "location_number": 18,
+          "text": "In Everyday Life",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_19",
+          "location_type": "page",
+          "location_number": 19,
+          "text": "Smart homes, Smart hotels, Smart Industries -\nSmart Cities",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_20",
+          "location_type": "page",
+          "location_number": 20,
+          "text": "“The\ncoming\nera\nof\nArtificial\nIntelligence will not be the era of\nwar,\nbut\nbe\nthe\nera\nof\ndeep\ncompassion, non-violence, and love.”\n- Amit Ray, Pioneer of Compassionate AI Movement",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_21",
+          "location_type": "page",
+          "location_number": 21,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_22",
+          "location_type": "page",
+          "location_number": 22,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_23",
+          "location_type": "page",
+          "location_number": 23,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_24",
+          "location_type": "page",
+          "location_number": 24,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_25",
+          "location_type": "page",
+          "location_number": 25,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_26",
+          "location_type": "page",
+          "location_number": 26,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_27",
+          "location_type": "page",
+          "location_number": 27,
+          "text": "",
+          "ocr_regions": null
+        },
+        {
+          "content_id": "pdf_001_page_28",
+          "location_type": "page",
+          "location_number": 28,
+          "text": "THANK YOU",
+          "ocr_regions": null
         }
       ]
     }
   ],
-  "ingestion_timestamp": "2026-08-10T23:30:08.426818"
+  "ingestion_timestamp": "2026-08-11T14:31:36.602112"
 }
