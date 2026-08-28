@@ -55,13 +55,41 @@ class Settings(BaseSettings):
     neo4j_password: str = ""
     neo4j_database: str = "neo4j"
 
+    # embeddings / vector store
+    embedding_model: str = "BAAI/bge-m3"
+    qdrant_url: str = ""            # empty -> embedded local mode (no server)
+    qdrant_api_key: str = ""
+    qdrant_path: str = "qdrant_data"
+    qdrant_timeout: int = 120
+    qdrant_upsert_batch: int = 16
+    retrieval_top_k: int = 8
+    semantic_score_threshold: float = 0.30
+
+    # hybrid fusion weights per retriever
+    weight_keyword: float = 1.0
+    weight_semantic: float = 1.0
+    weight_graph: float = 0.8
+
+    # RAG
+    rag_max_citations: int = 12
+    rag_evidence_per_concept: int = 2
+    rag_chunk_char_limit: int = 600
+    rag_thin_evidence_threshold: int = 3
+
     # relationships — controlled vocabulary; anything outside this is rejected
     relationship_types: list[str] = [
         "related_to", "part_of", "depends_on", "requires", "produces",
         "causes", "used_for", "example_of", "prerequisite_of",
     ]
 
+    # cross-chunk linking — large documents are batched so the JSON response
+    # stays small enough for provider-side validation
+    cross_chunk_max_concepts: int = 15
+    cross_chunk_anchor_concepts: int = 4
+
     # normalization
+    # merge the same concept across documents into one node
+    normalize_cross_document: bool = True
     normalize_strip_parentheticals: bool = True
     normalize_fold_plurals: bool = True
 

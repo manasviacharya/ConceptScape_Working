@@ -1,14 +1,12 @@
-import hashlib
 import json
 import logging
-import re
-import unicodedata
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from config import settings
 from llm_provider import LLMProvider
-from relationships.models import Relationship
+from relationships.common import make_relationship_id, norm, verify_evidence
+from relationships.models import EvidenceRecord, Relationship
 
 RELATIONSHIP_SCHEMA = {
     "type": "OBJECT",
@@ -30,25 +28,6 @@ RELATIONSHIP_SCHEMA = {
     },
     "required": ["relationships"],
 }
-
-
-def _norm(s: str) -> str:
-    s = unicodedata.normalize("NFKC", s or "")
-    return re.sub(r"\s+", " ", s).strip().casefold()
-
-
-def _verify_evidence(evidence: str, chunk_text: str, raw_page_text: str) -> Optional[str]:
-    """Same contract as concept evidence: the span must actually be in the source."""
-    if not evidence or not evidence.strip():
-        return None
-    ev = _norm(evidence)
-    if len(ev) < 10:
-        return None
-    if ev in _norm(chunk_text):
-        return "text"
-    if raw_page_text and ev in _norm(raw_page_text):
-        return "raw_page_text"
-    return None
 
 
 class RelationshipExtractor:
@@ -120,9 +99,9 @@ Text:
 
         name_to_id: Dict[str, str] = {}
         for c in canonical:
-            name_to_id[_norm(c["canonical_name"])] = c["concept_id"]
+            name_to_id[norm(c["canonical_name"])] = c["concept_id"]
             for alias in c.get("aliases", []):
-                name_to_id.setdefault(_norm(alias), c["concept_id"])
+                name_to_id.setdefault(norm(alias), c["concept_id"])
 
         id_to_name = {c["concept_id"]: c["canonical_name"] for c in canonical}
 
@@ -160,8 +139,8 @@ Text:
                     dropped_badtype += 1
                     continue
 
-                src_id = name_to_id.get(_norm(r.get("source", "")))
-                tgt_id = name_to_id.get(_norm(r.get("target", "")))
+                src_id = name_to_id.get(norm(r.get("source", "")))
+                tgt_id = name_to_id.get(norm(r.get("target", "")))
                 if not src_id or not tgt_id:
                     dropped_unknown += 1
                     logging.warning(
@@ -173,8 +152,9 @@ Text:
                     dropped_selfloop += 1
                     continue
 
-                verified = _verify_evidence(
-                    r.get("evidence", ""), chunk["text"], chunk.get("raw_page_text", "")
+                verified = verify_evidence(
+                    r.get("evidence", ""),
+                    [("text", chunk["text"]), ("raw_page_text", chunk.get("raw_page_text", ""))],
                 )
                 if settings.require_evidence and verified is None:
                     dropped_unverified += 1
@@ -193,22 +173,23 @@ Text:
                 conf = float(conf) if isinstance(conf, (int, float)) else 0.0
 
                 relationships.append(Relationship(
-                    relationship_id="rel_" + hashlib.sha256(
-                        f"{src_id}|{rtype}|{tgt_id}|{chunk_id}".encode()
-                    ).hexdigest()[:12],
+                    relationship_id=make_relationship_id(src_id, rtype, tgt_id),
                     source_concept_id=src_id,
                     source_name=id_to_name.get(src_id, ""),
                     target_concept_id=tgt_id,
                     target_name=id_to_name.get(tgt_id, ""),
                     type=rtype,
-                    evidence=r.get("evidence", ""),
-                    evidence_verified_against=verified or "",
-                    confidence=conf,
-                    chunk_id=chunk_id,
-                    filename=chunk.get("filename", ""),
-                    location_number=chunk.get("location_number", 0),
                     resource_id=chunk.get("resource_id", ""),
-                    model_used=model_used,
+                    evidence=[EvidenceRecord(
+                        text=r.get("evidence", ""),
+                        verified_against=verified or "",
+                        chunk_id=chunk_id,
+                        filename=chunk.get("filename", ""),
+                        location_number=chunk.get("location_number", 0),
+                        confidence=conf,
+                        model_used=model_used,
+                        scope="chunk",
+                    )],
                 ))
 
         if total_returned:

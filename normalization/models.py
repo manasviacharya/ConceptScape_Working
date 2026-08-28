@@ -5,16 +5,17 @@ from typing import List
 @dataclass
 class CanonicalConcept:
     """
-    One concept within a single document, merged from all its mentions.
+    One concept merged from every mention of it across the whole corpus.
 
-    Cross-document merging is a later phase — a CanonicalConcept therefore
-    belongs to exactly one resource_id. Every provenance field is a UNION over
-    the merged mentions and is never truncated on merge: citations in later
-    phases trace back through these lists.
+    A concept spanning several documents carries all of them in resource_ids —
+    "Stochastic Gradient Descent" taught in four decks is ONE node citing four
+    sources, not four disconnected nodes. Every provenance field is a UNION
+    over the merged mentions and is never truncated: citations in later phases
+    trace back through these lists.
     """
     concept_id: str
     canonical_name: str
-    resource_id: str
+    resource_ids: List[str]
     definition: str
     aliases: List[str] = field(default_factory=list)
     keywords: List[str] = field(default_factory=list)

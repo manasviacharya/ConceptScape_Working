@@ -116,30 +116,55 @@ class Neo4jGraphStore(BaseGraphStore):
                 c.occurrence_count= row.occurrence_count,
                 c.mean_confidence = row.mean_confidence,
                 c.models_used     = row.models_used,
-                c.resource_id     = row.resource_id
+                c.resource_ids    = row.resource_ids
             """,
             rows=concepts,
         )
         return len(concepts)
 
     def upsert_relationships(self, relationships: List[Dict[str, Any]]) -> int:
+        # Neo4j properties must be primitives or lists of primitives, so the
+        # evidence records are flattened into parallel lists. Index i of each
+        # list belongs to the same evidence record.
+        rows = []
+        for r in relationships:
+            ev = r.get("evidence") or []
+            rows.append({
+                "relationship_id": r["relationship_id"],
+                "source_concept_id": r["source_concept_id"],
+                "target_concept_id": r["target_concept_id"],
+                "type": r["type"],
+                "resource_id": r.get("resource_id", ""),
+                "occurrence_count": r.get("occurrence_count", len(ev)),
+                "mean_confidence": r.get("mean_confidence", 0.0),
+                "chunk_ids": r.get("chunk_ids", []),
+                "evidence_texts": [e.get("text", "") for e in ev],
+                "evidence_filenames": [e.get("filename", "") for e in ev],
+                "evidence_locations": [e.get("location_number", 0) for e in ev],
+                "evidence_scopes": [e.get("scope", "") for e in ev],
+                "models_used": sorted({e.get("model_used", "") for e in ev if e.get("model_used")}),
+            })
+
         self._run(
             f"""
             UNWIND $rows AS row
             MATCH (a:Concept {{concept_id: row.source_concept_id}})
             MATCH (b:Concept {{concept_id: row.target_concept_id}})
             MERGE (a)-[r:{_EDGE} {{relationship_id: row.relationship_id}}]->(b)
-            SET r.type            = row.type,
-                r.evidence        = row.evidence,
-                r.confidence      = row.confidence,
-                r.chunk_id        = row.chunk_id,
-                r.filename        = row.filename,
-                r.location_number = row.location_number,
-                r.model_used      = row.model_used
+            SET r.type               = row.type,
+                r.resource_id        = row.resource_id,
+                r.occurrence_count   = row.occurrence_count,
+                r.mean_confidence    = row.mean_confidence,
+                r.chunk_ids          = row.chunk_ids,
+                r.evidence_texts     = row.evidence_texts,
+                r.evidence_filenames = row.evidence_filenames,
+                r.evidence_locations = row.evidence_locations,
+                r.evidence_scopes    = row.evidence_scopes,
+                r.models_used        = row.models_used
             """,
-            rows=relationships,
+            rows=rows,
         )
-        return len(relationships)
+        return len(rows)
 
     # ── queries ──────────────────────────────────────────────────────────
 
@@ -159,7 +184,7 @@ class Neo4jGraphStore(BaseGraphStore):
         rows = self._run(
             f"""
             MATCH (c:Concept {{concept_id: $cid}})-[r:{_EDGE}]-(n:Concept)
-            RETURN n, r.type AS type, r.evidence AS evidence,
+            RETURN n, r.type AS type, r.evidence_texts AS evidence,
                    startNode(r).concept_id = $cid AS outgoing
             """,
             cid=concept_id,

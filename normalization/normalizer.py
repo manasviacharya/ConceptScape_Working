@@ -1,8 +1,9 @@
 import hashlib
+import logging
 import re
 import unicodedata
 from collections import Counter, defaultdict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from config import settings
 from normalization.models import CanonicalConcept
@@ -32,27 +33,90 @@ def _fold_plural(word: str) -> str:
     return word
 
 
-def match_key(name: str) -> str:
+def build_abbreviation_map(names: List[str]) -> Dict[str, str]:
+    """
+    Learn abbreviations from the corpus itself, e.g. "Stochastic Gradient
+    Descent (SGD)" teaches SGD -> "stochastic gradient descent".
+
+    Derived from the documents rather than hardcoded, so it never invents an
+    expansion the source material does not actually state. Only short, mostly
+    uppercase parentheticals qualify — that excludes qualifiers like
+    "Gradient (batch)" and symbols like "Learning rate (η)", which are
+    disambiguators, not abbreviations.
+    """
+    mapping: Dict[str, str] = {}
+    for name in names:
+        m = re.search(r"^(.*?)\s*\(([^)]{1,6})\)\s*$", name or "")
+        if not m:
+            continue
+        long_form, abbr = m.group(1).strip(), m.group(2).strip()
+        if not long_form or not abbr.isalpha():
+            continue
+        # Require it to look like an initialism, not a lowercase qualifier.
+        if not (abbr.isupper() and len(abbr) >= 2):
+            continue
+        mapping.setdefault(abbr.casefold(), _basic_key(long_form))
+    return mapping
+
+
+def _basic_key(name: str) -> str:
+    """Canonicalisation shared by match_key and the abbreviation map."""
+    s = unicodedata.normalize("NFKC", name or "")
+    if settings.normalize_strip_parentheticals:
+        s = _TRAILING_PAREN.sub("", s)
+    s = re.sub(r"\s+", " ", s).strip().casefold()
+    s = _EDGE_JUNK.sub("", s)
+    if settings.normalize_fold_plurals and s:
+        parts = s.split(" ")
+        parts[-1] = _fold_plural(parts[-1])
+        s = " ".join(parts)
+    return s
+
+
+def _expand_abbreviations(key: str, abbrev: Dict[str, str]) -> str:
+    """
+    Expand abbreviation tokens using the corpus-derived map.
+
+    Handles the whole name being an abbreviation ("SGD") and an abbreviation
+    used as part of a longer name ("Stochastic GD"), which is why expansion is
+    per-token rather than whole-string.
+    """
+    if not abbrev or not key:
+        return key
+    if key in abbrev:
+        return abbrev[key]
+    tokens = key.split(" ")
+    if len(tokens) > 1:
+        expanded, changed = [], False
+        for t in tokens:
+            if t in abbrev:
+                expanded.extend(abbrev[t].split(" "))
+                changed = True
+            else:
+                expanded.append(t)
+        if changed:
+            # Collapse repeats introduced by expansion, e.g.
+            # "stochastic" + "gradient descent" from "Stochastic GD".
+            seen, out = set(), []
+            for t in expanded:
+                if t not in seen:
+                    seen.add(t)
+                    out.append(t)
+            return " ".join(out)
+    return key
+
+
+def match_key(name: str, abbrev: Optional[Dict[str, str]] = None) -> str:
     """
     Reduce a surface form to the key that decides whether two mentions merge.
 
     Only the LAST word is plural-folded: "Neural Networks" -> "neural network",
     while "Gradient Descent Variants" keeps its internal words intact.
     """
-    s = unicodedata.normalize("NFKC", name or "")
-
-    if settings.normalize_strip_parentheticals:
-        s = _TRAILING_PAREN.sub("", s)
-
-    s = re.sub(r"\s+", " ", s).strip().casefold()
-    s = _EDGE_JUNK.sub("", s)
-
-    if settings.normalize_fold_plurals and s:
-        parts = s.split(" ")
-        parts[-1] = _fold_plural(parts[-1])
-        s = " ".join(parts)
-
-    return s
+    key = _basic_key(name)
+    if abbrev:
+        key = _expand_abbreviations(key, abbrev)
+    return key
 
 
 def _pick_canonical_name(names: List[str]) -> str:
@@ -88,20 +152,36 @@ def _dedupe(values: List[Any]) -> List[Any]:
     return out
 
 
-def normalize(mentions: List[Dict[str, Any]]) -> List[CanonicalConcept]:
-    """Merge mentions into canonical concepts, scoped within each document."""
+def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> List[CanonicalConcept]:
+    """
+    Merge mentions into canonical concepts.
+
+    With cross_document enabled the group key is the match key alone, so the
+    same concept taught in several documents becomes ONE node carrying every
+    source. Scoping to a single document instead leaves duplicates that
+    fragment the graph and crowd out retrieval results.
+    """
+    if cross_document is None:
+        cross_document = settings.normalize_cross_document
+
+    abbrev = build_abbreviation_map([m.get("concept_name", "") for m in mentions])
+    if abbrev:
+        logging.info(f"Learned {len(abbrev)} abbreviation(s) from the corpus: "
+                     + ", ".join(f"{k.upper()}->{v}" for k, v in sorted(abbrev.items())))
+
     groups: Dict[tuple, List[Dict[str, Any]]] = defaultdict(list)
 
     for m in mentions:
         resource_id = (m.get("source_reference") or {}).get("resource_id", "")
-        key = match_key(m.get("concept_name", ""))
+        key = match_key(m.get("concept_name", ""), abbrev)
         if not key:
             continue
-        groups[(resource_id, key)].append(m)
+        groups[(key,) if cross_document else (resource_id, key)].append(m)
 
     concepts: List[CanonicalConcept] = []
 
-    for (resource_id, key), group in sorted(groups.items()):
+    for group_key, group in sorted(groups.items()):
+        key = group_key[-1]
         names = [m.get("concept_name", "") for m in group]
         confidences = [float(m.get("confidence") or 0.0) for m in group]
         canonical = _pick_canonical_name(names)
@@ -113,12 +193,15 @@ def normalize(mentions: List[Dict[str, Any]]) -> List[CanonicalConcept]:
             if isinstance(n, int):
                 pages.append(n)
 
-        digest = hashlib.sha256(f"{resource_id}:{key}".encode("utf-8")).hexdigest()[:12]
+        resource_ids = _dedupe([(m.get("source_reference") or {}).get("resource_id", "") for m in group])
+        digest = hashlib.sha256(
+            (key if cross_document else f"{resource_ids[0] if resource_ids else ''}:{key}").encode("utf-8")
+        ).hexdigest()[:12]
 
         concepts.append(CanonicalConcept(
             concept_id=f"concept_{digest}",
             canonical_name=canonical,
-            resource_id=resource_id,
+            resource_ids=sorted(resource_ids),
             definition=_pick_definition(group),
             aliases=sorted(_dedupe(names)),
             keywords=sorted(_dedupe([k for m in group for k in (m.get("keywords") or [])])),

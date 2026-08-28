@@ -12,3 +12,5 @@ onnxruntime>=1.16.0
 pysbd>=0.3.4
 neo4j>=5.14.0
 certifi>=2023.7.22
+qdrant-client>=1.9.0
+sentence-transformers>=2.7.0
