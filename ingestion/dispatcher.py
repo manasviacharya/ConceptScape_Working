@@ -3,11 +3,12 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 from dataclasses import asdict
 from datetime import datetime
 
 from ingestion.base_parser import BaseParser
+from ingestion.ocr_engine import PaddleOCREngine
 from ingestion.pdf_parser import PDFParser
 from ingestion.ppt_parser import PPTParser
 from ingestion.image_parser import ImageParser
@@ -52,6 +53,7 @@ def _reconstruct_resource(resource_dict: dict) -> IngestedResource:
             location_number=c.get("location_number", 0),
             text=c.get("text", ""),
             content_hash=c.get("content_hash", ""),
+            extraction_method=c.get("extraction_method", ""),
             ocr_regions=c.get("ocr_regions"),
         ))
     return IngestedResource(
@@ -66,33 +68,27 @@ def _reconstruct_resource(resource_dict: dict) -> IngestedResource:
 
 class IngestionDispatcher:
     def __init__(self):
+        ocr_engine = PaddleOCREngine()
         self.parsers: List[BaseParser] = [
-            PDFParser(),
+            PDFParser(ocr_engine=ocr_engine),
             PPTParser(),
-            ImageParser()
+            ImageParser(ocr_engine=ocr_engine),
         ]
-        self.pdf_count = 0
-        self.ppt_count = 0
-        self.image_count = 0
 
     def _generate_resource_id(self, filepath: Path) -> str:
         ext = filepath.suffix.lower()
-        if ext == ".pdf":
-            self.pdf_count += 1
-            return f"pdf_{self.pdf_count:03d}"
-        elif ext in [".ppt", ".pptx"]:
-            self.ppt_count += 1
-            return f"ppt_{self.ppt_count:03d}"
-        elif ext in ImageParser.SUPPORTED_EXTENSIONS:
-            self.image_count += 1
-            return f"image_{self.image_count:03d}"
-        return "unknown_000"
+        prefix = ("pdf" if ext == ".pdf"
+                  else "ppt" if ext in (".ppt", ".pptx")
+                  else "image" if ext in ImageParser.SUPPORTED_EXTENSIONS
+                  else "unknown")
+        digest = hashlib.sha256(filepath.name.encode("utf-8")).hexdigest()[:8]
+        return f"{prefix}_{digest}"
 
-    def run(self, documents_dir: str, subject_id: str) -> IngestionResult:
+    def run(self, documents_dir: str, subject_id: str) -> Tuple[IngestionResult, List[Tuple[str, str]]]:
         doc_dir = Path(documents_dir)
         if not doc_dir.exists() or not doc_dir.is_dir():
             logging.error(f"Documents directory not found: {documents_dir}")
-            return IngestionResult(subject_id=subject_id, resources=[], ingestion_timestamp=datetime.now().isoformat())
+            return IngestionResult(subject_id=subject_id, resources=[], ingestion_timestamp=datetime.now().isoformat()), []
 
         files = [f for f in doc_dir.iterdir() if f.is_file()]
         supported_files = []
@@ -107,6 +103,7 @@ class IngestionDispatcher:
 
         previous_cache = _load_previous_ingestion_cache()
         ingested_resources = []
+        failed_files: List[Tuple[str, str]] = []
 
         for filepath in supported_files:
             file_hash = _compute_file_hash(filepath)
@@ -132,13 +129,21 @@ class IngestionDispatcher:
                         logging.info(f"  -> Extracted {len(resource.content)} {resource.content[0].location_type if resource.content else 'items'}s")
                         logging.info(f"  -> Resource ID: {resource.resource_id}")
                         ingested_resources.append(resource)
+                    else:
+                        failed_files.append((filepath.name, "parser returned no result"))
                     break
 
             if not handled:
-                logging.warning(f"No parser available for {filepath.name} despite earlier check.")
+                reason = "no parser available despite earlier check"
+                logging.warning(f"{reason}: {filepath.name}")
+                failed_files.append((filepath.name, reason))
+
+        if failed_files:
+            for fname, reason in failed_files:
+                logging.error(f"FAILED: {fname} — {reason}")
 
         return IngestionResult(
             subject_id=subject_id,
             resources=ingested_resources,
             ingestion_timestamp=datetime.now().isoformat()
-        )
+        ), failed_files

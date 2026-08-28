@@ -35,6 +35,7 @@ class PPTParser(BaseParser):
                     location_number=slide_num,
                     text=text,
                     content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                    extraction_method="native_text",
                 )
                 chunks.append(chunk)
                 

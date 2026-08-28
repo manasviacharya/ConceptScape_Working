@@ -26,14 +26,15 @@ def main():
         extractor = ConceptExtractor()
     except ValueError as e:
         logging.error(str(e))
-        logging.info("Please create a .env file with GEMINI_API_KEY")
+        logging.info("Please create a .env file with CONCEPTSCAPE_GEMINI_API_KEY")
         return
 
-    all_concepts = extractor.process_ingestion_result(ingestion_data)
+    result = extractor.process_ingestion_result(ingestion_data)
+    all_concepts = result["concepts"]
 
     os.makedirs(settings.data_dir, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump({"concepts": all_concepts}, f, indent=2, ensure_ascii=False)
+        json.dump(result, f, indent=2, ensure_ascii=False)
 
     pdf_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "pdf")
     ppt_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "ppt")

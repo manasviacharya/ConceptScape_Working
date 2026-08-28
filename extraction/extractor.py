@@ -3,7 +3,7 @@ import logging
 import os
 import time
 import uuid
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 from config import settings
 
@@ -20,25 +20,25 @@ except ImportError:
     GROQ_SDK_AVAILABLE = False
 
 
-def _load_previous_extraction_cache() -> dict:
+def _load_previous_extraction_cache() -> Tuple[dict, dict]:
+    """Returns (processed_chunks, concepts_by_chunk) from previous output."""
     cache_path = os.path.join(settings.data_dir, "extracted_concepts.json")
     if not os.path.exists(cache_path):
-        return {}
+        return {}, {}
     try:
         with open(cache_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        lookup = {}
+        processed = data.get("processed_chunks", {})
+        concepts_by_chunk: Dict[str, list] = {}
         for concept in data.get("concepts", []):
             src = concept.get("source_reference", {})
             chunk_id = src.get("chunk_id")
-            content_hash = src.get("content_hash")
-            if chunk_id and content_hash:
-                key = f"{chunk_id}:{content_hash}"
-                lookup.setdefault(key, []).append(concept)
-        return lookup
+            if chunk_id:
+                concepts_by_chunk.setdefault(chunk_id, []).append(concept)
+        return processed, concepts_by_chunk
     except Exception:
         logging.warning("Could not load previous extracted_concepts.json for caching — treating as full cache miss")
-        return {}
+        return {}, {}
 
 
 class ConceptExtractor:
@@ -127,7 +127,7 @@ class ConceptExtractor:
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
-            temperature=0.1
+            temperature=settings.groq_temperature
         )
         return response.choices[0].message.content
 
@@ -179,11 +179,13 @@ Text:
 
         return []
 
-    def process_ingestion_result(self, ingestion_data: dict) -> List[Dict[str, Any]]:
+    def process_ingestion_result(self, ingestion_data: dict) -> Dict[str, Any]:
+        """Returns {"processed_chunks": {...}, "concepts": [...]}."""
         all_concepts = []
+        processed_chunks: Dict[str, str] = {}
         subject_id = ingestion_data.get("subject_id")
 
-        extraction_cache = _load_previous_extraction_cache()
+        prev_processed, prev_concepts = _load_previous_extraction_cache()
 
         for resource in ingestion_data.get("resources", []):
             resource_id = resource.get("resource_id")
@@ -200,10 +202,10 @@ Text:
                 location_type = chunk.get("location_type")
                 location_number = chunk.get("location_number")
 
-                cache_key = f"{chunk_id}:{content_hash}" if chunk_id and content_hash else None
-                if cache_key and cache_key in extraction_cache:
+                if chunk_id and content_hash and prev_processed.get(chunk_id) == content_hash:
                     logging.info(f"CACHE HIT (unchanged): chunk {chunk_id}")
-                    all_concepts.extend(extraction_cache[cache_key])
+                    processed_chunks[chunk_id] = content_hash
+                    all_concepts.extend(prev_concepts.get(chunk_id, []))
                     continue
 
                 logging.info(f"CACHE MISS (extracting): chunk {chunk_id}")
@@ -211,6 +213,8 @@ Text:
 
                 concepts = self.extract_from_chunk(text)
                 logging.info(f"Extracted {len(concepts)} concept mention(s)")
+
+                processed_chunks[chunk_id] = content_hash
 
                 for concept in concepts:
                     concept_mention = {
@@ -239,4 +243,4 @@ Text:
 
                     all_concepts.append(concept_mention)
 
-        return all_concepts
+        return {"processed_chunks": processed_chunks, "concepts": all_concepts}

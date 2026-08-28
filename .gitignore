@@ -7,10 +7,10 @@ __pycache__/
 *$py.class
 *.so
 
-# Data and Outputs (Uncomment if you want to push these to GitHub)
+# Data and Outputs
 # documents/
-# output/
-# data/
+output/
+data/
 
 # IDE files
 .vscode/

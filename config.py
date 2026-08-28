@@ -5,7 +5,12 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    model_config = {"env_file": find_dotenv(), "env_file_encoding": "utf-8", "extra": "ignore"}
+    model_config = {
+        "env_file": find_dotenv(),
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+        "env_prefix": "CONCEPTSCAPE_",
+    }
 
     # secrets
     gemini_api_key: Optional[str] = None
@@ -15,14 +20,18 @@ class Settings(BaseSettings):
     documents_dir: str = "documents"
     output_dir: str = "output"
     data_dir: str = "data"
-    cache_dir: str = "cache"
 
-    # OCR
+    # OCR (PaddleOCR)
     ocr_target_width: int = 1200
-    ocr_clahe_clip_limit: float = 2.0
     ocr_min_confidence: float = 0.3
-    ocr_languages: list[str] = ["en"]
-    ocr_gpu: bool = False
+    ocr_language: str = "en"
+    ocr_use_angle_cls: bool = True
+    ocr_use_gpu: bool = False
+
+    # PDF OCR fallback
+    pdf_native_text_min_chars: int = 50
+    pdf_ocr_render_dpi: int = 200
+    enable_pdf_ocr_fallback: bool = True
 
     # Gemini
     gemini_model: str = "gemini-2.5-flash"
@@ -32,6 +41,7 @@ class Settings(BaseSettings):
 
     # Groq
     groq_model: str = "llama-3.3-70b-versatile"
+    groq_temperature: float = 0.1
 
     # logging
     log_level: str = "INFO"

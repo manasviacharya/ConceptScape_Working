@@ -9,6 +9,7 @@ class ContentChunk:
     location_number: int
     text: str
     content_hash: str = ""
+    extraction_method: str = ""
     ocr_regions: Optional[List[Dict[str, Any]]] = None
 
 @dataclass
