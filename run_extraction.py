@@ -9,7 +9,7 @@ from extraction.extractor import ConceptExtractor
 def main():
     configure_logging()
 
-    INPUT_FILE = os.path.join(settings.output_dir, "ingestion_result.json")
+    INPUT_FILE = os.path.join(settings.output_dir, "preprocessed_chunks.json")
     OUTPUT_FILE = os.path.join(settings.data_dir, "extracted_concepts.json")
 
     if not os.path.exists(INPUT_FILE):
@@ -17,10 +17,10 @@ def main():
         return
 
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
-        ingestion_data = json.load(f)
+        preprocessed_data = json.load(f)
 
     logging.info("ConceptScape Extraction Pipeline starting...")
-    logging.info(f"Subject: {ingestion_data.get('subject_id')}")
+    logging.info(f"Subject: {preprocessed_data.get('subject_id')}")
 
     try:
         extractor = ConceptExtractor()
@@ -29,7 +29,7 @@ def main():
         logging.info("Please create a .env file with CONCEPTSCAPE_GEMINI_API_KEY")
         return
 
-    result = extractor.process_ingestion_result(ingestion_data)
+    result = extractor.process_chunks(preprocessed_data)
     all_concepts = result["concepts"]
 
     os.makedirs(settings.data_dir, exist_ok=True)
@@ -41,9 +41,9 @@ def main():
     image_concepts = sum(1 for c in all_concepts if c.get("source_reference", {}).get("resource_type") == "image")
 
     logging.info("\n==================================================")
-    logging.info("INGESTION + CONCEPT EXTRACTION COMPLETE")
+    logging.info("EXTRACTION COMPLETE")
     logging.info("==================================================")
-    logging.info(f"Subject: {ingestion_data.get('subject_id')}")
+    logging.info(f"Subject: {preprocessed_data.get('subject_id')}")
     logging.info("\nConcept mentions extracted by source type:")
     logging.info(f"  PDF: {pdf_concepts}")
     logging.info(f"  PPT: {ppt_concepts}")

@@ -21,12 +21,10 @@ class Settings(BaseSettings):
     output_dir: str = "output"
     data_dir: str = "data"
 
-    # OCR (PaddleOCR)
+    # OCR (PaddleOCR 3.x with ONNX runtime backend)
     ocr_target_width: int = 1200
     ocr_min_confidence: float = 0.3
     ocr_language: str = "en"
-    ocr_use_angle_cls: bool = True
-    ocr_use_gpu: bool = False
 
     # PDF OCR fallback
     pdf_native_text_min_chars: int = 50
@@ -42,6 +40,20 @@ class Settings(BaseSettings):
     # Groq
     groq_model: str = "llama-3.3-70b-versatile"
     groq_temperature: float = 0.1
+
+    # preprocessing — chunking
+    chunk_target_chars: int = 1200
+    chunk_overlap_chars: int = 150
+    chunk_min_chars: int = 100
+
+    # preprocessing — cleaning
+    clean_normalize_unicode: bool = True
+    clean_dehyphenate: bool = True
+    clean_remove_headers_footers: bool = True
+    clean_remove_page_numbers: bool = True
+    clean_normalize_bullets: bool = True
+    clean_join_ocr_lines: bool = True
+    header_footer_min_page_ratio: float = 0.6
 
     # logging
     log_level: str = "INFO"

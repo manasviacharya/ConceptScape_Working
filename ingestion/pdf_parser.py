@@ -69,6 +69,7 @@ class PDFParser(BaseParser):
 
                 if pix.n == 4:
                     arr = arr[:, :, :3]
+                arr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
                 combined_text, ocr_regions = self.ocr_engine.run(arr)
 

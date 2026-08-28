@@ -32,7 +32,7 @@ def main():
     for r in pdf_resources:
         native_count = sum(1 for c in r.content if c.extraction_method == "native_text")
         ocr_count = sum(1 for c in r.content if c.extraction_method == "paddleocr")
-        logging.info(f"  ✓ PDF: {r.filename} ({len(r.content)} pages: {native_count} native_text, {ocr_count} easyocr)")
+        logging.info(f"  ✓ PDF: {r.filename} ({len(r.content)} pages: {native_count} native_text, {ocr_count} paddleocr)")
     for r in ppt_resources:
         logging.info(f"  ✓ PPT: {r.filename} ({len(r.content)} slides)")
     for r in image_resources:

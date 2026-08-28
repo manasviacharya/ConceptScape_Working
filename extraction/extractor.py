@@ -179,68 +179,66 @@ Text:
 
         return []
 
-    def process_ingestion_result(self, ingestion_data: dict) -> Dict[str, Any]:
-        """Returns {"processed_chunks": {...}, "concepts": [...]}."""
+    def process_chunks(self, preprocessed_data: dict) -> Dict[str, Any]:
+        """Consumes flat TextChunk list from preprocessed_chunks.json."""
         all_concepts = []
         processed_chunks: Dict[str, str] = {}
-        subject_id = ingestion_data.get("subject_id")
+        subject_id = preprocessed_data.get("subject_id")
 
         prev_processed, prev_concepts = _load_previous_extraction_cache()
 
-        for resource in ingestion_data.get("resources", []):
-            resource_id = resource.get("resource_id")
-            resource_type = resource.get("resource_type")
-            filename = resource.get("filename")
+        for chunk in preprocessed_data.get("chunks", []):
+            text = chunk.get("text", "").strip()
+            if not text:
+                continue
 
-            for chunk in resource.get("content", []):
-                text = chunk.get("text", "").strip()
-                if not text:
-                    continue
+            chunk_id = chunk.get("chunk_id", "")
+            content_hash = chunk.get("content_hash", "")
+            resource_id = chunk.get("resource_id", "")
+            source_type = chunk.get("source_type", "")
+            filename = chunk.get("filename", "")
+            location_type = chunk.get("location_type", "")
+            location_number = chunk.get("location_number", 0)
 
-                chunk_id = chunk.get("chunk_id", chunk.get("content_id", ""))
-                content_hash = chunk.get("content_hash", "")
-                location_type = chunk.get("location_type")
-                location_number = chunk.get("location_number")
-
-                if chunk_id and content_hash and prev_processed.get(chunk_id) == content_hash:
-                    logging.info(f"CACHE HIT (unchanged): chunk {chunk_id}")
-                    processed_chunks[chunk_id] = content_hash
-                    all_concepts.extend(prev_concepts.get(chunk_id, []))
-                    continue
-
-                logging.info(f"CACHE MISS (extracting): chunk {chunk_id}")
-                logging.info(f"Processing {resource_type.upper()} {location_type} {location_number} ({filename})")
-
-                concepts = self.extract_from_chunk(text)
-                logging.info(f"Extracted {len(concepts)} concept mention(s)")
-
+            if chunk_id and content_hash and prev_processed.get(chunk_id) == content_hash:
+                logging.info(f"CACHE HIT (unchanged): chunk {chunk_id}")
                 processed_chunks[chunk_id] = content_hash
+                all_concepts.extend(prev_concepts.get(chunk_id, []))
+                continue
 
-                for concept in concepts:
-                    concept_mention = {
-                        "concept_id": f"mention_{uuid.uuid4().hex[:8]}",
-                        "concept_name": concept.get("concept_name", ""),
-                        "definition": concept.get("definition", ""),
-                        "keywords": concept.get("keywords", []),
-                        "relationships": [
-                            {"target": r.get("target"), "type": r.get("type")}
-                            for r in concept.get("relationships", [])
-                        ],
-                        "source_reference": {
-                            "resource_id": resource_id,
-                            "resource_type": resource_type,
-                            "filename": filename,
-                            "chunk_id": chunk_id,
-                            "content_hash": content_hash,
-                        },
-                        "workspace_id": subject_id
-                    }
+            logging.info(f"CACHE MISS (extracting): chunk {chunk_id}")
+            logging.info(f"Processing {source_type.upper()} {location_type} {location_number} ({filename})")
 
-                    if location_type == "page":
-                        concept_mention["source_reference"]["page_number"] = location_number
-                    elif location_type == "slide":
-                        concept_mention["source_reference"]["slide_number"] = location_number
+            concepts = self.extract_from_chunk(text)
+            logging.info(f"Extracted {len(concepts)} concept mention(s)")
 
-                    all_concepts.append(concept_mention)
+            processed_chunks[chunk_id] = content_hash
+
+            for concept in concepts:
+                concept_mention = {
+                    "concept_id": f"mention_{uuid.uuid4().hex[:8]}",
+                    "concept_name": concept.get("concept_name", ""),
+                    "definition": concept.get("definition", ""),
+                    "keywords": concept.get("keywords", []),
+                    "relationships": [
+                        {"target": r.get("target"), "type": r.get("type")}
+                        for r in concept.get("relationships", [])
+                    ],
+                    "source_reference": {
+                        "resource_id": resource_id,
+                        "resource_type": source_type,
+                        "filename": filename,
+                        "chunk_id": chunk_id,
+                        "content_hash": content_hash,
+                    },
+                    "workspace_id": subject_id
+                }
+
+                if location_type == "page":
+                    concept_mention["source_reference"]["page_number"] = location_number
+                elif location_type == "slide":
+                    concept_mention["source_reference"]["slide_number"] = location_number
+
+                all_concepts.append(concept_mention)
 
         return {"processed_chunks": processed_chunks, "concepts": all_concepts}
