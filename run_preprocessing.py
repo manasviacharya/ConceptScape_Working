@@ -67,18 +67,10 @@ def main():
                 continue
 
             sentences = split_sentences(cleaned)
-            raw_sentences = split_sentences(raw_page_text)
-
-            # Align raw sentences to cleaned: if counts differ, pad or truncate
-            if len(raw_sentences) != len(sentences):
-                if len(raw_sentences) < len(sentences):
-                    raw_sentences.extend([""] * (len(sentences) - len(raw_sentences)))
-                else:
-                    raw_sentences = raw_sentences[:len(sentences)]
 
             chunks = chunk_page(
                 sentences=sentences,
-                raw_sentences=raw_sentences,
+                raw_page_text=raw_page_text,
                 parent_chunk_id=parent_chunk_id,
                 resource_id=resource_id,
                 filename=filename,

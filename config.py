@@ -32,14 +32,26 @@ class Settings(BaseSettings):
     enable_pdf_ocr_fallback: bool = True
 
     # Gemini
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.6-flash"
     gemini_temperature: float = 0.1
-    gemini_max_retries: int = 3
-    gemini_retry_base_delay: float = 2.0
+    gemini_max_retries: int = 4
+    gemini_retry_base_delay: float = 3.0
+    # after this many rate-limited chunks, stop using Gemini for the run
+    gemini_rate_limit_trip_after: int = 2
 
     # Groq
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-120b"
     groq_temperature: float = 0.1
+
+    # extraction — chunks shorter than this are skipped (titles, headers)
+    extraction_min_chunk_chars: int = 50
+    # drop concepts whose evidence span cannot be found in the source
+    require_evidence: bool = True
+    min_concept_confidence: float = 0.0
+
+    # normalization
+    normalize_strip_parentheticals: bool = True
+    normalize_fold_plurals: bool = True
 
     # preprocessing — chunking
     chunk_target_chars: int = 1200
