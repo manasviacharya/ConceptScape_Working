@@ -3,10 +3,12 @@ from typing import List, Dict, Any, Optional
 
 @dataclass
 class ContentChunk:
-    content_id: str
+    chunk_id: str
+    source_type: str
     location_type: str
     location_number: int
     text: str
+    content_hash: str = ""
     ocr_regions: Optional[List[Dict[str, Any]]] = None
 
 @dataclass
@@ -16,6 +18,7 @@ class IngestedResource:
     filename: str
     subject_id: str
     content: List[ContentChunk]
+    content_hash: str = ""
 
 @dataclass
 class IngestionResult:

@@ -1,9 +1,11 @@
-import os
 import json
-import time
 import logging
+import os
+import time
 import uuid
 from typing import List, Dict, Any
+
+from config import settings
 
 try:
     from google import genai
@@ -18,25 +20,46 @@ except ImportError:
     GROQ_SDK_AVAILABLE = False
 
 
+def _load_previous_extraction_cache() -> dict:
+    cache_path = os.path.join(settings.data_dir, "extracted_concepts.json")
+    if not os.path.exists(cache_path):
+        return {}
+    try:
+        with open(cache_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        lookup = {}
+        for concept in data.get("concepts", []):
+            src = concept.get("source_reference", {})
+            chunk_id = src.get("chunk_id")
+            content_hash = src.get("content_hash")
+            if chunk_id and content_hash:
+                key = f"{chunk_id}:{content_hash}"
+                lookup.setdefault(key, []).append(concept)
+        return lookup
+    except Exception:
+        logging.warning("Could not load previous extracted_concepts.json for caching — treating as full cache miss")
+        return {}
+
+
 class ConceptExtractor:
     def __init__(self):
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        self.groq_api_key = os.getenv("GROQ_API_KEY")
-        
+        self.gemini_api_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
+        self.groq_api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY")
+
         self.gemini_client = None
         self.groq_client = None
-        
+
         if self.gemini_api_key and GEMINI_SDK_AVAILABLE:
             self.gemini_client = genai.Client(api_key=self.gemini_api_key)
             self.primary_provider = "gemini"
             logging.info("ConceptExtractor primary provider: Gemini 2.5 Flash (google-genai SDK)")
-        
+
         if self.groq_api_key and GROQ_SDK_AVAILABLE:
             self.groq_client = Groq(api_key=self.groq_api_key)
             if not self.gemini_client:
                 self.primary_provider = "groq"
             logging.info("ConceptExtractor secondary/fallback provider: Groq (llama-3.3-70b-versatile)")
-            
+
         if not self.gemini_client and not self.groq_client:
             raise ValueError("Neither GEMINI_API_KEY nor GROQ_API_KEY is available with required SDK.")
 
@@ -70,20 +93,19 @@ class ConceptExtractor:
             },
             "required": ["concepts"]
         }
-        
-        # Implement exponential backoff for rate limits (429)
-        max_retries = 3
-        delay = 2.0
+
+        max_retries = settings.gemini_max_retries
+        delay = settings.gemini_retry_base_delay
         for attempt in range(max_retries):
             try:
                 response = self.gemini_client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model=settings.gemini_model,
                     contents=prompt,
                     config={
                         "system_instruction": system_instruction,
                         "response_mime_type": "application/json",
                         "response_schema": schema,
-                        "temperature": 0.1
+                        "temperature": settings.gemini_temperature
                     }
                 )
                 return response.text
@@ -99,7 +121,7 @@ class ConceptExtractor:
 
     def _extract_with_groq(self, prompt: str, system_instruction: str) -> str:
         response = self.groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.groq_model,
             messages=[
                 {"role": "system", "content": system_instruction},
                 {"role": "user", "content": prompt}
@@ -161,6 +183,8 @@ Text:
         all_concepts = []
         subject_id = ingestion_data.get("subject_id")
 
+        extraction_cache = _load_previous_extraction_cache()
+
         for resource in ingestion_data.get("resources", []):
             resource_id = resource.get("resource_id")
             resource_type = resource.get("resource_type")
@@ -171,9 +195,18 @@ Text:
                 if not text:
                     continue
 
+                chunk_id = chunk.get("chunk_id", chunk.get("content_id", ""))
+                content_hash = chunk.get("content_hash", "")
                 location_type = chunk.get("location_type")
                 location_number = chunk.get("location_number")
 
+                cache_key = f"{chunk_id}:{content_hash}" if chunk_id and content_hash else None
+                if cache_key and cache_key in extraction_cache:
+                    logging.info(f"CACHE HIT (unchanged): chunk {chunk_id}")
+                    all_concepts.extend(extraction_cache[cache_key])
+                    continue
+
+                logging.info(f"CACHE MISS (extracting): chunk {chunk_id}")
                 logging.info(f"Processing {resource_type.upper()} {location_type} {location_number} ({filename})")
 
                 concepts = self.extract_from_chunk(text)
@@ -192,7 +225,9 @@ Text:
                         "source_reference": {
                             "resource_id": resource_id,
                             "resource_type": resource_type,
-                            "filename": filename
+                            "filename": filename,
+                            "chunk_id": chunk_id,
+                            "content_hash": content_hash,
                         },
                         "workspace_id": subject_id
                     }

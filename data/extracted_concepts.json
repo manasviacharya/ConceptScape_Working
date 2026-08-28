@@ -1,0 +1,1730 @@
+{
+  "concepts": [
+    {
+      "concept_id": "mention_f008e08c",
+      "concept_name": "Artificial Intelligence",
+      "definition": "The primary subject matter introduced in this document.",
+      "keywords": [
+        "Artificial Intelligence",
+        "AI"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_1",
+        "content_hash": "d9cef1558ee5e3027813d3cf1e51241807c997c367089b96a78878364b70c046",
+        "page_number": 1
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_f4acbc4c",
+      "concept_name": "Artificial Intelligence",
+      "definition": "Artificial Intelligence is an area of Computer Science that emphasizes the creation of intelligent machines that work and react like humans. It is intelligence exhibited by machines, rather than by humans or animals.",
+      "keywords": [
+        "Artificial Intelligence",
+        "Computer Science",
+        "intelligent machines",
+        "human-like reaction",
+        "machine intelligence"
+      ],
+      "relationships": [
+        {
+          "target": "Computer Science",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_5",
+        "content_hash": "daff4f687939da4ab081fd594152aaff829296dc13fa7166ce3d8fee1b9f9777",
+        "page_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_c533eca6",
+      "concept_name": "See & Spray Robot",
+      "definition": "A robot created by Blue River Technology that uses object detection and computer vision technologies to control and spray weedicide on cotton plants.",
+      "keywords": [
+        "robot",
+        "Blue River Technology",
+        "object detection",
+        "computer vision",
+        "weedicide",
+        "cotton plants",
+        "agriculture"
+      ],
+      "relationships": [
+        {
+          "target": "Blue River Technology",
+          "type": "related_to"
+        },
+        {
+          "target": "Object Detection",
+          "type": "requires"
+        },
+        {
+          "target": "Computer Vision Technologies",
+          "type": "requires"
+        },
+        {
+          "target": "Weedicide Application",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_c0600135",
+      "concept_name": "Plantix Application",
+      "definition": "An application developed by PEAT which checks defects and nutrient deficiencies in the soil and abnormalities in plants using images.",
+      "keywords": [
+        "application",
+        "PEAT",
+        "defects",
+        "nutrient deficiencies",
+        "soil",
+        "abnormalities",
+        "plants",
+        "images",
+        "agriculture"
+      ],
+      "relationships": [
+        {
+          "target": "PEAT",
+          "type": "related_to"
+        },
+        {
+          "target": "Image-based Analysis for Plant and Soil Health",
+          "type": "requires"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_51f07c8e",
+      "concept_name": "Object Detection",
+      "definition": "A computer vision technology used by the See & Spray robot to identify specific objects for targeted actions such as spraying weedicide on cotton plants.",
+      "keywords": [
+        "computer vision",
+        "See & Spray",
+        "weedicide",
+        "agriculture",
+        "technology"
+      ],
+      "relationships": [
+        {
+          "target": "Computer Vision Technologies",
+          "type": "part_of"
+        },
+        {
+          "target": "See & Spray Robot",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_518cdbb7",
+      "concept_name": "Computer Vision Technologies",
+      "definition": "Technologies, including object detection, utilized in agriculture for tasks such as controlling and spraying weedicide, as demonstrated by the See & Spray robot.",
+      "keywords": [
+        "object detection",
+        "See & Spray",
+        "agriculture",
+        "technology"
+      ],
+      "relationships": [
+        {
+          "target": "Object Detection",
+          "type": "related_to"
+        },
+        {
+          "target": "See & Spray Robot",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_98b3d1b6",
+      "concept_name": "Weedicide Application",
+      "definition": "The process of controlling and spraying weedicide on cotton plants, which can be automated and made precise using technologies like the See & Spray robot with object detection and computer vision.",
+      "keywords": [
+        "weedicide",
+        "spraying",
+        "cotton plants",
+        "See & Spray",
+        "object detection",
+        "computer vision",
+        "agriculture"
+      ],
+      "relationships": [
+        {
+          "target": "See & Spray Robot",
+          "type": "related_to"
+        },
+        {
+          "target": "Object Detection",
+          "type": "requires"
+        },
+        {
+          "target": "Computer Vision Technologies",
+          "type": "requires"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_d4e5fe98",
+      "concept_name": "Image-based Analysis for Plant and Soil Health",
+      "definition": "The method of using images to check for defects and nutrient deficiencies in the soil and abnormalities in plants, as demonstrated by the Plantix application.",
+      "keywords": [
+        "images",
+        "defects",
+        "nutrient deficiencies",
+        "soil",
+        "abnormalities",
+        "plants",
+        "Plantix",
+        "agriculture"
+      ],
+      "relationships": [
+        {
+          "target": "Plantix Application",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_11",
+        "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+        "page_number": 11
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_7390c919",
+      "concept_name": "AI in Gaming",
+      "definition": "The application of Artificial Intelligence within the gaming industry.",
+      "keywords": [
+        "AI",
+        "gaming",
+        "industry",
+        "application"
+      ],
+      "relationships": [
+        {
+          "target": "DeepMind",
+          "type": "related_to"
+        },
+        {
+          "target": "First Encounter Assault Recon",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_12",
+        "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+        "page_number": 12
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_c8dd9a98",
+      "concept_name": "DeepMind",
+      "definition": "A firm that developed a game which defeated Chess champ Garry Kasparov.",
+      "keywords": [
+        "firm",
+        "game",
+        "Chess champ",
+        "Garry Kasparov"
+      ],
+      "relationships": [
+        {
+          "target": "AI in Gaming",
+          "type": "related_to"
+        },
+        {
+          "target": "Game that defeated Chess champ Garry Kasparov",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_12",
+        "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+        "page_number": 12
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_d5d40fdd",
+      "concept_name": "Game that defeated Chess champ Garry Kasparov",
+      "definition": "A game developed by DeepMind that successfully defeated Chess champion Garry Kasparov.",
+      "keywords": [
+        "game",
+        "defeated",
+        "Chess champ",
+        "Garry Kasparov",
+        "DeepMind"
+      ],
+      "relationships": [
+        {
+          "target": "DeepMind",
+          "type": "related_to"
+        },
+        {
+          "target": "Garry Kasparov",
+          "type": "related_to"
+        },
+        {
+          "target": "AI in Gaming",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_12",
+        "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+        "page_number": 12
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_5b8cccd2",
+      "concept_name": "First Encounter Assault Recon",
+      "definition": "A first-person shooter video game cited as an example of AI application in gaming.",
+      "keywords": [
+        "First Encounter Assault Recon",
+        "F.E.A.R.",
+        "first person shooter",
+        "video game",
+        "AI",
+        "gaming"
+      ],
+      "relationships": [
+        {
+          "target": "AI in Gaming",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_12",
+        "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+        "page_number": 12
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_6d841be9",
+      "concept_name": "Garry Kasparov",
+      "definition": "A Chess champion who was defeated by a game developed by DeepMind, and who described himself as the first knowledge worker whose job was threatened by a machine.",
+      "keywords": [
+        "Chess champ",
+        "knowledge worker",
+        "threatened by machine",
+        "DeepMind"
+      ],
+      "relationships": [
+        {
+          "target": "Game that defeated Chess champ Garry Kasparov",
+          "type": "related_to"
+        },
+        {
+          "target": "DeepMind",
+          "type": "related_to"
+        },
+        {
+          "target": "AI in Gaming",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_12",
+        "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+        "page_number": 12
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_55795848",
+      "concept_name": "Teacher and AI Collaboration",
+      "definition": "The working together of teachers and artificial intelligence.",
+      "keywords": [
+        "Teacher",
+        "AI",
+        "collaboration"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_15",
+        "content_hash": "cf860a2c7e930679868eda491d686378155d80bc91c1f008aa80f94875e35fde",
+        "page_number": 15
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_a4d28466",
+      "concept_name": "Differentiated and Individualized Learning",
+      "definition": "Learning approaches tailored to individual student needs.",
+      "keywords": [
+        "Differentiated learning",
+        "individualized learning",
+        "learning"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_15",
+        "content_hash": "cf860a2c7e930679868eda491d686378155d80bc91c1f008aa80f94875e35fde",
+        "page_number": 15
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_bd3c17ec",
+      "concept_name": "Universal Access for All Students",
+      "definition": "Ensuring all students have access to educational opportunities.",
+      "keywords": [
+        "Universal access",
+        "all students",
+        "access"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_15",
+        "content_hash": "cf860a2c7e930679868eda491d686378155d80bc91c1f008aa80f94875e35fde",
+        "page_number": 15
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_d154d0d4",
+      "concept_name": "Support Outside the Classroom",
+      "definition": "Educational assistance provided beyond the traditional classroom environment.",
+      "keywords": [
+        "Support",
+        "outside classroom",
+        "educational support"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_15",
+        "content_hash": "cf860a2c7e930679868eda491d686378155d80bc91c1f008aa80f94875e35fde",
+        "page_number": 15
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_15237a3c",
+      "concept_name": "Business",
+      "definition": "The context in which chatbots, virtual assistants, business intelligence bots, targeted online advertising, predictive analytics, voice recognition, pattern recognition using clustering, and recommendation using clustering are applied.",
+      "keywords": [
+        "context",
+        "applications"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_16",
+        "content_hash": "b1e60e6503e3549192dbbcf176b8df4ff51e30555abc6b7998ea1a36a6e1c5f4",
+        "page_number": 16
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_e2b3f654",
+      "concept_name": "Clustering",
+      "definition": "A technique utilized for pattern recognition and recommendation in business applications.",
+      "keywords": [
+        "pattern recognition",
+        "recommendation",
+        "technique",
+        "business"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_16",
+        "content_hash": "b1e60e6503e3549192dbbcf176b8df4ff51e30555abc6b7998ea1a36a6e1c5f4",
+        "page_number": 16
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_26280fda",
+      "concept_name": "Pattern Recognition using Clustering",
+      "definition": "A method of pattern recognition that utilizes clustering, applied in business.",
+      "keywords": [
+        "pattern recognition",
+        "clustering",
+        "method",
+        "business"
+      ],
+      "relationships": [
+        {
+          "target": "Clustering",
+          "type": "requires"
+        },
+        {
+          "target": "Business",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_16",
+        "content_hash": "b1e60e6503e3549192dbbcf176b8df4ff51e30555abc6b7998ea1a36a6e1c5f4",
+        "page_number": 16
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_19a75c34",
+      "concept_name": "Recommendation using Clustering",
+      "definition": "A method of recommendation that utilizes clustering, applied in business.",
+      "keywords": [
+        "recommendation",
+        "clustering",
+        "method",
+        "business"
+      ],
+      "relationships": [
+        {
+          "target": "Clustering",
+          "type": "requires"
+        },
+        {
+          "target": "Business",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_16",
+        "content_hash": "b1e60e6503e3549192dbbcf176b8df4ff51e30555abc6b7998ea1a36a6e1c5f4",
+        "page_number": 16
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_16bf6187",
+      "concept_name": "Telemedicine",
+      "definition": "A concept in healthcare.",
+      "keywords": [
+        "Healthcare",
+        "Telemedicine"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_3e1bea56",
+      "concept_name": "Nanorobots for operations",
+      "definition": "The use of nanorobots for operations in healthcare.",
+      "keywords": [
+        "Healthcare",
+        "Nanorobots",
+        "Operations"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_1dad42ce",
+      "concept_name": "Medical chatbots",
+      "definition": "Chatbots used in a medical context.",
+      "keywords": [
+        "Healthcare",
+        "Medical",
+        "Chatbots"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_12e73510",
+      "concept_name": "Image Processing for detection of diseases",
+      "definition": "The application of image processing for the detection of diseases.",
+      "keywords": [
+        "Healthcare",
+        "Image Processing",
+        "Disease Detection"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_421f5ce4",
+      "concept_name": "Medical data analysis for prediction",
+      "definition": "The analysis of medical data for prediction purposes.",
+      "keywords": [
+        "Healthcare",
+        "Medical Data",
+        "Data Analysis",
+        "Prediction"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_25f8a972",
+      "concept_name": "Automated prescription reading app",
+      "definition": "An application for automated reading of prescriptions.",
+      "keywords": [
+        "Healthcare",
+        "Automated",
+        "Prescription Reading",
+        "App"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_17",
+        "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+        "page_number": 17
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_cbdd40f5",
+      "concept_name": "Smart homes",
+      "definition": "Homes that are characterized by being smart.",
+      "keywords": [
+        "Smart homes",
+        "homes"
+      ],
+      "relationships": [
+        {
+          "target": "Smart Cities",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_19",
+        "content_hash": "c59e7f3e9068ce422f7deccc3ce6364e40b21b431c4b9bddafa26faf460b2e60",
+        "page_number": 19
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_9279fd46",
+      "concept_name": "Smart hotels",
+      "definition": "Hotels that are characterized by being smart.",
+      "keywords": [
+        "Smart hotels",
+        "hotels"
+      ],
+      "relationships": [
+        {
+          "target": "Smart Cities",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_19",
+        "content_hash": "c59e7f3e9068ce422f7deccc3ce6364e40b21b431c4b9bddafa26faf460b2e60",
+        "page_number": 19
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_a5e81fdf",
+      "concept_name": "Smart Industries",
+      "definition": "Industries that are characterized by being smart.",
+      "keywords": [
+        "Smart Industries",
+        "industries"
+      ],
+      "relationships": [
+        {
+          "target": "Smart Cities",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_19",
+        "content_hash": "c59e7f3e9068ce422f7deccc3ce6364e40b21b431c4b9bddafa26faf460b2e60",
+        "page_number": 19
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_771103dd",
+      "concept_name": "Smart Cities",
+      "definition": "Cities that are characterized by being smart.",
+      "keywords": [
+        "Smart Cities",
+        "cities"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_19",
+        "content_hash": "c59e7f3e9068ce422f7deccc3ce6364e40b21b431c4b9bddafa26faf460b2e60",
+        "page_number": 19
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_b58b59de",
+      "concept_name": "Artificial Intelligence",
+      "definition": "A future technological era that, according to Amit Ray, will be characterized by deep compassion, non-violence, and love, rather than war.",
+      "keywords": [
+        "Artificial Intelligence",
+        "AI",
+        "coming era"
+      ],
+      "relationships": [
+        {
+          "target": "Deep Compassion",
+          "type": "part_of"
+        },
+        {
+          "target": "Non-violence",
+          "type": "part_of"
+        },
+        {
+          "target": "Love",
+          "type": "part_of"
+        },
+        {
+          "target": "Compassionate AI Movement",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_22f1f889",
+      "concept_name": "Compassionate AI Movement",
+      "definition": "A movement pioneered by Amit Ray, advocating for an era of Artificial Intelligence defined by deep compassion, non-violence, and love.",
+      "keywords": [
+        "Compassionate AI",
+        "Movement",
+        "Pioneer"
+      ],
+      "relationships": [
+        {
+          "target": "Amit Ray",
+          "type": "related_to"
+        },
+        {
+          "target": "Artificial Intelligence",
+          "type": "related_to"
+        },
+        {
+          "target": "Deep Compassion",
+          "type": "related_to"
+        },
+        {
+          "target": "Non-violence",
+          "type": "related_to"
+        },
+        {
+          "target": "Love",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_beddde8c",
+      "concept_name": "Deep Compassion",
+      "definition": "A characteristic predicted by Amit Ray to define the coming era of Artificial Intelligence.",
+      "keywords": [
+        "Deep compassion",
+        "compassion"
+      ],
+      "relationships": [
+        {
+          "target": "Artificial Intelligence",
+          "type": "part_of"
+        },
+        {
+          "target": "Non-violence",
+          "type": "related_to"
+        },
+        {
+          "target": "Love",
+          "type": "related_to"
+        },
+        {
+          "target": "Compassionate AI Movement",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_8e16b920",
+      "concept_name": "Non-violence",
+      "definition": "A characteristic predicted by Amit Ray to define the coming era of Artificial Intelligence.",
+      "keywords": [
+        "Non-violence"
+      ],
+      "relationships": [
+        {
+          "target": "Artificial Intelligence",
+          "type": "part_of"
+        },
+        {
+          "target": "Deep Compassion",
+          "type": "related_to"
+        },
+        {
+          "target": "Love",
+          "type": "related_to"
+        },
+        {
+          "target": "Compassionate AI Movement",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_001cffcb",
+      "concept_name": "Love",
+      "definition": "A characteristic predicted by Amit Ray to define the coming era of Artificial Intelligence.",
+      "keywords": [
+        "Love"
+      ],
+      "relationships": [
+        {
+          "target": "Artificial Intelligence",
+          "type": "part_of"
+        },
+        {
+          "target": "Deep Compassion",
+          "type": "related_to"
+        },
+        {
+          "target": "Non-violence",
+          "type": "related_to"
+        },
+        {
+          "target": "Compassionate AI Movement",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_bc8296f0",
+      "concept_name": "Amit Ray",
+      "definition": "The pioneer of the Compassionate AI Movement, who envisions the coming era of Artificial Intelligence as one of deep compassion, non-violence, and love.",
+      "keywords": [
+        "Amit Ray",
+        "Pioneer"
+      ],
+      "relationships": [
+        {
+          "target": "Compassionate AI Movement",
+          "type": "related_to"
+        },
+        {
+          "target": "Artificial Intelligence",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "pdf_001",
+        "resource_type": "pdf",
+        "filename": "AI_Lecture 1.pdf",
+        "chunk_id": "pdf_001_page_20",
+        "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+        "page_number": 20
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_8b49d944",
+      "concept_name": "Conflict Management",
+      "definition": "A concept identified as a means to overcome barriers.",
+      "keywords": [
+        "conflict",
+        "management",
+        "overcome barriers"
+      ],
+      "relationships": [
+        {
+          "target": "Means to Overcome Barriers",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_1",
+        "content_hash": "b030e74ff9f09c5cdeb0606452c20ac1f8a3d545ac6ceb77d50de47aee784b12",
+        "slide_number": 1
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_76c11065",
+      "concept_name": "Means to Overcome Barriers",
+      "definition": "Strategies or methods used to resolve obstacles, with Conflict Management being an example.",
+      "keywords": [
+        "means",
+        "overcome",
+        "barriers",
+        "strategies",
+        "methods"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Management",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_1",
+        "content_hash": "b030e74ff9f09c5cdeb0606452c20ac1f8a3d545ac6ceb77d50de47aee784b12",
+        "slide_number": 1
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_44681367",
+      "concept_name": "Managed Conflict",
+      "definition": "Conflict that, when handled properly, can lead to positive outcomes.",
+      "keywords": [
+        "managed",
+        "properly",
+        "positive outcome"
+      ],
+      "relationships": [
+        {
+          "target": "Analysis of Goals in Real-time",
+          "type": "related_to"
+        },
+        {
+          "target": "Dialogue Creation",
+          "type": "related_to"
+        },
+        {
+          "target": "Creative Solutions Fostering",
+          "type": "related_to"
+        },
+        {
+          "target": "Overcoming Individual Psychological Barriers",
+          "type": "related_to"
+        },
+        {
+          "target": "Higher Decision Quality",
+          "type": "related_to"
+        },
+        {
+          "target": "Organizational and Employee Stagnation",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_6ca6e573",
+      "concept_name": "Analysis of Goals in Real-time",
+      "definition": "The process of examining goals as they are happening or developing, which conflict helps to achieve.",
+      "keywords": [
+        "analyze",
+        "goals",
+        "real-time"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_898648ad",
+      "concept_name": "Dialogue Creation",
+      "definition": "The act of initiating or establishing a conversation or exchange of ideas, which conflict helps to create.",
+      "keywords": [
+        "creates",
+        "dialogue"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_482f65b9",
+      "concept_name": "Creative Solutions Fostering",
+      "definition": "The process of encouraging and developing innovative answers or methods, which conflict helps to foster.",
+      "keywords": [
+        "fosters",
+        "creative solutions"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_7a2eecac",
+      "concept_name": "Overcoming Individual Psychological Barriers",
+      "definition": "The process by which conflict helps individuals move past mental obstacles by forcing them out of their traditional mode of thinking.",
+      "keywords": [
+        "overcome",
+        "psychological barriers",
+        "traditional mode of thinking"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_7741be87",
+      "concept_name": "Higher Decision Quality",
+      "definition": "The improved standard or excellence of choices made, especially when there is strong resistance, which conflict can lead to.",
+      "keywords": [
+        "higher",
+        "decision quality",
+        "resistance"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_d2168861",
+      "concept_name": "Organizational and Employee Stagnation",
+      "definition": "A state where organizations and employees cease to develop or progress, which occurs without conflict.",
+      "keywords": [
+        "stagnate",
+        "organizations",
+        "employees",
+        "without conflict"
+      ],
+      "relationships": [
+        {
+          "target": "Managed Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_3",
+        "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+        "slide_number": 3
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_b802ef4a",
+      "concept_name": "Types of Conflict",
+      "definition": "A classification of conflict that includes Interpersonal, Organizational, Technical, and National and International categories.",
+      "keywords": [
+        "Conflict",
+        "classification",
+        "categories"
+      ],
+      "relationships": [
+        {
+          "target": "Interpersonal Conflict",
+          "type": "related_to"
+        },
+        {
+          "target": "Organizational Conflict",
+          "type": "related_to"
+        },
+        {
+          "target": "Technical Conflict",
+          "type": "related_to"
+        },
+        {
+          "target": "National and International Conflict",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_4",
+        "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+        "slide_number": 4
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_71254a3c",
+      "concept_name": "Interpersonal Conflict",
+      "definition": "A type of conflict.",
+      "keywords": [
+        "Interpersonal",
+        "conflict"
+      ],
+      "relationships": [
+        {
+          "target": "Types of Conflict",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_4",
+        "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+        "slide_number": 4
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_2680fea5",
+      "concept_name": "Organizational Conflict",
+      "definition": "A type of conflict.",
+      "keywords": [
+        "Organizational",
+        "conflict"
+      ],
+      "relationships": [
+        {
+          "target": "Types of Conflict",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_4",
+        "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+        "slide_number": 4
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_d502b1f5",
+      "concept_name": "Technical Conflict",
+      "definition": "A type of conflict.",
+      "keywords": [
+        "Technical",
+        "conflict"
+      ],
+      "relationships": [
+        {
+          "target": "Types of Conflict",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_4",
+        "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+        "slide_number": 4
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_14b22098",
+      "concept_name": "National and International Conflict",
+      "definition": "A type of conflict.",
+      "keywords": [
+        "National",
+        "International",
+        "conflict"
+      ],
+      "relationships": [
+        {
+          "target": "Types of Conflict",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_4",
+        "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+        "slide_number": 4
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_6855ca8f",
+      "concept_name": "Conflict Resolution Strategies",
+      "definition": "A set of approaches used to manage and resolve disagreements.",
+      "keywords": [
+        "conflict",
+        "resolution",
+        "strategies",
+        "disagreement"
+      ],
+      "relationships": [],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_c510e5ea",
+      "concept_name": "Avoiding",
+      "definition": "A conflict resolution strategy.",
+      "keywords": [
+        "avoidance",
+        "conflict",
+        "strategy"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Resolution Strategies",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_b91f0d8c",
+      "concept_name": "Accommodating",
+      "definition": "A conflict resolution strategy.",
+      "keywords": [
+        "accommodation",
+        "conflict",
+        "strategy"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Resolution Strategies",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_cfb1c4c1",
+      "concept_name": "Compromising",
+      "definition": "A conflict resolution strategy.",
+      "keywords": [
+        "compromise",
+        "conflict",
+        "strategy"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Resolution Strategies",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_13f4c94c",
+      "concept_name": "Forcing",
+      "definition": "A conflict resolution strategy.",
+      "keywords": [
+        "force",
+        "conflict",
+        "strategy"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Resolution Strategies",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_b04ffd43",
+      "concept_name": "Problem Solving-Negotiating",
+      "definition": "A conflict resolution strategy that involves problem solving and negotiation.",
+      "keywords": [
+        "problem solving",
+        "negotiating",
+        "conflict",
+        "strategy"
+      ],
+      "relationships": [
+        {
+          "target": "Conflict Resolution Strategies",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_5",
+        "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+        "slide_number": 5
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_996124ad",
+      "concept_name": "Negotiating as the best strategy",
+      "definition": "A strategic approach to negotiation where cooperation is favored over competition, parties can be trusted, differences are minimized, and a mutually acceptable solution can be found.",
+      "keywords": [
+        "negotiating",
+        "strategy",
+        "best"
+      ],
+      "relationships": [
+        {
+          "target": "Cooperation (in negotiation)",
+          "type": "requires"
+        },
+        {
+          "target": "Trust between parties (in negotiation)",
+          "type": "requires"
+        },
+        {
+          "target": "Minimizing Differences (in negotiation)",
+          "type": "requires"
+        },
+        {
+          "target": "Mutually Acceptable Solution",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_3794c8a8",
+      "concept_name": "Cooperation (in negotiation)",
+      "definition": "An approach in negotiation that is considered better than competition.",
+      "keywords": [
+        "cooperation"
+      ],
+      "relationships": [
+        {
+          "target": "Competition (in negotiation)",
+          "type": "related_to"
+        },
+        {
+          "target": "Negotiating as the best strategy",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_4384191f",
+      "concept_name": "Competition (in negotiation)",
+      "definition": "An approach in negotiation that is less effective than cooperation.",
+      "keywords": [
+        "competition"
+      ],
+      "relationships": [
+        {
+          "target": "Cooperation (in negotiation)",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_b4841c09",
+      "concept_name": "Trust between parties (in negotiation)",
+      "definition": "The belief that parties involved in negotiation can be relied upon, potentially facilitated by the Communication Pyramid.",
+      "keywords": [
+        "trust",
+        "parties",
+        "Communication Pyramid"
+      ],
+      "relationships": [
+        {
+          "target": "Communication Pyramid",
+          "type": "related_to"
+        },
+        {
+          "target": "Negotiating as the best strategy",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_950846b6",
+      "concept_name": "Communication Pyramid",
+      "definition": "A concept or tool mentioned as a means by which parties can be trusted in negotiation.",
+      "keywords": [
+        "Communication Pyramid",
+        "trust"
+      ],
+      "relationships": [
+        {
+          "target": "Trust between parties (in negotiation)",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_dc0c55bd",
+      "concept_name": "Minimizing Differences (in negotiation)",
+      "definition": "The act of reducing the disagreements or disparities between negotiating parties.",
+      "keywords": [
+        "differences",
+        "minimized"
+      ],
+      "relationships": [
+        {
+          "target": "Negotiating as the best strategy",
+          "type": "part_of"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    },
+    {
+      "concept_id": "mention_74050422",
+      "concept_name": "Mutually Acceptable Solution",
+      "definition": "An outcome of negotiation that is agreeable to all parties involved.",
+      "keywords": [
+        "mutually acceptable",
+        "solution"
+      ],
+      "relationships": [
+        {
+          "target": "Negotiating as the best strategy",
+          "type": "related_to"
+        }
+      ],
+      "source_reference": {
+        "resource_id": "ppt_001",
+        "resource_type": "ppt",
+        "filename": "Means to overcome Barriers and Conflict (1).pptx",
+        "chunk_id": "ppt_001_slide_6",
+        "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+        "slide_number": 6
+      },
+      "workspace_id": "subject_001"
+    }
+  ]
+}

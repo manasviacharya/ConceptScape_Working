@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from pathlib import Path
 from typing import Optional
@@ -28,10 +29,12 @@ class PPTParser(BaseParser):
                     logging.warning(f"Empty text found on slide {slide_num} of {filepath.name}")
                 
                 chunk = ContentChunk(
-                    content_id=f"{resource_id}_slide_{slide_num}",
+                    chunk_id=f"{resource_id}_slide_{slide_num}",
+                    source_type="ppt",
                     location_type="slide",
                     location_number=slide_num,
-                    text=text
+                    text=text,
+                    content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
                 )
                 chunks.append(chunk)
                 

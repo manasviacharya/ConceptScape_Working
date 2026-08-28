@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from pathlib import Path
 from typing import Optional
@@ -15,17 +16,19 @@ class PDFParser(BaseParser):
         try:
             doc = fitz.open(filepath)
             chunks = []
-            
+
             for page_num, page in enumerate(doc, start=1):
                 text = page.get_text("text").strip()
                 if not text:
                     logging.warning(f"Empty text found on page {page_num} of {filepath.name}")
-                
+
                 chunk = ContentChunk(
-                    content_id=f"{resource_id}_page_{page_num}",
+                    chunk_id=f"{resource_id}_page_{page_num}",
+                    source_type="pdf",
                     location_type="page",
                     location_number=page_num,
-                    text=text
+                    text=text,
+                    content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
                 )
                 chunks.append(chunk)
                 

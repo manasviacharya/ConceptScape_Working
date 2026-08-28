@@ -1,0 +1,348 @@
+{
+  "subject_id": "subject_001",
+  "resources": [
+    {
+      "resource_id": "pdf_001",
+      "resource_type": "pdf",
+      "filename": "AI_Lecture 1.pdf",
+      "subject_id": "subject_001",
+      "content": [
+        {
+          "chunk_id": "pdf_001_page_1",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 1,
+          "text": "INTRODUCTION TO \nARTIFICIAL \nINTELLIGENCE\nBy\nDr. Poulami Das",
+          "content_hash": "d9cef1558ee5e3027813d3cf1e51241807c997c367089b96a78878364b70c046",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_2",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 2,
+          "text": "Goals of the Course",
+          "content_hash": "82897f1af8afdbddd2227c3419ba8e73e37679f201c98f074b54d424151c9f00",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_3",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 3,
+          "text": "Some Fundamental Questions",
+          "content_hash": "b8992377d9642e5b850656a87370dcf0e36d8496230cf1547608538eeb41ba0f",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_4",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 4,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_5",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 5,
+          "text": "Artificial Intelligence - Definition\n• Artificial\nIntelligence\nis\nan\narea\nof\nComputer Science that emphasizes the\ncreation of intelligent machines that work\nand react like humans.\n• Artificial\nIntelligence\nis\nintelligence\nexhibited by machines, rather than the\nhumans or animals.",
+          "content_hash": "daff4f687939da4ab081fd594152aaff829296dc13fa7166ce3d8fee1b9f9777",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_6",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 6,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_7",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 7,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_8",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 8,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_9",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 9,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_10",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 10,
+          "text": "Applications of Artificial Intelligence",
+          "content_hash": "9222852fa3b35b08e83e75d1810d4435099261aa9cd6f56d2b4ce980c04e1545",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_11",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 11,
+          "text": "In Agriculture\nA firm called Blue River Technology has created a robot\nknown as See & Spray. It uses object detection like\ncomputer vision technologies to control and spray\nweedicide on cotton plants.\nAnother firm PEAT is developing an application known\nas Plantix which checks defects and nutrient deficiencies\nin the soil and abnormalities in plants using images.",
+          "content_hash": "83ed0d9035b96611928f87743363fd29418b5f2a36a764ccfe327feabfe51745",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_12",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 12,
+          "text": "In Gaming\nThere is a tremendous application of AI in the\ngaming\nindustry.\nThere\nis\na\nfirm\ncalled\nDeepMind, which has developed a game that\ndefeated Chess champ Garry Kasparov.\nAnother example is the First Encounter Assault\nRecon, which is a first person shooter video\ngame.\n“I always say I was the first knowledge worker whose job \nwas threatened by a machine” – Garry Kasparov",
+          "content_hash": "2903f472e16fb60477d9951cbfd8ed1d2460b1a8893ce54177861c2f43dc990c",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_13",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 13,
+          "text": "In Space Exploration\nAI is used extensively in space exploration. Space\nexploration is used to analyze lots of data.\nAstronomers used AI to sift through lots of data\nfrom the Kepler telescope for identifying a solar\nplanet system.\nAnother instance of AI being used is Mars 2020\nRover. It is also known as AEGIS and is already on\nMARS. The rover is used to target cameras for\nperforming investigations on MARS.",
+          "content_hash": "582b375fc7895c52b65bf4131c2f1e04797e1939d155ff7c2b7bb0b73bb7a875",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_14",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 14,
+          "text": "AI is instrumental in the case of self driving\nvehicles. Firms like Waymo are deploying\ntheir AI based public ride hailing service. The\nAI system collects data from cameras, GPS,\nvehicles radar, and cloud services to produce\ncontrol signals which operate the vehicle.\nAnother example is Tesla’s self driving car. AI\nis\nused\nto\nimplement\nimage\ndetection,\ncomputer vision and deep learning for making\ncars which automatically drive and check\nobjects.\nIn Self-driving vehicles",
+          "content_hash": "a59ead744eb77ba8370a10d0eb2dbe0e6e1fda6720ad9e5244cd311ffcd5a30c",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_15",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 15,
+          "text": "Teacher and AI collaboration.\nDifferentiated and individualized learning.\nUniversal access for all students.\nSupport outside the classroom.\nIn Education",
+          "content_hash": "cf860a2c7e930679868eda491d686378155d80bc91c1f008aa80f94875e35fde",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_16",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 16,
+          "text": "•Chatbots, virtual assistants, and business \nintelligence bots\n•Targeted online advertising\n•Predictive analytics\n•Voice recognition\n•Pattern recognition using Clustering\n•Recommendation using Clustering\nIn Business",
+          "content_hash": "b1e60e6503e3549192dbbcf176b8df4ff51e30555abc6b7998ea1a36a6e1c5f4",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_17",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 17,
+          "text": "In Healthcare\nTelemedicine.\nNanorobots for operations.\nMedical chatbots.\nImage Processing for detection of diseases.\nMedical data analysis for prediction.\nAutomated prescription reading app.",
+          "content_hash": "508442439080c141531e9bddb8accf97fbf44b7c9e765ab51852b413bc392d9b",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_18",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 18,
+          "text": "In Everyday Life",
+          "content_hash": "b386decb3afac31d3a16e51e3f9fa2d0320ca6de8477c04618b5ec3fa6b5b2e8",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_19",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 19,
+          "text": "Smart homes, Smart hotels, Smart Industries -\nSmart Cities",
+          "content_hash": "c59e7f3e9068ce422f7deccc3ce6364e40b21b431c4b9bddafa26faf460b2e60",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_20",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 20,
+          "text": "“The\ncoming\nera\nof\nArtificial\nIntelligence will not be the era of\nwar,\nbut\nbe\nthe\nera\nof\ndeep\ncompassion, non-violence, and love.”\n- Amit Ray, Pioneer of Compassionate AI Movement",
+          "content_hash": "5c841a21a873e2d9989242d7a0829cd42ae7bee7abccf0c069959497f2e37b83",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_21",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 21,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_22",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 22,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_23",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 23,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_24",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 24,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_25",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 25,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_26",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 26,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_27",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 27,
+          "text": "",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "pdf_001_page_28",
+          "source_type": "pdf",
+          "location_type": "page",
+          "location_number": 28,
+          "text": "THANK YOU",
+          "content_hash": "304bc9496ce6be541bc1deda1ed740922d4e683d29f2fec2906a4895dcacb19f",
+          "ocr_regions": null
+        }
+      ],
+      "content_hash": "ed899b413c3a8b419c4f9d4b22a278e08f64813428d93888acf83db009a93db8"
+    },
+    {
+      "resource_id": "ppt_001",
+      "resource_type": "ppt",
+      "filename": "Means to overcome Barriers and Conflict (1).pptx",
+      "subject_id": "subject_001",
+      "content": [
+        {
+          "chunk_id": "ppt_001_slide_1",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 1,
+          "text": "Means to Overcome Barriers\n(Conflict Management)",
+          "content_hash": "b030e74ff9f09c5cdeb0606452c20ac1f8a3d545ac6ceb77d50de47aee784b12",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_2",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 2,
+          "text": "Conflict Management\n   What do you understand by the term conflict?",
+          "content_hash": "76631eed3a1d0947c9758fa14f9308ae0c5298f47d2fbfcf5735777b626ef89a",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_3",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 3,
+          "text": "Benefits of having a conflict:\nIf managed properly conflicts can lead to positive outcome.\nHelps to analyze goals in real-time\nCreates dialogue\nFosters creative solutions\nConflict helps to overcome individual psychological barriers by forcing people out of their traditional mode of thinking.\nHigher decision quality especially when the resistance is strong\n\n    Without conflict organizations and employees stagnate",
+          "content_hash": "09e2b6c8123de69729281967f69a06358635ede7ad30aee2d81caaa09e095e7f",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_4",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 4,
+          "text": "Types of Conflict:\nInterpersonal\nOrganizational\nTechnical\nNational and International",
+          "content_hash": "3d1612c96feae41f8bb2d3a54807e6c4aeb4db8b763da638b411c7a349001b7c",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_5",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 5,
+          "text": "Conflict resolution Strategies:\nAvoiding\nAccommodating\nCompromising\nForcing\nProblem solving- Negotiating",
+          "content_hash": "ff696cddc9a39882f0486e24b986ad3fcd4097e7b4ec38f37269530b2b9302bf",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_6",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 6,
+          "text": "Negotiating as the best strategy:\n\n\nCooperation is better than Competition\nParties can be trusted (Communication Pyramid)\nDifferences can be minimized\nMutually acceptable solution can be found",
+          "content_hash": "56a72e1b3aca0079a1bcbb5072ae99b9c673aa22f334d4efbf40068b4785ab22",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_7",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 7,
+          "text": "Communication Pyramid",
+          "content_hash": "21e87c2ab0fc272429a5807f1e26ef28f4622114fef493a18cb1e945eba50c45",
+          "ocr_regions": null
+        },
+        {
+          "chunk_id": "ppt_001_slide_8",
+          "source_type": "ppt",
+          "location_type": "slide",
+          "location_number": 8,
+          "text": "https://www.ted.com/talks/guy_winch_why_we_all_need_to_practice_emotional_first_aid?language=en",
+          "content_hash": "d8622996a38a7cbd153d16b8a526e3075c08ef9dd904563253263c3d8e500edc",
+          "ocr_regions": null
+        }
+      ],
+      "content_hash": "091fb6ab47fe12a32ecd5601b515497c225610604394522dbf6b8e8548e91fa5"
+    }
+  ],
+  "ingestion_timestamp": "2026-08-28T13:36:08.248372"
+}
