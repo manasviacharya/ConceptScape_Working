@@ -49,6 +49,12 @@ class Settings(BaseSettings):
     require_evidence: bool = True
     min_concept_confidence: float = 0.0
 
+    # Neo4j
+    neo4j_uri: str = ""
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = ""
+    neo4j_database: str = "neo4j"
+
     # relationships — controlled vocabulary; anything outside this is rejected
     relationship_types: list[str] = [
         "related_to", "part_of", "depends_on", "requires", "produces",
