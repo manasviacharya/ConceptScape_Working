@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, FileText, X } from "lucide-react";
 import { FLAG_LABELS, ask, type AskResponse, type Citation } from "@/lib/api";
+import { Navbar } from "@/components/Navbar";
 
 type Turn = {
   query: string;
@@ -23,6 +25,7 @@ export default function ChatPage() {
   const [busy, setBusy] = useState(false);
   const [openCitation, setOpenCitation] = useState<Citation | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,98 +47,165 @@ export default function ChatPage() {
       );
     } finally {
       setBusy(false);
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit(input);
+    }
+  };
+
   return (
-    <div className="chat-page">
-      <header className="chat-head">
-        <span className="title">ConceptScape</span>
-        <nav className="nav">
-          <Link href="/">Graph</Link>
-          <span className="nav-active">Ask</span>
-          <Link href="/upload">Documents</Link>
-        </nav>
-      </header>
+    <div className="chat-container">
+      <Navbar />
 
-      <div className="chat-scroll">
-        {turns.length === 0 && (
-          <div className="chat-intro">
-            <h2>Ask the knowledge base</h2>
-            <p>
-              Answers come only from your indexed documents. Every claim is cited back to a
-              page you can check — and if the material does not answer the question, it says so
-              rather than guessing.
-            </p>
-            <div className="examples">
-              {EXAMPLES.map((e) => (
-                <button key={e} className="example" onClick={() => submit(e)}>
-                  {e}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {turns.map((turn, i) => (
-          <div className="turn" key={i}>
-            <div className="q">{turn.query}</div>
-
-            {turn.pending && <div className="a pending">Searching the knowledge graph…</div>}
-
-            {turn.error && (
-              <div className="a error">
-                {turn.error}
-                <div className="hint-inline">
-                  Is the API running? Start it with <code>python run_api.py</code>.
-                </div>
+      <div className="chat-inner">
+        <div className="chat-scroll">
+          {turns.length === 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="chat-intro"
+            >
+              <h2 className="chat-intro-title">Ask ConceptScape</h2>
+              <p>
+                Answers come only from your indexed documents. Every claim is cited back to a
+                page you can check — and if the material does not answer the question, it says so
+                rather than guessing.
+              </p>
+              <div className="examples">
+                {EXAMPLES.map((e, i) => (
+                  <motion.button
+                    key={e}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{ y: -4, borderColor: "var(--accent)", color: "#fff" }}
+                    className="example"
+                    onClick={() => submit(e)}
+                  >
+                    {e}
+                  </motion.button>
+                ))}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {turn.result && <AnswerBlock result={turn.result} onCite={setOpenCitation} />}
-          </div>
-        ))}
-        <div ref={endRef} />
+          {turns.map((turn, i) => (
+            <motion.div 
+              className="turn" 
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+            >
+              <div className="q">{turn.query}</div>
+
+              {turn.pending && (
+                <div className="a pending">
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                    <span style={{ fontSize: 13, color: "var(--text-3)" }}>Searching the knowledge graph</span>
+                    <div style={{ display: "flex", gap: "4px", marginLeft: 4 }}>
+                      {[0, 1, 2].map((dot) => (
+                        <motion.span
+                          key={dot}
+                          style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--text-3)" }}
+                          animate={{ y: [0, -4, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: dot * 0.15 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {turn.error && (
+                <div className="a error">
+                  {turn.error}
+                  <div className="hint-inline">
+                    Is the API running? Start it with <code>python run_api.py</code>.
+                  </div>
+                </div>
+              )}
+
+              {turn.result && <AnswerBlock result={turn.result} onCite={setOpenCitation} />}
+            </motion.div>
+          ))}
+          <div ref={endRef} />
+        </div>
+
+        <div className="composer-wrap">
+          <form
+            className="composer"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(input);
+            }}
+          >
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about your documents… (Press Enter to send)"
+              disabled={busy}
+              rows={Math.min(5, input.split("\n").length || 1)}
+            />
+            <motion.button 
+              whileTap={{ scale: 0.93 }}
+              type="submit" 
+              className="composer-btn"
+              disabled={busy || !input.trim()}
+            >
+              <Send size={18} strokeWidth={2.5} />
+            </motion.button>
+          </form>
+        </div>
       </div>
 
-      <form
-        className="composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit(input);
-        }}
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about your documents…"
-          disabled={busy}
-        />
-        <button type="submit" disabled={busy || !input.trim()}>
-          {busy ? "…" : "Ask"}
-        </button>
-      </form>
-
-      {openCitation && (
-        <div className="modal-backdrop" onClick={() => setOpenCitation(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <button className="close" onClick={() => setOpenCitation(null)}>×</button>
-            <h3>
-              {openCitation.relationship
-                ? "Relationship evidence"
-                : openCitation.concept_name || "Source text"}
-            </h3>
-            {openCitation.relationship && (
-              <div className="modal-rel">{openCitation.relationship}</div>
-            )}
-            <blockquote>“{openCitation.text}”</blockquote>
-            <div className="modal-src">
-              {openCitation.filename}
-              {openCitation.page_number > 0 && ` · page ${openCitation.page_number}`}
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {openCitation && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-backdrop" 
+            onClick={() => setOpenCitation(null)}
+          >
+            <motion.div 
+              initial={{ y: 50, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="modal" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="close" onClick={() => setOpenCitation(null)}>
+                <X size={20} />
+              </button>
+              <h3>
+                {openCitation.relationship
+                  ? "Relationship evidence"
+                  : openCitation.concept_name || "Source text"}
+              </h3>
+              {openCitation.relationship && (
+                <div className="modal-rel">{openCitation.relationship}</div>
+              )}
+              <blockquote>“{openCitation.text}”</blockquote>
+              <div className="modal-src">
+                <FileText size={14} />
+                <span>
+                  {openCitation.filename}
+                  {openCitation.page_number > 0 && ` · page ${openCitation.page_number}`}
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -155,16 +225,25 @@ function AnswerBlock({
   return (
     <div className="a">
       <div className="a-meta">
-        <span className={`badge type-${result.query_type}`}>
+        <motion.span 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={`badge type-${result.query_type}`}
+        >
+          <span className="badge-dot" />
           Type {result.query_type} · {result.query_type_label}
+        </motion.span>
+        <span className="badge">
+          {result.retriever_used} retrieval
         </span>
-        <span className="badge muted">{result.retriever_used} retrieval</span>
         {result.concepts_identified.length > 0 && (
-          <span className="badge muted">{result.concepts_identified.join(", ")}</span>
+          <span className="badge">
+            {result.concepts_identified.join(", ")}
+          </span>
         )}
       </div>
 
-      <p className="a-text">{renderWithCitations(result.answer, byIndex, onCite)}</p>
+      <div className="a-text">{renderWithCitations(result.answer, byIndex, onCite)}</div>
 
       {!result.sufficient_evidence && (
         <div className="warn">
@@ -184,15 +263,16 @@ function AnswerBlock({
           {used.map((c) => (
             <button className="source" key={c.index} onClick={() => onCite(c)}>
               <span className="cite-num">{c.index}</span>
-              <span className="source-body">
+              <div className="source-body">
                 <span className="source-title">
                   {c.relationship || c.concept_name || "source text"}
                 </span>
                 <span className="source-where">
+                  <FileText size={12} />
                   {c.filename}
                   {c.page_number > 0 && ` · p${c.page_number}`}
                 </span>
-              </span>
+              </div>
             </button>
           ))}
         </div>
@@ -201,7 +281,6 @@ function AnswerBlock({
   );
 }
 
-/** Turns "[3]" in the answer text into a clickable chip showing that evidence. */
 function renderWithCitations(
   text: string,
   byIndex: Map<number, Citation>,

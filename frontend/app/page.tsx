@@ -1,188 +1,309 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import ReactFlow, { Background, Controls, type Edge, type Node } from "reactflow";
-import ConceptList from "./ConceptList";
-import ConceptNode from "./ConceptNode";
-import DetailPanel from "./DetailPanel";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import {
-  TYPE_COLORS,
-  layout,
-  radialLayout,
-  subgraph,
-  type ConceptEdge,
-  type ConceptNode as Concept,
-  type GraphExport,
-} from "@/lib/graph";
+  Network,
+  Upload,
+  Brain,
+  MessageSquare,
+  ArrowRight,
+  Sparkles,
+  FileText,
+  GitBranch,
+  Search,
+  Zap,
+  Shield,
+} from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { getHealth, type HealthStatus } from "@/lib/api";
 
-const nodeTypes = { concept: ConceptNode };
+const FEATURES = [
+  {
+    icon: Upload,
+    title: "Multi-Format Ingestion",
+    desc: "Drop PDFs, PowerPoints, or images. PaddleOCR handles scanned pages automatically.",
+    color: "#22c55e",
+  },
+  {
+    icon: Brain,
+    title: "AI Concept Extraction",
+    desc: "Gemini & Groq extract concepts, definitions, and relationships — every claim verified against source text.",
+    color: "#7c5cfc",
+  },
+  {
+    icon: GitBranch,
+    title: "Knowledge Graph",
+    desc: "Concepts become nodes, relationships become edges. Explore how ideas connect across your documents.",
+    color: "#3d8dae",
+  },
+  {
+    icon: MessageSquare,
+    title: "Grounded Q&A",
+    desc: "Ask questions and get cited answers. If the material doesn't cover it, ConceptScape says so.",
+    color: "#f59e0b",
+  },
+  {
+    icon: Shield,
+    title: "Evidence-First",
+    desc: "No hallucinations. Every concept, edge, and answer traces back to a specific page in your documents.",
+    color: "#e07a5f",
+  },
+  {
+    icon: Zap,
+    title: "7-Stage Pipeline",
+    desc: "Ingest, Clean, Extract, Normalize, Relate, Graph, Index. Cached and resumable.",
+    color: "#8a63d2",
+  },
+];
 
-export default function Page() {
-  const [graph, setGraph] = useState<GraphExport | null>(null);
-  const [error, setError] = useState("");
-  const [focusId, setFocusId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [hops, setHops] = useState(1);
-  const [overview, setOverview] = useState(false);
+const STEPS = [
+  { num: "01", title: "Upload Documents", desc: "PDF, PPTX, JPG, PNG — drag and drop.", icon: FileText },
+  { num: "02", title: "Run Pipeline", desc: "AI extracts concepts and builds the graph.", icon: Sparkles },
+  { num: "03", title: "Explore & Ask", desc: "Navigate the graph or ask questions with cited answers.", icon: Search },
+];
+
+const PIPELINE = ["Ingest", "Clean", "Extract", "Normalize", "Relate", "Graph", "Index"];
+
+export default function LandingPage() {
+  const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [backendUp, setBackendUp] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch("/data/graph_export.json")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((g: GraphExport) => {
-        setGraph(g);
-        // Open on the most connected concept rather than an empty canvas, so the
-        // first thing seen is a readable, representative piece of the graph.
-        const degree = new Map<string, number>();
-        for (const e of g.edges) {
-          degree.set(e.source_concept_id, (degree.get(e.source_concept_id) ?? 0) + 1);
-          degree.set(e.target_concept_id, (degree.get(e.target_concept_id) ?? 0) + 1);
-        }
-        const hub = [...g.nodes].sort(
-          (a, b) => (degree.get(b.concept_id) ?? 0) - (degree.get(a.concept_id) ?? 0)
-        )[0];
-        if (hub) setFocusId(hub.concept_id);
-      })
-      .catch((e) =>
-        setError(
-          `Could not load the graph (${e.message}). Run "python run_build_graph.py", then "npm run sync".`
-        )
-      );
+    getHealth()
+      .then((h) => { setHealth(h); setBackendUp(true); })
+      .catch(() => setBackendUp(false));
   }, []);
 
-  const conceptsById = useMemo(() => {
-    const m: Record<string, Concept> = {};
-    for (const n of graph?.nodes ?? []) m[n.concept_id] = n;
-    return m;
-  }, [graph]);
-
-  const view = useMemo(() => {
-    if (!graph) return null;
-    if (overview || !focusId) {
-      const connected = graph.nodes.filter((n) =>
-        graph.edges.some(
-          (e) => e.source_concept_id === n.concept_id || e.target_concept_id === n.concept_id
-        )
-      );
-      const ids = new Set(connected.map((n) => n.concept_id));
-      const edges = graph.edges.filter(
-        (e) => ids.has(e.source_concept_id) && ids.has(e.target_concept_id)
-      );
-      return { ...layout(connected, edges), shown: connected.length };
-    }
-    const sub = subgraph(focusId, graph.nodes, graph.edges, hops);
-    return { ...radialLayout(focusId, sub.nodes, sub.edges, sub.depth), shown: sub.nodes.length };
-  }, [graph, focusId, hops, overview]);
-
-  const nodes: Node[] = useMemo(
-    () =>
-      (view?.nodes ?? []).map((n) => ({
-        ...n,
-        data: { ...n.data, selected: n.id === focusId },
-      })),
-    [view, focusId]
-  );
-
-  const edges: Edge[] = view?.edges ?? [];
-
-  if (error) return <div className="fullmsg">{error}</div>;
-  if (!graph || !view) return <div className="fullmsg">Loading graph…</div>;
-
-  const focus = focusId ? conceptsById[focusId] ?? null : null;
-  const usedTypes = Array.from(new Set(graph.edges.map((e) => e.type))).sort();
+  const artifactCount = health
+    ? Object.values(health.artifacts).filter(Boolean).length
+    : 0;
 
   return (
-    <div className="layout">
-      <ConceptList
-        concepts={graph.nodes}
-        edges={graph.edges as ConceptEdge[]}
-        focusId={focusId}
-        search={search}
-        onSearch={setSearch}
-        onFocus={(id) => {
-          setFocusId(id);
-          setOverview(false);
-        }}
-      />
+    <div className="landing">
+      <Navbar />
 
-      <div className="canvas">
-        <div className="topbar">
-          <span className="title">ConceptScape</span>
-          <nav className="nav-inline">
-            <span className="nav-active">Graph</span>
-            <Link href="/chat">Ask</Link>
-            <Link href="/upload">Documents</Link>
-          </nav>
-          <span className="stats">
-            {overview
-              ? `overview · ${view.shown} connected concepts`
-              : `${focus?.canonical_name ?? ""} · ${view.shown} concepts within ${hops} hop${hops === 1 ? "" : "s"}`}
-          </span>
+      {/* Hero */}
+      <section className="hero">
+        <div className="hero-glow" />
+        <div className="hero-content">
+          <motion.div
+            className="hero-badge"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Sparkles size={14} />
+            AI-Powered Learning Workspace
+          </motion.div>
 
-          <div className="controls">
-            {!overview && (
-              <div className="segmented">
-                {[1, 2].map((h) => (
-                  <button
-                    key={h}
-                    className={hops === h ? "seg active" : "seg"}
-                    onClick={() => setHops(h)}
-                  >
-                    {h} hop{h === 1 ? "" : "s"}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button className="seg" onClick={() => setOverview((v) => !v)}>
-              {overview ? "← focus view" : "whole graph"}
-            </button>
-          </div>
+          <motion.h1
+            className="hero-title"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            Turn Documents into
+            <span className="hero-gradient"> Knowledge Graphs</span>
+          </motion.h1>
+
+          <motion.p
+            className="hero-sub"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            Upload your study material. ConceptScape extracts concepts,
+            maps relationships, and lets you explore and ask questions —
+            every answer grounded in evidence from your documents.
+          </motion.p>
+
+          <motion.div
+            className="hero-actions"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Link href="/upload" className="hero-cta">
+              Get Started
+              <ArrowRight size={18} />
+            </Link>
+            <Link href="/graph" className="hero-cta-secondary">
+              <Network size={18} />
+              Explore Graph
+            </Link>
+          </motion.div>
+
+          <motion.div
+            className="hero-status"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <span className={`status-dot ${backendUp === true ? "up" : backendUp === false ? "down" : ""}`} />
+            {backendUp === null
+              ? "Checking backend…"
+              : backendUp
+                ? `Backend online · ${artifactCount}/4 artifacts ready`
+                : "Backend offline — start with: uvicorn api.service:app --port 8000"}
+          </motion.div>
         </div>
 
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          onNodeClick={(_, node) => {
-            setFocusId(node.id);
-            setOverview(false);
-          }}
-          fitView
-          fitViewOptions={{ padding: 0.22 }}
-          minZoom={0.08}
-          proOptions={{ hideAttribution: true }}
+        <motion.div
+          className="hero-visual"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
         >
-          <Background gap={20} color="#e6e5e0" />
-          <Controls showInteractive={false} />
-        </ReactFlow>
+          <GraphPreview />
+        </motion.div>
+      </section>
 
-        <div className="legend">
-          {usedTypes.map((t) => (
-            <div className="legend-item" key={t}>
-              <span className="swatch" style={{ background: TYPE_COLORS[t] ?? "#999" }} />
-              {t}
+      {/* How it works */}
+      <section className="section">
+        <div className="section-header">
+          <span className="section-label">How It Works</span>
+          <h2 className="section-title">Three Steps to Understanding</h2>
+        </div>
+        <div className="steps-grid">
+          {STEPS.map((step) => (
+            <div key={step.num} className="step-card">
+              <span className="step-num">{step.num}</span>
+              <div className="step-icon-wrap">
+                <step.icon size={24} />
+              </div>
+              <h3>{step.title}</h3>
+              <p>{step.desc}</p>
             </div>
           ))}
         </div>
+      </section>
 
-        {!overview && view.shown === 1 && (
-          <div className="hint">
-            This concept has no relationships — the source material never explicitly
-            stated one. Edges are only created where the text supports them.
+      {/* Features */}
+      <section className="section">
+        <div className="section-header">
+          <span className="section-label">Features</span>
+          <h2 className="section-title">Built for Deep Understanding</h2>
+        </div>
+        <div className="features-grid">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="feature-card">
+              <div className="feature-icon" style={{ background: `${f.color}15`, color: f.color }}>
+                <f.icon size={22} />
+              </div>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pipeline */}
+      <section className="section">
+        <div className="section-header">
+          <span className="section-label">Pipeline</span>
+          <h2 className="section-title">Seven Stages, Fully Automated</h2>
+        </div>
+        <div className="pipeline-bar">
+          {PIPELINE.map((s, i) => (
+            <div key={s} className="pipeline-stage">
+              <span className="pipeline-num">{i + 1}</span>
+              <span>{s}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="section cta-section">
+        <div className="cta-block">
+          <div className="cta-glow" />
+          <h2>Ready to Build Your Knowledge Graph?</h2>
+          <p>Upload your first document and watch ConceptScape map out the concepts.</p>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+            <Link href="/upload" className="hero-cta">
+              Upload Documents <ArrowRight size={18} />
+            </Link>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
-      <DetailPanel
-        concept={focus}
-        edges={graph.edges as ConceptEdge[]}
-        conceptsById={conceptsById}
-        onSelect={(id) => {
-          setFocusId(id);
-          setOverview(false);
-        }}
-        onClose={() => setFocusId(null)}
-      />
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <Network size={16} style={{ color: "var(--accent)" }} />
+            <span>ConceptScape</span>
+          </div>
+          <span className="footer-text">Evidence-grounded concept knowledge graph</span>
+        </div>
+      </footer>
     </div>
+  );
+}
+
+function GraphPreview() {
+  const nodes = [
+    { id: "ml", label: "Machine Learning", x: 200, y: 40, main: true },
+    { id: "gd", label: "Gradient Descent", x: 120, y: 130, main: false },
+    { id: "lr", label: "Learning Rate", x: 310, y: 110, main: false },
+    { id: "nn", label: "Neural Network", x: 50, y: 60, main: false },
+    { id: "opt", label: "Optimization", x: 80, y: 210, main: false },
+    { id: "lf", label: "Loss Function", x: 300, y: 200, main: false },
+    { id: "bp", label: "Backpropagation", x: 220, y: 260, main: false },
+  ];
+
+  const edges = [
+    { from: "ml", to: "gd" }, { from: "ml", to: "lr" }, { from: "ml", to: "nn" },
+    { from: "gd", to: "opt" }, { from: "gd", to: "lf" }, { from: "nn", to: "bp" },
+    { from: "bp", to: "gd" }, { from: "lr", to: "lf" },
+  ];
+
+  return (
+    <svg viewBox="0 0 420 310" className="graph-preview">
+      <defs>
+        <radialGradient id="node-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {edges.map((e, i) => {
+        const from = nodes.find((n) => n.id === e.from)!;
+        const to = nodes.find((n) => n.id === e.to)!;
+        return (
+          <line
+            key={i}
+            x1={from.x + 50} y1={from.y + 16}
+            x2={to.x + 50} y2={to.y + 16}
+            stroke="var(--border-med)"
+            strokeWidth="1.5"
+            opacity="0.6"
+          />
+        );
+      })}
+      {nodes.map((n) => (
+        <g key={n.id}>
+          {n.main && <circle cx={n.x + 50} cy={n.y + 16} r="40" fill="url(#node-glow)" />}
+          <rect
+            x={n.x} y={n.y}
+            width="100" height="32" rx="8"
+            fill={n.main ? "rgba(124,92,252,0.15)" : "var(--surface-2)"}
+            stroke={n.main ? "var(--accent)" : "var(--border-med)"}
+            strokeWidth={n.main ? "1.5" : "1"}
+          />
+          <text
+            x={n.x + 50} y={n.y + 20}
+            textAnchor="middle"
+            fill="var(--text)"
+            fontSize="10"
+            fontWeight={n.main ? "600" : "500"}
+            fontFamily="var(--font-inter), sans-serif"
+          >
+            {n.label}
+          </text>
+        </g>
+      ))}
+    </svg>
   );
 }

@@ -1,211 +1,217 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { API_BASE } from "@/lib/api";
-
-type Doc = { filename: string; size_bytes: number; suffix: string };
-type Stage = { key: string; label: string; status: string; detail: string; seconds: number };
-type RunStatus = {
-  running: boolean;
-  current: string | null;
-  error: string | null;
-  stages: Stage[];
-  elapsed: number;
-};
-
-const ACCEPT = ".pdf,.pptx,.ppt,.png,.jpg,.jpeg,.webp";
+import { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, FileText, Presentation, Image as ImageIcon, Trash2, CheckCircle2, Play, AlertCircle } from "lucide-react";
+import { type PipelineStatus, listDocuments, uploadDocument, runPipeline, getStatus, removeDocument } from "@/lib/api";
+import { Navbar } from "@/components/Navbar";
+import clsx from "clsx";
 
 export default function UploadPage() {
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [status, setStatus] = useState<RunStatus | null>(null);
+  const [docs, setDocs] = useState<string[]>([]);
+  const [status, setStatus] = useState<PipelineStatus | null>(null);
+  const [drag, setDrag] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInput = useRef<HTMLInputElement>(null);
 
-  const loadDocs = useCallback(async () => {
+  const refresh = useCallback(async () => {
     try {
-      const r = await fetch(`${API_BASE}/documents`);
-      setDocs((await r.json()).documents ?? []);
-      setError("");
-    } catch {
-      setError(`Cannot reach the API at ${API_BASE}. Start it with: python run_api.py`);
-    }
-  }, []);
-
-  const loadStatus = useCallback(async () => {
-    try {
-      const r = await fetch(`${API_BASE}/pipeline/status`);
-      setStatus(await r.json());
-    } catch {
-      /* the documents call already reports connectivity */
-    }
-  }, []);
-
-  useEffect(() => {
-    loadDocs();
-    loadStatus();
-  }, [loadDocs, loadStatus]);
-
-  // Poll only while a run is active. A full run takes minutes, so the UI must
-  // show which stage is executing rather than an indefinite spinner.
-  useEffect(() => {
-    if (!status?.running) return;
-    const t = setInterval(() => {
-      loadStatus();
-      loadDocs();
-    }, 2000);
-    return () => clearInterval(t);
-  }, [status?.running, loadStatus, loadDocs]);
-
-  async function upload(files: FileList | null) {
-    if (!files?.length) return;
-    setUploading(true);
-    setNotice("");
-    const body = new FormData();
-    Array.from(files).forEach((f) => body.append("files", f));
-    try {
-      const r = await fetch(`${API_BASE}/documents`, { method: "POST", body });
-      const data = await r.json();
-      const parts: string[] = [];
-      if (data.saved?.length) parts.push(`${data.saved.length} file(s) uploaded`);
-      for (const rej of data.rejected ?? []) parts.push(`${rej.filename}: ${rej.reason}`);
-      setNotice(parts.join(" · "));
-      await loadDocs();
+      const [d, s] = await Promise.all([listDocuments(), getStatus()]);
+      setDocs(d.documents);
+      setStatus(s);
     } catch (e: any) {
-      setError(`Upload failed: ${e.message}`);
-    } finally {
-      setUploading(false);
-      if (fileInput.current) fileInput.current.value = "";
+      setError(e.message || "Failed to connect to backend.");
     }
-  }
+  }, []);
 
-  async function remove(filename: string) {
-    await fetch(`${API_BASE}/documents/${encodeURIComponent(filename)}`, { method: "DELETE" });
-    await loadDocs();
-  }
+  useEffect(() => {
+    refresh();
+    const t = setInterval(refresh, 2500);
+    return () => clearInterval(t);
+  }, [refresh]);
 
-  async function run() {
-    setNotice("");
-    const r = await fetch(`${API_BASE}/pipeline/run`, { method: "POST" });
-    const data = await r.json();
-    if (!data.started) setNotice(data.reason ?? "Could not start the pipeline.");
-    await loadStatus();
-  }
+  const onDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDrag(false);
+    if (busy) return;
+    setBusy(true);
+    setError("");
 
-  const running = status?.running ?? false;
-  const done = status?.stages?.every((s) => s.status === "done") && !running;
+    for (const file of Array.from(e.dataTransfer.files)) {
+      try {
+        await uploadDocument(file);
+      } catch (err: any) {
+        setError(err.message || `Failed to upload ${file.name}`);
+      }
+    }
+    await refresh();
+    setBusy(false);
+  };
+
+  const onDelete = async (name: string) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await removeDocument(name);
+      await refresh();
+    } catch (e: any) {
+      setError(e.message);
+    }
+    setBusy(false);
+  };
+
+  const onRun = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await runPipeline();
+      await refresh();
+    } catch (e: any) {
+      setError(e.message);
+    }
+    setBusy(false);
+  };
+
+  const isRunning = status?.running === true;
 
   return (
-    <div className="chat-page">
-      <header className="chat-head">
-        <span className="title">ConceptScape</span>
-        <nav className="nav">
-          <Link href="/">Graph</Link>
-          <Link href="/chat">Ask</Link>
-          <span className="nav-active">Documents</span>
-        </nav>
-      </header>
-
-      <div className="chat-scroll">
-        {error && <div className="warn">{error}</div>}
-        {notice && <div className="warn subtle">{notice}</div>}
-
-        <div
-          className={`dropzone${dragging ? " dragging" : ""}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            upload(e.dataTransfer.files);
-          }}
-          onClick={() => fileInput.current?.click()}
+    <div className="upload-container">
+      <Navbar rightSlot={
+        <button 
+          className="btn-primary" 
+          disabled={docs.length === 0 || isRunning || busy} 
+          onClick={onRun}
         >
-          <input
-            ref={fileInput}
-            type="file"
-            multiple
-            accept={ACCEPT}
-            hidden
-            onChange={(e) => upload(e.target.files)}
-          />
-          <div className="dz-title">{uploading ? "Uploading…" : "Drop documents here"}</div>
-          <div className="dz-sub">PDF · PPTX · PNG · JPG · WEBP — or click to browse</div>
+          {isRunning ? "Pipeline Running…" : "Run Pipeline"}
+          <Play size={14} />
+        </button>
+      } />
+
+      {error && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="warn">
+          <AlertCircle size={18} />
+          {error}
+        </motion.div>
+      )}
+
+      <div
+        className={clsx("dropzone", drag && "dragging")}
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={onDrop}
+        onClick={() => document.getElementById("file-upload-input")?.click()}
+        style={{ cursor: "pointer" }}
+      >
+        <input
+          id="file-upload-input"
+          type="file"
+          multiple
+          style={{ display: "none" }}
+          onChange={async (e) => {
+            if (busy || !e.target.files) return;
+            setBusy(true);
+            setError("");
+            for (const file of Array.from(e.target.files)) {
+              try {
+                await uploadDocument(file);
+              } catch (err: any) {
+                setError(err.message || `Failed to upload ${file.name}`);
+              }
+            }
+            await refresh();
+            setBusy(false);
+          }}
+        />
+        <motion.div 
+          animate={drag ? { y: [0, -8, 0] } : {}} 
+          transition={{ repeat: drag ? Infinity : 0, duration: 0.8 }}
+        >
+          <UploadCloud size={48} strokeWidth={1.5} className="dz-icon" />
+        </motion.div>
+        <div>
+          <div className="dz-title">Drag & Drop Documents Here</div>
+          <div className="dz-sub">Supports PDF, PPTX, JPG, PNG (or click to select files)</div>
         </div>
-
-        <div className="doc-head">
-          <h3>Documents ({docs.length})</h3>
-          <button className="primary" onClick={run} disabled={running || docs.length === 0}>
-            {running ? "Processing…" : "Process documents"}
-          </button>
-        </div>
-
-        {docs.length === 0 && (
-          <div className="sidebar-empty">No documents yet. Add some to build the graph.</div>
-        )}
-
-        <div className="doc-list">
-          {docs.map((d) => (
-            <div className="doc-row" key={d.filename}>
-              <span className="doc-name">{d.filename}</span>
-              <span className="doc-size">{(d.size_bytes / 1_000_000).toFixed(1)} MB</span>
-              <button className="doc-del" onClick={() => remove(d.filename)} disabled={running}>
-                remove
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {status?.stages?.length > 0 && (
-          <>
-            <div className="doc-head">
-              <h3>
-                Pipeline {running ? `· running (${status.elapsed}s)` : done ? "· complete" : "· last run"}
-              </h3>
-            </div>
-
-            {status.error && <div className="warn">{status.error}</div>}
-
-            <div className="stages">
-              {status.stages.map((s) => (
-                <div className={`stage ${s.status}`} key={s.key}>
-                  <span className="stage-dot" />
-                  <span className="stage-label">
-                    {s.label}
-                    {s.detail && <span className="stage-detail">{s.detail}</span>}
-                  </span>
-                  <span className="stage-status">
-                    {s.status === "done" && `${s.seconds}s`}
-                    {s.status === "running" && "running…"}
-                    {s.status === "failed" && "failed"}
-                    {s.status === "skipped" && "skipped"}
-                    {s.status === "pending" && "waiting"}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {done && (
-              <div className="warn subtle">
-                Processing finished. The <Link href="/">graph</Link> and{" "}
-                <Link href="/chat">chat</Link> now reflect these documents.
-              </div>
-            )}
-            {status.error && (
-              <div className="warn subtle">
-                Every stage caches its work, so running again resumes from the failure
-                rather than starting over. If an LLM quota was exhausted, wait and retry.
-              </div>
-            )}
-          </>
-        )}
       </div>
+
+      <div className="doc-head">
+        <h3>Indexed Documents</h3>
+      </div>
+      
+      <div className="doc-list">
+        <AnimatePresence>
+          {docs.length === 0 && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ padding: 40, textAlign: "center", color: "var(--text-3)" }}
+            >
+              No documents uploaded. The knowledge graph is empty.
+            </motion.div>
+          )}
+          {docs.map((doc, i) => (
+            <motion.div 
+              key={doc}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ delay: i * 0.05 }}
+              className="doc-row"
+            >
+              <DocIcon name={doc} />
+              <div className="doc-info">
+                <span className="doc-name">{doc}</span>
+              </div>
+              <button 
+                className="doc-del" 
+                onClick={() => onDelete(doc)} 
+                disabled={isRunning || busy}
+                title="Remove document"
+              >
+                <Trash2 size={16} />
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {status && (
+        <>
+          <div className="doc-head">
+            <h3>Pipeline Status</h3>
+          </div>
+          <div className="stages">
+            {status.stages.map((st, i) => (
+              <motion.div 
+                key={st.key}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={clsx("stage", st.status)}
+              >
+                <div className="stage-icon">
+                  {st.status === "done" ? <CheckCircle2 size={14} /> : 
+                   st.status === "running" ? <div className="spinner" style={{ width: 12, height: 12, border: "2px solid", borderTopColor: "transparent", borderRadius: "50%" }} /> : 
+                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />}
+                </div>
+                <div className="stage-content">
+                  <span className="stage-label">{st.label.replace(/_/g, " ")}</span>
+                  <span className="stage-status">{st.status}</span>
+                  {st.detail && <span className="stage-detail">{st.detail}</span>}
+                </div>
+                {st.status === "running" && <div className="stage-progress" />}
+              </motion.div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
+}
+
+function DocIcon({ name }: { name: string }) {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return <FileText size={20} className="doc-icon" />;
+  if (ext === "pptx" || ext === "ppt") return <Presentation size={20} className="doc-icon" />;
+  if (["png", "jpg", "jpeg", "webp"].includes(ext || "")) return <ImageIcon size={20} className="doc-icon" />;
+  return <FileText size={20} className="doc-icon" />;
 }

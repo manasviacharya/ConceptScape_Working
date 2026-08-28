@@ -54,3 +54,68 @@ export const FLAG_LABELS: Record<string, string> = {
   generation_failed: "Answer generation failed — all model providers were unavailable",
   parse_failure: "The model response could not be parsed",
 };
+
+// --- Health / Stats ---
+export type HealthStatus = {
+  status: string;
+  artifacts: {
+    concepts: boolean;
+    relationships: boolean;
+    graph: boolean;
+    chunks: boolean;
+  };
+};
+
+export async function getHealth(): Promise<HealthStatus> {
+  const r = await fetch(`${API_BASE}/health`);
+  if (!r.ok) throw new Error("Backend unavailable");
+  return r.json();
+}
+
+// --- Upload & Pipeline API ---
+
+export type Doc = { filename: string; size_bytes: number; suffix: string };
+export type Stage = { key: string; label: string; status: string; detail: string; seconds: number };
+export type PipelineStatus = {
+  running: boolean;
+  current: string | null;
+  error: string | null;
+  stages: Stage[];
+  elapsed: number;
+};
+
+export async function listDocuments(): Promise<{ documents: string[] }> {
+  const r = await fetch(`${API_BASE}/documents`);
+  if (!r.ok) throw new Error("Failed to list documents");
+  const data = await r.json();
+  return { documents: (data.documents ?? []).map((d: Doc) => d.filename) };
+}
+
+export async function uploadDocument(file: File): Promise<void> {
+  const body = new FormData();
+  body.append("files", file);
+  const r = await fetch(`${API_BASE}/documents`, { method: "POST", body });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.detail ?? `Upload failed for ${file.name}`);
+  }
+}
+
+export async function removeDocument(filename: string): Promise<void> {
+  const r = await fetch(`${API_BASE}/documents/${encodeURIComponent(filename)}`, { method: "DELETE" });
+  if (!r.ok) throw new Error(`Failed to remove ${filename}`);
+}
+
+export async function getStatus(): Promise<PipelineStatus> {
+  const r = await fetch(`${API_BASE}/pipeline/status`);
+  if (!r.ok) throw new Error("Failed to get pipeline status");
+  return r.json();
+}
+
+export async function runPipeline(): Promise<void> {
+  const r = await fetch(`${API_BASE}/pipeline/run`, { method: "POST" });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.reason ?? "Could not start the pipeline.");
+  }
+}
