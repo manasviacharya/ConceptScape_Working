@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ReactFlow, { Background, Controls, type Edge, type Node } from "reactflow";
 import ConceptList from "./ConceptList";
@@ -107,6 +108,11 @@ export default function Page() {
       <div className="canvas">
         <div className="topbar">
           <span className="title">ConceptScape</span>
+          <nav className="nav-inline">
+            <span className="nav-active">Graph</span>
+            <Link href="/chat">Ask</Link>
+            <Link href="/upload">Documents</Link>
+          </nav>
           <span className="stats">
             {overview
               ? `overview · ${view.shown} connected concepts`

@@ -70,6 +70,13 @@ class Settings(BaseSettings):
     weight_semantic: float = 1.0
     weight_graph: float = 0.8
 
+    # API service
+    api_host: str = "127.0.0.1"
+    api_port: int = 8000
+    api_allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:3111"]
+
+    upload_max_bytes: int = 50_000_000
+
     # RAG
     rag_max_citations: int = 12
     rag_evidence_per_concept: int = 2
