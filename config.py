@@ -49,6 +49,12 @@ class Settings(BaseSettings):
     require_evidence: bool = True
     min_concept_confidence: float = 0.0
 
+    # relationships — controlled vocabulary; anything outside this is rejected
+    relationship_types: list[str] = [
+        "related_to", "part_of", "depends_on", "requires", "produces",
+        "causes", "used_for", "example_of", "prerequisite_of",
+    ]
+
     # normalization
     normalize_strip_parentheticals: bool = True
     normalize_fold_plurals: bool = True
