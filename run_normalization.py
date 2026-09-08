@@ -6,6 +6,7 @@ from dataclasses import asdict
 from config import settings
 from logging_setup import configure_logging
 from normalization.normalizer import normalize
+from normalization.semantic_fusion import fuse
 
 
 def main():
@@ -26,9 +27,20 @@ def main():
     logging.info(f"Input mentions: {len(mentions)}")
 
     concepts = normalize(mentions)
+    lexical_count = len(concepts)
+
+    merge_log = []
+    if settings.fusion_enabled:
+        # Runs after lexical merging so it only has to bridge what string
+        # matching genuinely cannot — far fewer pairs, and each surviving
+        # concept already carries a consolidated definition to compare on.
+        concepts, merge_log = fuse(concepts)
 
     merged = [c for c in concepts if c.occurrence_count > 1]
     logging.info(f"Canonical concepts: {len(concepts)} (from {len(mentions)} mentions)")
+    if settings.fusion_enabled:
+        logging.info(f"  lexical merge: {len(mentions)} -> {lexical_count}"
+                     f" | semantic fusion: {lexical_count} -> {len(concepts)}")
     logging.info(f"Concepts formed by merging >1 mention: {len(merged)}")
 
     logging.info("\nLargest merge groups:")
@@ -40,6 +52,7 @@ def main():
     output = {
         "subject_id": data.get("subject_id", ""),
         "concepts": [asdict(c) for c in concepts],
+        "semantic_merges": merge_log,
     }
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)

@@ -4,6 +4,7 @@ import os
 
 from config import settings
 from logging_setup import configure_logging
+from graph.memory_store import InMemoryGraphStore
 from graph.neo4j_store import Neo4jGraphStore
 
 
@@ -26,12 +27,21 @@ def main():
     logging.info("ConceptScape Graph Build starting...")
     logging.info(f"Concepts: {len(concepts)} | Relationships: {len(relationships)}")
 
+    # Neo4j is preferred, but Bolt (7687) is blocked on many managed networks and
+    # has no HTTPS fallback. Rather than leave the app with no graph at all, fall
+    # back to the in-memory store — the export and every query the UI and
+    # retriever use go through BaseGraphStore, so nothing downstream changes.
     store = Neo4jGraphStore()
     try:
         store.connect()
     except Exception as e:
-        logging.error(f"Could not connect to Neo4j: {e}")
-        return
+        logging.warning(f"Neo4j unavailable ({str(e)[:120]})")
+        if not settings.graph_allow_memory_fallback:
+            logging.error("Falling back is disabled (graph_allow_memory_fallback=False). Aborting.")
+            return
+        logging.warning("Falling back to the in-memory graph store")
+        store = InMemoryGraphStore()
+        store.connect()
 
     try:
         store.init_schema()

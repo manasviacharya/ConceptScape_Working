@@ -143,6 +143,16 @@ def _pick_definition(mentions: List[Dict[str, Any]]) -> str:
     return best.get("definition", "")
 
 
+def _dedupe_locations(locations: List[dict]) -> List[dict]:
+    seen, out = set(), []
+    for loc in locations:
+        key = (loc["type"], loc["number"], loc["filename"])
+        if key not in seen:
+            seen.add(key)
+            out.append(loc)
+    return sorted(out, key=lambda l: (l["filename"], l["number"]))
+
+
 def _dedupe(values: List[Any]) -> List[Any]:
     seen, out = set(), []
     for v in values:
@@ -186,12 +196,23 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
         confidences = [float(m.get("confidence") or 0.0) for m in group]
         canonical = _pick_canonical_name(names)
 
-        pages = []
+        # Positions are collected from the generic location_number, falling back
+        # to the typed aliases for mentions extracted before that field existed.
+        # Reading only page_number/slide_number silently dropped the position of
+        # every source measured in anything else — a video timestamp, say.
+        pages, locations = [], []
         for m in group:
             src = m.get("source_reference") or {}
-            n = src.get("page_number", src.get("slide_number"))
+            n = src.get("location_number")
+            if n is None:
+                n = src.get("page_number", src.get("slide_number", src.get("timestamp_seconds")))
             if isinstance(n, int):
                 pages.append(n)
+                locations.append({
+                    "type": src.get("location_type", ""),
+                    "number": n,
+                    "filename": src.get("filename", ""),
+                })
 
         resource_ids = _dedupe([(m.get("source_reference") or {}).get("resource_id", "") for m in group])
         digest = hashlib.sha256(
@@ -209,6 +230,7 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
             chunk_ids=_dedupe([(m.get("source_reference") or {}).get("chunk_id", "") for m in group]),
             filenames=_dedupe([(m.get("source_reference") or {}).get("filename", "") for m in group]),
             page_numbers=sorted(set(pages)),
+            locations=_dedupe_locations(locations),
             evidence=_dedupe([m.get("evidence", "") for m in group]),
             occurrence_count=len(group),
             mean_confidence=round(sum(confidences) / len(confidences), 3) if confidences else 0.0,

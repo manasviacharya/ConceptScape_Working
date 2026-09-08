@@ -7,6 +7,7 @@ import ConceptList from "../ConceptList";
 import ConceptNode from "../ConceptNode";
 import DetailPanel from "../DetailPanel";
 import { Navbar } from "@/components/Navbar";
+import { getGraph } from "@/lib/api";
 import {
   TYPE_COLORS,
   layout,
@@ -28,8 +29,7 @@ export default function GraphPage() {
   const [overview, setOverview] = useState(false);
 
   useEffect(() => {
-    fetch("/data/graph_export.json")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+    getGraph()
       .then((g: GraphExport) => {
         setGraph(g);
         const degree = new Map<string, number>();
@@ -44,7 +44,8 @@ export default function GraphPage() {
       })
       .catch((e) =>
         setError(
-          `Could not load the graph (${e.message}). Upload documents and run the pipeline first.`
+          `Could not load the graph: ${e.message}. ` +
+          `Check the API is running (python run_api.py), then upload documents and run the pipeline.`
         )
       );
   }, []);

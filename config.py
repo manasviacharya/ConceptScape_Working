@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     ocr_min_confidence: float = 0.3
     ocr_language: str = "en"
 
+    # YouTube transcripts — caption snippets are a few words each, so they are
+    # grouped into segments of roughly this length before chunking
+    youtube_segment_seconds: int = 45
+
     # PDF OCR fallback
     pdf_native_text_min_chars: int = 50
     pdf_ocr_render_dpi: int = 200
@@ -61,6 +65,8 @@ class Settings(BaseSettings):
     qdrant_api_key: str = ""
     qdrant_path: str = "qdrant_data"
     qdrant_timeout: int = 120
+    # use an embedded local Qdrant when the cloud instance is unreachable
+    qdrant_allow_local_fallback: bool = True
     qdrant_upsert_batch: int = 16
     retrieval_top_k: int = 8
     semantic_score_threshold: float = 0.30
@@ -83,6 +89,9 @@ class Settings(BaseSettings):
     rag_chunk_char_limit: int = 600
     rag_thin_evidence_threshold: int = 3
 
+    # fall back to the in-memory graph when Neo4j cannot be reached
+    graph_allow_memory_fallback: bool = True
+
     # relationships — controlled vocabulary; anything outside this is rejected
     relationship_types: list[str] = [
         "related_to", "part_of", "depends_on", "requires", "produces",
@@ -97,6 +106,13 @@ class Settings(BaseSettings):
     # normalization
     # merge the same concept across documents into one node
     normalize_cross_document: bool = True
+    # semantic fusion — merges concepts lexical matching cannot bridge
+    fusion_enabled: bool = True
+    # A coarse pre-filter only — the guards in semantic_fusion.py decide.
+    # 0.92 was too strict: the target pair (Mini-Batch SGD / Mini-Batch
+    # Stochastic Gradient Descent) sits at 0.85.
+    fusion_similarity_threshold: float = 0.80
+    fusion_min_token_overlap: float = 0.5
     normalize_strip_parentheticals: bool = True
     normalize_fold_plurals: bool = True
 

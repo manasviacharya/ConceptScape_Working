@@ -112,6 +112,22 @@ export async function getStatus(): Promise<PipelineStatus> {
   return r.json();
 }
 
+/**
+ * Fetch the concept graph from the API rather than a build-time JSON copy.
+ *
+ * A static file only changes when someone re-runs the sync script, so the graph
+ * silently showed stale data after a pipeline run. Reading the API means an
+ * upload is reflected as soon as the page is revisited.
+ */
+export async function getGraph(): Promise<{ nodes: any[]; edges: any[] }> {
+  const res = await fetch(`${API_BASE}/graph`, { cache: "no-store" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `Request failed (HTTP ${res.status})`);
+  }
+  return res.json();
+}
+
 export async function runPipeline(): Promise<void> {
   const r = await fetch(`${API_BASE}/pipeline/run`, { method: "POST" });
   if (!r.ok) {

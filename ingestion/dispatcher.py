@@ -11,6 +11,7 @@ from ingestion.base_parser import BaseParser
 from ingestion.ocr_engine import PaddleOCREngine
 from ingestion.pdf_parser import PDFParser
 from ingestion.ppt_parser import PPTParser
+from ingestion.youtube_parser import YouTubeParser
 from ingestion.image_parser import ImageParser
 from ingestion.models import IngestionResult, IngestedResource, ContentChunk
 from config import settings
@@ -73,12 +74,14 @@ class IngestionDispatcher:
             PDFParser(ocr_engine=ocr_engine),
             PPTParser(),
             ImageParser(ocr_engine=ocr_engine),
+            YouTubeParser(),
         ]
 
     def _generate_resource_id(self, filepath: Path) -> str:
         ext = filepath.suffix.lower()
         prefix = ("pdf" if ext == ".pdf"
                   else "ppt" if ext in (".ppt", ".pptx")
+                  else "youtube" if ext in YouTubeParser.SUPPORTED_EXTENSIONS
                   else "image" if ext in ImageParser.SUPPORTED_EXTENSIONS
                   else "unknown")
         digest = hashlib.sha256(filepath.name.encode("utf-8")).hexdigest()[:8]

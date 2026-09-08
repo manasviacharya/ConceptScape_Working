@@ -1,0 +1,213 @@
+{
+  "_readme": [
+    "Ground truth for retrieval evaluation. Each case names a query and the",
+    "concepts a correct retriever should return.",
+    "",
+    "'relevant' uses concept NAMES, not ids. Ids are derived from the match key",
+    "and are reassigned whenever normalization changes (enabling semantic fusion",
+    "rewrites all of them), which would silently invalidate every case. Names and",
+    "aliases are resolved at evaluation time; anything unresolvable is reported",
+    "rather than scored as a miss.",
+    "",
+    "Cases are hand-written against concepts that exist in this corpus, NOT",
+    "generated from the concept text — generating queries from the same text the",
+    "concepts were embedded from would inflate semantic retrieval.",
+    "",
+    "'paraphrase' cases should share as little vocabulary as possible with the",
+    "target concept: that is what separates lexical from semantic and graph",
+    "retrieval. Add more cases freely."
+  ],
+  "cases": [
+    {
+      "id": "q01",
+      "query": "what is mini-batch SGD?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Mini-Batch SGD"
+      ]
+    },
+    {
+      "id": "q02",
+      "query": "what is a learning rate?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q03",
+      "query": "define batch size",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "batch size"
+      ]
+    },
+    {
+      "id": "q04",
+      "query": "what is stochastic gradient descent?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Stochastic Gradient Descent"
+      ]
+    },
+    {
+      "id": "q05",
+      "query": "explain hill climbing",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q06",
+      "query": "what is an epoch?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "epoch"
+      ]
+    },
+    {
+      "id": "q07",
+      "query": "what is the update rule?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Update Rule",
+        "weight update rule"
+      ]
+    },
+    {
+      "id": "q08",
+      "query": "what does mini-batch SGD require?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Mini-Batch SGD",
+        "batch size"
+      ]
+    },
+    {
+      "id": "q09",
+      "query": "what does hill climbing depend on?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q10",
+      "query": "how are batch gradient descent and the gradient related?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Batch Gradient Descent",
+        "Gradient"
+      ]
+    },
+    {
+      "id": "q11",
+      "query": "what is momentum used for in gradient descent?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Momentum-based gradient descent",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q12",
+      "query": "what is part of a genetic algorithm?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Genetic Algonithm"
+      ]
+    },
+    {
+      "id": "q13",
+      "query": "how do I stop my model from overshooting the minimum?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "learning rate",
+        "Momentum-based gradient descent",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q14",
+      "query": "how much data does each weight update look at?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "batch size",
+        "mini-batch",
+        "Mini-Batch SGD"
+      ]
+    },
+    {
+      "id": "q15",
+      "query": "how do I measure how wrong my predictions are?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "error",
+        "Loss function (mean over N = 4 samples)"
+      ]
+    },
+    {
+      "id": "q16",
+      "query": "why does training take one sample at a time sometimes?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Stochastic Gradient Descent"
+      ]
+    },
+    {
+      "id": "q17",
+      "query": "what tells the model which direction to move its weights?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Gradient",
+        "weight (parameter)"
+      ]
+    },
+    {
+      "id": "q18",
+      "query": "how does a search method climb toward a better solution?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q19",
+      "query": "what happens after the whole dataset has been seen once?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "epoch"
+      ]
+    },
+    {
+      "id": "q20",
+      "query": "what is averaged across the samples in a batch?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "average gradient over the batch",
+        "average gradient"
+      ]
+    }
+  ]
+}

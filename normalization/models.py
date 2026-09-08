@@ -23,6 +23,9 @@ class CanonicalConcept:
     chunk_ids: List[str] = field(default_factory=list)
     filenames: List[str] = field(default_factory=list)
     page_numbers: List[int] = field(default_factory=list)
+    # Typed positions: [{"type": "page"|"slide"|"timestamp", "number", "filename"}]
+    # page_numbers alone cannot say whether 57 means page 57 or 57 seconds.
+    locations: List[dict] = field(default_factory=list)
     evidence: List[str] = field(default_factory=list)
     occurrence_count: int = 0
     mean_confidence: float = 0.0

@@ -380,10 +380,19 @@ Text:
                     "workspace_id": subject_id
                 }
 
+                # location_number is always recorded; the typed alias below is
+                # what the UI reads to label a citation. Without the generic
+                # field, any source whose unit is not a page or slide — a video
+                # timestamp, say — loses its position entirely.
+                concept_mention["source_reference"]["location_type"] = location_type
+                concept_mention["source_reference"]["location_number"] = location_number
+
                 if location_type == "page":
                     concept_mention["source_reference"]["page_number"] = location_number
                 elif location_type == "slide":
                     concept_mention["source_reference"]["slide_number"] = location_number
+                elif location_type == "timestamp":
+                    concept_mention["source_reference"]["timestamp_seconds"] = location_number
 
                 all_concepts.append(concept_mention)
 
