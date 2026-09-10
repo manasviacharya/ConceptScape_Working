@@ -113,7 +113,10 @@ def fuse(
     key with neither. Embedding similarity can — but only behind the guards
     above, because the failure mode is silent and destructive.
 
-    Returns (fused_concepts, merge_log).
+    Returns (fused_concepts, decisions) where decisions records BOTH merges and
+    refusals. The refusals are a result in their own right: a pair scoring high
+    similarity that the guards held apart is the guard design working, and it is
+    the half of the evaluation that shows the method is not merely permissive.
     """
     threshold = threshold if threshold is not None else settings.fusion_similarity_threshold
     if len(concepts) < 2:
@@ -177,7 +180,9 @@ def fuse(
     ]
     logging.info(f"Semantic fusion: {len(concepts)} -> {len(fused)} concepts "
                  f"({len(merge_log)} merges, {len(rejected)} held apart)")
-    return fused, merge_log
+    decisions = ([{**m, "decision": "merged"} for m in merge_log] +
+                 [{**r, "decision": "held_apart"} for r in rejected])
+    return fused, decisions
 
 
 def _merge_group(group: List[Any]) -> Any:

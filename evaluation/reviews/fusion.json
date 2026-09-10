@@ -1,0 +1,178 @@
+{
+  "_instructions": [
+    "Set verdict='correct' if the system's decision was right.",
+    "For a 'merged' item: correct means they really are one concept.",
+    "For a 'held_apart' item: correct means they really are different concepts.",
+    "Refusals matter as much as merges — a system that never refuses is not conservative."
+  ],
+  "_verdicts": ["correct", "incorrect", "unsure"],
+  "reviewed": 15,
+  "total": 15,
+  "items": [
+    {
+      "id": "fus000",
+      "decision": "merged",
+      "concept_a": "Gradient",
+      "concept_b": "Gradient of loss with respect to w",
+      "similarity": 0.8352,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "corpus never introduces gradient as a general operator; SGD slide 2 and Batch GD slide 2 both define the gradient symbol directly as 'gradient of the loss'"
+    },
+    {
+      "id": "fus001",
+      "decision": "merged",
+      "concept_a": "Gradient",
+      "concept_b": "Gradient of loss with respect to weight",
+      "similarity": 0.8836,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "same as fus000; 'weight' and 'w' are the same parameter"
+    },
+    {
+      "id": "fus002",
+      "decision": "merged",
+      "concept_a": "Gradient of loss with respect to w",
+      "concept_b": "Gradient of loss with respect to weight",
+      "similarity": 0.9172,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "decks define w explicitly as 'weight (parameter) being learned'; identical after expansion"
+    },
+    {
+      "id": "fus003",
+      "decision": "merged",
+      "concept_a": "Hill Climbing",
+      "concept_b": "Hill Climbing algorithm movement",
+      "similarity": 0.8054,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "'movement' describes how the algorithm steps between states, not a separate concept; second term is an extraction fragment"
+    },
+    {
+      "id": "fus004",
+      "decision": "merged",
+      "concept_a": "Linear model",
+      "concept_b": "Model",
+      "similarity": 0.933,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "every deck uses the single model y-hat = w*x, which is linear; no other model type appears in the corpus, so both names denote the same object here"
+    },
+    {
+      "id": "fus005",
+      "decision": "merged",
+      "concept_a": "Loss",
+      "concept_b": "Loss function (mean over N = 4 samples)",
+      "similarity": 0.8097,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "string taken verbatim from Batch GD slide 5 worked example; same loss instantiated for N=4, not a distinct concept"
+    },
+    {
+      "id": "fus006",
+      "decision": "merged",
+      "concept_a": "Loss",
+      "concept_b": "Loss function for regression",
+      "similarity": 0.8194,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "corpus contains only squared-error loss on a regression task; no classification loss appears, so the qualifier adds no distinction here"
+    },
+    {
+      "id": "fus007",
+      "decision": "merged",
+      "concept_a": "Mini-Batch SGD",
+      "concept_b": "Mini-Batch Stochastic Gradient Descent",
+      "similarity": 0.8502,
+      "system_reason": "same phrase after expanding abbreviations",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "deck title uses the full form, slide 2 body uses the abbreviation for the same thing"
+    },
+    {
+      "id": "fus008",
+      "decision": "merged",
+      "concept_a": "prediction",
+      "concept_b": "prediction ŷi",
+      "similarity": 0.983,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "algorithm slides write 'Compute prediction y-hat_i = w*x_i'; the symbol is the notation for the prediction"
+    },
+    {
+      "id": "fus009",
+      "decision": "merged",
+      "concept_a": "Simple Hill Climbing",
+      "concept_b": "Simple Hill Climbing Algorithm",
+      "similarity": 0.8205,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "notes are titled 'Simple Hill Climbing Algorithm'; trailing noun adds nothing"
+    },
+    {
+      "id": "fus010",
+      "decision": "merged",
+      "concept_a": "Update Rule",
+      "concept_b": "weight update rule",
+      "similarity": 0.8247,
+      "system_reason": "one name contains the other, no distinguishing modifier",
+      "question": "Are these the same concept, and should they have been merged?",
+      "verdict": "correct",
+      "note": "every deck has an 'Update Rule' section and it is always the weight update w = w - eta*grad"
+    },
+    {
+      "id": "fus011",
+      "decision": "held_apart",
+      "concept_a": "Batch Gradient Descent",
+      "concept_b": "Mini-Batch SGD",
+      "similarity": 0.8155,
+      "system_reason": "names differ: ['descent', 'gradient', 'mini', 'sgd']",
+      "question": "Are these genuinely different concepts, i.e. was holding them apart right?",
+      "verdict": "correct",
+      "note": "Variants deck slide 5 explicitly contrasts them by batch size: Batch GD b=N, Mini-Batch 1<b<N; different update behaviour and cost"
+    },
+    {
+      "id": "fus012",
+      "decision": "held_apart",
+      "concept_a": "Batch Gradient Descent",
+      "concept_b": "Mini-Batch Stochastic Gradient Descent",
+      "similarity": 0.8087,
+      "system_reason": "names differ: ['mini', 'stochastic']",
+      "question": "Are these genuinely different concepts, i.e. was holding them apart right?",
+      "verdict": "correct",
+      "note": "same distinction as fus011 with the abbreviation expanded; separate decks and separate worked examples"
+    },
+    {
+      "id": "fus013",
+      "decision": "held_apart",
+      "concept_a": "Gradient of loss with respect to w",
+      "concept_b": "Loss function for regression",
+      "similarity": 0.8192,
+      "system_reason": "names differ: ['for', 'function', 'gradient', 'of']",
+      "question": "Are these genuinely different concepts, i.e. was holding them apart right?",
+      "verdict": "correct",
+      "note": "decks list them separately as 'Loss: L = 1/2(y-hat - y)^2' and 'Gradient: dL/dw = (y-hat - y)*x'; one is the derivative of the other"
+    },
+    {
+      "id": "fus014",
+      "decision": "held_apart",
+      "concept_a": "Gradient of loss with respect to weight",
+      "concept_b": "Loss function for regression",
+      "similarity": 0.8365,
+      "system_reason": "names differ: ['for', 'function', 'gradient', 'of']",
+      "question": "Are these genuinely different concepts, i.e. was holding them apart right?",
+      "verdict": "correct",
+      "note": "same as fus013 with 'weight' spelled out; function and its derivative remain distinct"
+    }
+  ]
+}

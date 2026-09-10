@@ -13,6 +13,9 @@ export type ConceptNode = {
   chunk_ids: string[];
   filenames: string[];
   page_numbers: number[];
+  // Typed positions. page_numbers alone cannot say whether 57 means page 57 or
+  // 57 seconds into a video, so anything user-facing reads this instead.
+  locations?: { type: string; number: number; filename: string }[];
   evidence: string[];
   occurrence_count: number;
   mean_confidence: number;

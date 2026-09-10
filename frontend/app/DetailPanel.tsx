@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
 import type { ConceptEdge, ConceptNode } from "@/lib/graph";
 import { TYPE_COLORS } from "@/lib/graph";
+import { formatLocation } from "@/lib/api";
 
 type Props = {
   concept: ConceptNode | null;
@@ -120,7 +121,8 @@ function EvidenceTab({ concept }: { concept: ConceptNode }) {
             “{ev}”
             <span className="src">
               {concept.filenames[0]}
-              {concept.page_numbers?.length > 0 && ` · p${concept.page_numbers[0]}`}
+              {concept.locations?.length ? ` · ${formatLocation(concept.locations[0].type, concept.locations[0].number)}`
+                 : concept.page_numbers?.length > 0 ? ` · p${concept.page_numbers[0]}` : ""}
             </span>
           </div>
         ))
@@ -132,9 +134,17 @@ function EvidenceTab({ concept }: { concept: ConceptNode }) {
       {concept.filenames.map((f, i) => (
         <div className="source-line" key={i}>
           {f}
-          {concept.page_numbers?.length > 0 && (
+          {concept.locations?.length ? (
+            <span style={{ color: "var(--text-3)" }}>
+              {" · "}
+              {concept.locations
+                .filter((l) => l.filename === f)
+                .map((l) => formatLocation(l.type, l.number))
+                .join(", ")}
+            </span>
+          ) : concept.page_numbers?.length > 0 ? (
             <span style={{ color: "var(--text-3)" }}> · p{concept.page_numbers.join(", ")}</span>
-          )}
+          ) : null}
         </div>
       ))}
     </>

@@ -52,7 +52,7 @@ def main():
     output = {
         "subject_id": data.get("subject_id", ""),
         "concepts": [asdict(c) for c in concepts],
-        "semantic_merges": merge_log,
+        "fusion_decisions": merge_log,
     }
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)

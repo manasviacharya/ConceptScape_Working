@@ -208,6 +208,260 @@
         "average gradient over the batch",
         "average gradient"
       ]
+    },
+    {
+      "id": "q21",
+      "query": "what is momentum in optimisation?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Momentum",
+        "Momentum-based gradient descent"
+      ]
+    },
+    {
+      "id": "q22",
+      "query": "define a heuristic function",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Heuristic function"
+      ]
+    },
+    {
+      "id": "q23",
+      "query": "what is a local maximum?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Local Maximum"
+      ]
+    },
+    {
+      "id": "q24",
+      "query": "what is a cost function?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Cost function",
+        "Loss function (mean over N = 4 samples)"
+      ]
+    },
+    {
+      "id": "q25",
+      "query": "explain Nesterov accelerated gradient descent",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Nesterov (NAG)",
+        "Nesterov Accelerated Gradient Descent"
+      ]
+    },
+    {
+      "id": "q26",
+      "query": "what is crossover in a genetic algorithm?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Cross Over"
+      ]
+    },
+    {
+      "id": "q27",
+      "query": "what are vanishing gradients?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Vanishing gradients"
+      ]
+    },
+    {
+      "id": "q28",
+      "query": "what is a saddle point?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "saddle point"
+      ]
+    },
+    {
+      "id": "q29",
+      "query": "what does the weight update rule depend on?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "weight update rule",
+        "learning rate",
+        "Gradient"
+      ]
+    },
+    {
+      "id": "q30",
+      "query": "what causes overshooting during training?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "overshoot",
+        "Velocity v",
+        "Momentum"
+      ]
+    },
+    {
+      "id": "q31",
+      "query": "what is a genetic algorithm made up of?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Genetic Algonithm",
+        "Initial Population",
+        "Cross Over"
+      ]
+    },
+    {
+      "id": "q32",
+      "query": "what does gradient descent produce?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Gradient Descent",
+        "Global Minimum"
+      ]
+    },
+    {
+      "id": "q33",
+      "query": "what kind of technique is hill climbing an example of?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Hill Climbing algorithm movement",
+        "Heuristic search technique"
+      ]
+    },
+    {
+      "id": "q34",
+      "query": "what does stochastic gradient descent need to work?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Stochastic Gradient Descent",
+        "Gradient",
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q35",
+      "query": "my training keeps getting stuck on a plateau where nothing improves",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Flat local maximum",
+        "Local Maximum"
+      ]
+    },
+    {
+      "id": "q36",
+      "query": "the signal fades away as it travels back through the layers",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Vanishing gradients"
+      ]
+    },
+    {
+      "id": "q37",
+      "query": "the numbers blow up and become impossible to work with",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Exploding gradients"
+      ]
+    },
+    {
+      "id": "q38",
+      "query": "how do I pick a good starting point before training begins?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "initialization of weights"
+      ]
+    },
+    {
+      "id": "q39",
+      "query": "the algorithm keeps rolling in the same direction it was already going",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Momentum",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q40",
+      "query": "it peeks ahead before deciding where to step",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "look-ahead correction",
+        "look-ahead point",
+        "Nesterov (NAG)"
+      ]
+    },
+    {
+      "id": "q41",
+      "query": "how does the system decide which candidate solutions survive?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Fitness Value",
+        "Calculate fitnesp"
+      ]
+    },
+    {
+      "id": "q42",
+      "query": "the surface is flat in one direction and curved in another",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "saddle point"
+      ]
+    },
+    {
+      "id": "q43",
+      "query": "randomness helps it escape somewhere it would otherwise be trapped",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Escaping shallow local minima via noise",
+        "Stochastic Hill Climbing"
+      ]
+    },
+    {
+      "id": "q44",
+      "query": "how big a step should it take each time it adjusts?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q45",
+      "query": "it always picks whichever neighbour looks best right now",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Steepest Hill Climbing",
+        "Steepest - Ascent Hill Climbing"
+      ]
+    },
+    {
+      "id": "q46",
+      "query": "the lowest point anywhere on the whole surface",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Global Minimum"
+      ]
     }
   ]
 }

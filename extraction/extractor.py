@@ -188,7 +188,13 @@ class ConceptExtractor:
         call (must NOT be cached, so a later run retries it). Rate limits
         surface as None, which is what makes a partial run resumable.
         """
-        prompt = f"""
+        # The ungrounded prompt is the ablation baseline: what a conventional
+        # "extract the concepts" instruction produces with no evidence
+        # requirement. Keeping it here rather than in the harness means the
+        # comparison differs only in the instruction, not in parsing, schema
+        # or provider — so any measured difference is attributable to grounding.
+        if settings.extraction_grounded_prompt:
+            prompt = f"""
 Extract meaningful educational concepts from the text below.
 
 RULES — follow all of them:
@@ -207,6 +213,17 @@ RULES — follow all of them:
 - Prefer FEWER, well-grounded concepts over many weak ones.
 - Set "confidence" between 0.0 and 1.0: how sure you are this is a real,
   well-supported educational concept given only this text.
+
+Text:
+{text}
+"""
+        else:
+            prompt = f"""
+Extract the educational concepts from the text below.
+
+For each concept give its name, a definition, and relevant keywords.
+Also provide an "evidence" field with text related to the concept, and a
+"confidence" between 0.0 and 1.0.
 
 Text:
 {text}
@@ -275,6 +292,7 @@ Text:
 
         skipped_short = 0
         dropped_unverified = 0
+        dropped_concepts: List[Dict[str, Any]] = []
         dropped_low_conf = 0
         total_returned = 0
 
@@ -329,6 +347,18 @@ Text:
 
                 if settings.require_evidence and verified is None:
                     dropped_unverified += 1
+                    # Recorded, not discarded: this is exactly the set the
+                    # verification step removes, so keeping it lets the ablation
+                    # measure the verifier's effect without a second LLM run.
+                    dropped_concepts.append({
+                        "concept_name": concept.get("concept_name", ""),
+                        "definition": concept.get("definition", ""),
+                        "evidence": evidence,
+                        "confidence": concept.get("confidence"),
+                        "chunk_id": chunk_id,
+                        "filename": filename,
+                        "reason": "evidence_not_in_source",
+                    })
                     logging.warning(
                         f"DROPPED (evidence not found in source): "
                         f"{concept.get('concept_name','?')!r} — evidence={evidence[:90]!r}"
@@ -416,4 +446,5 @@ Text:
             "processed_chunks": processed_chunks,
             "concepts": all_concepts,
             "failed_chunks": failed_chunks,
+            "dropped_concepts": dropped_concepts,
         }

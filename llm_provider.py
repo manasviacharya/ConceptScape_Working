@@ -33,15 +33,19 @@ class LLMProvider:
     falling back — minutes of sleeping per chunk, for nothing.
     """
 
+    # Breaker state is class-level, not per-instance. Each pipeline stage builds
+    # its own LLMProvider, so instance-level state meant a daily quota that was
+    # already exhausted got re-probed — and its full retry backoff paid — once
+    # per stage. Exhaustion is a property of the account, not of one object.
+    _gemini_rate_limit_hits = 0
+    _gemini_disabled = False
+
     def __init__(self):
         self.gemini_api_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
         self.groq_api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY")
 
         self.gemini_client = None
         self.groq_client = None
-        self._gemini_rate_limit_hits = 0
-        self._gemini_disabled = False
-
         if self.gemini_api_key and GEMINI_SDK_AVAILABLE:
             self.gemini_client = genai.Client(api_key=self.gemini_api_key)
             logging.info(f"LLM primary provider: Gemini ({settings.gemini_model})")
@@ -107,9 +111,9 @@ class LLMProvider:
                 return self._call_gemini(prompt, system_instruction, schema), settings.gemini_model
             except Exception as e:
                 if is_rate_limit(e):
-                    self._gemini_rate_limit_hits += 1
-                    if self._gemini_rate_limit_hits >= settings.gemini_rate_limit_trip_after:
-                        self._gemini_disabled = True
+                    LLMProvider._gemini_rate_limit_hits += 1
+                    if LLMProvider._gemini_rate_limit_hits >= settings.gemini_rate_limit_trip_after:
+                        LLMProvider._gemini_disabled = True
                         logging.warning(
                             f"Gemini rate-limited {self._gemini_rate_limit_hits} times — "
                             f"disabling Gemini for the rest of this run, using Groq only."

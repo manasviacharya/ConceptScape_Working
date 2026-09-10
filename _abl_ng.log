@@ -1,0 +1,383 @@
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.5.1)/charset_normalizer (3.4.6) doesn't match a supported version!
+  warnings.warn(
+[INFO] ConceptScape Extraction Pipeline starting...
+[INFO] Subject: subject_001
+[INFO] ConceptExtractor primary provider: Gemini (gemini-3.6-flash)
+[INFO] ConceptExtractor fallback provider: Groq (openai/gpt-oss-120b)
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_1_c000
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_2_c000
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_3_c000
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_4_c000
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_5_c000
+[INFO] CACHE HIT (unchanged): chunk ppt_3ba4e1df_slide_6_c000
+[INFO] CACHE MISS (extracting): chunk ppt_3ba4e1df_slide_7_c000
+[INFO] Processing PPT slide 7 (Stochastic Gradient Descent.pptx)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 3.0s... (attempt 1/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 6.0s... (attempt 2/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 12.0s... (attempt 3/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini extraction failed (429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash\nPlease retry in 38.408306487s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '38s'}]}}). Trying fallback provider...
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk image_e888a5ba_image_1_c000
+[INFO] Processing IMAGE image 1 (Understanding GA.png)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 3.0s... (attempt 1/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 6.0s... (attempt 2/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini API rate limit hit (429). Retrying in 12.0s... (attempt 3/4)
+[INFO] AFC is enabled with max remote calls: 10.
+[INFO] HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+[WARNING] Gemini rate-limited 2 times — disabling Gemini for the rest of this run, using Groq only.
+[WARNING] Gemini extraction failed (429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash\nPlease retry in 12.471227137s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '12s'}]}}). Trying fallback provider...
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_1_c000
+[INFO] Processing PPT slide 1 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 9 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_2_c000
+[INFO] Processing PPT slide 2 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE HIT (unchanged): chunk ppt_43dfaf06_slide_3_c000
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_4_c000
+[INFO] Processing PPT slide 4 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_5_c000
+[INFO] Processing PPT slide 5 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_6_c000
+[INFO] Processing PPT slide 6 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_7_c000
+[INFO] Processing PPT slide 7 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_8_c000
+[INFO] Processing PPT slide 8 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 12.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_9_c000
+[INFO] Processing PPT slide 9 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_10_c000
+[INFO] Processing PPT slide 10 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 9.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_11_c000
+[INFO] Processing PPT slide 11 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 9 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_43dfaf06_slide_12_c000
+[INFO] Processing PPT slide 12 (Gradient_Descent_Variants.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk pdf_4f53e9ee_page_1_c000
+[INFO] Processing PDF page 1 (Hill Climbing.pdf)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 15.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk pdf_4f53e9ee_page_2_c000
+[INFO] Processing PDF page 2 (Hill Climbing.pdf)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 12.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk pdf_4f53e9ee_page_3_c000
+[INFO] Processing PDF page 3 (Hill Climbing.pdf)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 4 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk pdf_4f53e9ee_page_4_c000
+[INFO] Processing PDF page 4 (Hill Climbing.pdf)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 8.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk pdf_4f53e9ee_page_5_c000
+[INFO] Processing PDF page 5 (Hill Climbing.pdf)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk image_4bd0a41d_image_1_c000
+[INFO] Processing IMAGE image 1 (gradient_descent.png)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_1_c000
+[INFO] Processing PPT slide 1 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_2_c000
+[INFO] Processing PPT slide 2 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 9.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_3_c000
+[INFO] Processing PPT slide 3 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 8 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_4_c000
+[INFO] Processing PPT slide 4 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 1 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_5_c000
+[INFO] Processing PPT slide 5 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 8.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_e74930bb_slide_6_c000
+[INFO] Processing PPT slide 6 (Batch_GD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk image_57de7d15_image_1_c000
+[INFO] Processing IMAGE image 1 (Hill Climbing.jpg)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk image_f874dfdf_image_1_c000
+[INFO] Processing IMAGE image 1 (GA Flowchart.jpg)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 8 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_0_c000
+[INFO] Processing YOUTUBE timestamp 0 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 10 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_57_c000
+[INFO] Processing YOUTUBE timestamp 57 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 7 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_105_c000
+[INFO] Processing YOUTUBE timestamp 105 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 3.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_156_c000
+[INFO] Processing YOUTUBE timestamp 156 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 8.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_210_c000
+[INFO] Processing YOUTUBE timestamp 210 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 8.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 4 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_262_c000
+[INFO] Processing YOUTUBE timestamp 262 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 4.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_315_c000
+[INFO] Processing YOUTUBE timestamp 315 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 1.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 8 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_362_c000
+[INFO] Processing YOUTUBE timestamp 362 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 7.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 4 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk youtube_3f1cc456_timestamp_413_c000
+[INFO] Processing YOUTUBE timestamp 413 (gradient_descent.yt)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 6.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 3.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 0 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_1_c000
+[INFO] Processing PPT slide 1 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_2_c000
+[INFO] Processing PPT slide 2 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_3_c000
+[INFO] Processing PPT slide 3 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 3.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 5 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_4_c000
+[INFO] Processing PPT slide 4 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 11.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 2 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_5_c000
+[INFO] Processing PPT slide 5 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 5.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 9 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] CACHE MISS (extracting): chunk ppt_c930db42_slide_6_c000
+[INFO] Processing PPT slide 6 (MiniBatch_SGD.pptx)
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 10.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[INFO] Retrying request to /openai/v1/chat/completions in 2.000000 seconds
+[INFO] HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+[INFO] Extracted 6 concept mention(s) (0 dropped) via openai/gpt-oss-120b
+[INFO] Evidence verification: 0/252 (0.0%) dropped as unverifiable; 0 dropped on confidence
+[INFO] 
+==================================================
+[INFO] EXTRACTION COMPLETE
+[INFO] ==================================================
+[INFO] Subject: subject_001
+[INFO] 
+Concept mentions extracted by source type:
+[INFO]   PDF: 28
+[INFO]   PPT: 190
+[INFO]   Images: 26
+[INFO]   Total: 294
+[INFO] 
+Output saved to: data/ablation/no_grounding/extracted_concepts.json
+[INFO] ConceptScape Normalization starting...
+[INFO] Input mentions: 294
+[INFO] Learned 2 abbreviation(s) from the corpus: NAG->nesterov accelerated gradient, SGD->stochastic gradient descent
+[INFO] Semantic fusion: embedding 125 concepts (threshold 0.8)
+[INFO] Loading embedding model: BAAI/bge-m3 (first run downloads ~2.2GB)
+[INFO] Load pretrained SentenceTransformer: BAAI/bge-m3
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/huggingface_hub/file_download.py:1132: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+[INFO] Use pytorch device_name: mps
+[INFO] Embedding dimension: 1024
+Batches:   0%|          | 0/16 [00:00<?, ?it/s]Batches:   6%|▋         | 1/16 [00:01<00:18,  1.21s/it]Batches:  12%|█▎        | 2/16 [00:01<00:07,  1.78it/s]Batches:  19%|█▉        | 3/16 [00:01<00:04,  2.82it/s]Batches:  25%|██▌       | 4/16 [00:01<00:03,  3.91it/s]Batches:  31%|███▏      | 5/16 [00:01<00:02,  5.01it/s]Batches:  44%|████▍     | 7/16 [00:01<00:01,  7.18it/s]Batches:  56%|█████▋    | 9/16 [00:01<00:00,  8.64it/s]Batches:  69%|██████▉   | 11/16 [00:02<00:00, 10.67it/s]Batches:  81%|████████▏ | 13/16 [00:02<00:00, 10.88it/s]Batches:  94%|█████████▍| 15/16 [00:02<00:00, 11.69it/s]Batches: 100%|██████████| 16/16 [00:02<00:00,  6.52it/s]
+[INFO]   held apart (0.8257): 'Batch Gradient Descent' / 'Gradient Descent' — contains, but differs by ['batch']
+[INFO]   held apart (0.8062): 'Batch Gradient Descent' / 'Mini-batch Gradient Descent' — contains, but differs by ['mini']
+[INFO]   held apart (0.8639): 'Batch Gradient Descent' / 'Stochastic Gradient Descent' — names differ: ['batch', 'stochastic']
+[INFO]   held apart (0.8043): 'Full-batch Gradient Descent' / 'Mini-batch Gradient Descent' — names differ: ['full', 'mini']
+[INFO]   held apart (0.9514): 'Gradient (∇J(w))' / 'Gradient (∇J_i(w))' — names differ: ['j', 'j_i']
+[INFO]   held apart (0.9257): 'Gradient (∇J(w))' / 'Gradient (∇Ji(w))' — names differ: ['j', 'ji']
+[INFO]   held apart (0.8417): 'Gradient (∇J(w))' / 'Gradient of loss w.r.t weight' — names differ: ['j', 'loss', 'of', 'r']
+[INFO]   held apart (0.9427): 'Gradient (∇J_i(w))' / 'Gradient (∇Ji(w))' — names differ: ['j_i', 'ji']
+[INFO]   held apart (0.8091): 'Gradient (∇J_i(w))' / 'Gradient of loss w.r.t weight' — names differ: ['j_i', 'loss', 'of', 'r']
+[INFO]   held apart (0.8705): 'Gradient Descent' / 'Stochastic Gradient Descent' — contains, but differs by ['stochastic']
+[INFO]   held apart (0.8043): 'Heuristic function' / 'Heuristic search' — names differ: ['function', 'search']
+[INFO]   held apart (0.8248): 'Initial population' / 'Population' — contains, but differs by ['initial']
+[INFO]   held apart (0.8538): 'Label Data' / 'Labeled dataset' — names differ: ['data', 'dataset', 'label', 'labeled']
+[INFO]   held apart (0.8476): 'Label Data' / 'Labeled Training Data' — names differ: ['label', 'labeled', 'training']
+[INFO]   held apart (0.8473): 'Labeled dataset' / 'Labeled Training Data' — names differ: ['data', 'dataset', 'training']
+[INFO]   held apart (0.8414): 'Linear model ŷ = w·x' / 'Model prediction' — names differ: ['linear', 'prediction', 'w', 'x']
+[INFO]   held apart (0.8017): 'Mini-batch Gradient Descent' / 'Stochastic Gradient Descent' — names differ: ['batch', 'mini', 'stochastic']
+[INFO]   held apart (0.8168): 'Mini-Batch SGD' / 'Stochastic Gradient Descent' — names differ: ['batch', 'mini']
+[INFO]   held apart (0.8053): 'Momentum' / 'Velocity (v)' — names differ: ['momentum', 'v', 'velocity']
+[INFO]   held apart (0.9161): 'Momentum Gradient Descent (Momentum GD)' / 'Momentum-based Gradient Descent' — names differ: ['based']
+[INFO]   held apart (0.841): 'Neighboring node' / 'Neighbour State' — names differ: ['neighboring', 'neighbour', 'node', 'state']
+[INFO]   held apart (0.8207): 'Nesterov Accelerated Gradient (NAG)' / 'Nesterov Accelerated Gradient Descent' — names differ: ['descent']
+[INFO]   held apart (0.8062): 'Optimal solution' / 'Optimization' — names differ: ['optimal', 'optimization', 'solution']
+[INFO]   held apart (0.8949): 'Parameter Update' / 'Weight Update' — names differ: ['parameter', 'weight']
+[INFO]   held apart (0.8132): 'Parameter Update' / 'Weight update rule' — names differ: ['parameter', 'rule', 'weight']
+[INFO]   held apart (0.8285): 'Steepest Ascent Hill Climbing' / 'Stochastic Hill Climbing' — names differ: ['ascent', 'steepest', 'stochastic']
+[INFO]   held apart (0.8169): 'Update Rule' / 'Weight Update' — names differ: ['rule', 'weight']
+[INFO]   held apart (0.892): 'Velocity (v)' / 'Velocity term (v)' — names differ: ['term']
+[INFO]   MERGE (0.9321): 'Adam' + 'Adam Optimizer' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8431): 'Batch Gradient Descent' + 'Full-batch Gradient Descent' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8179): 'Biases' + 'Weights and Biases' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8111): 'convex problem' + 'non-convex problems' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8036): 'Flat Local Maximum' + 'Local Maximum' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8621): 'Gradient' + 'Gradient (∇J(w))' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8753): 'Gradient' + 'Gradient (∇J_i(w))' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8998): 'Gradient' + 'Gradient (∇Ji(w))' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8859): 'Hill Climbing' + 'Hill Climbing Algorithm' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8476): 'Loss' + 'Loss function' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8329): 'Mini-batch' + 'Mini-batch Gradient Descent' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8335): 'Mini-batch' + 'Mini-Batch SGD' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8047): 'Momentum' + 'Momentum-based Gradient Descent' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8896): 'Optimization' + 'Optimization Algorithm' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8096): 'Overshoot' + 'Trade-off (overshoot)' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8948): 'Prediction (ŷi)' + 'Prediction ŷi' — same phrase after expanding abbreviations
+[INFO]   MERGE (0.9037): 'RMSProp' + 'RMSProp Optimizer' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.946): 'Steepest Ascent Hill Climbing' + 'Steepest-Ascent Hill Climbing' — same phrase after expanding abbreviations
+[INFO]   MERGE (0.8826): 'True relation' + 'True relation y = 2x' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8689): 'Update Rule' + 'Weight update rule' — one name contains the other, no distinguishing modifier
+[INFO]   MERGE (0.8737): 'Weight Update' + 'Weight update rule' — one name contains the other, no distinguishing modifier
+[INFO] Semantic fusion: 125 -> 104 concepts (21 merges, 28 held apart)
+[INFO] Canonical concepts: 104 (from 294 mentions)
+[INFO]   lexical merge: 294 -> 125 | semantic fusion: 125 -> 104
+[INFO] Concepts formed by merging >1 mention: 47
+[INFO] 
+Largest merge groups:
+[INFO]    22x  Learning rate (η)                              aliases=['Learning Rate', 'Learning Rate (η)', 'Learning rate', 'Learning rate (η)']
+[INFO]    16x  Stochastic Gradient Descent                    aliases=['Stochastic Gradient Descent', 'Stochastic Gradient Descent (SGD)']
+[INFO]    15x  Gradient                                       aliases=['Gradient', 'Gradient (derivative of loss w.r.t weight)', 'Gradient (∇J(w))', 'Gradient (∇J_i(w))', 'Gradient (∇Ji(w))']
+[INFO]    14x  Update Rule                                    aliases=['Update Rule', 'Weight Update', 'Weight update rule']
+[INFO]    13x  Mini-Batch SGD                                 aliases=['Mini-Batch', 'Mini-Batch SGD', 'Mini-Batch Stochastic Gradient Descent', 'Mini-Batch Stochastic Gradient Descent (Mini-Batch SGD)', 'Mini-Batch Stochastic Gradient Descent (SGD)', 'Mini-batch', 'Mini-batch Gradient Descent', 'Mini-batch Stochastic Gradient Descent']
+[INFO]    12x  Batch Gradient Descent                         aliases=['Batch Gradient Descent', 'Batch gradient descent', 'Full-batch Gradient Descent']
+[INFO]    12x  Epoch                                          aliases=['Epoch']
+[INFO]     9x  Neural Networks                                aliases=['Neural Network', 'Neural Networks', 'Neural network']
+[INFO]     8x  Gradient Descent                               aliases=['Gradient Descent', 'Gradient descent', 'gradient descent']
+[INFO]     7x  Optimization                                   aliases=['Optimization', 'Optimization Algorithm']
+[INFO] 
+Output saved to: data/ablation/no_grounding/normalized_concepts.json
+RESULT no_grounding: mentions=294 unverifiable=38 dropped=0 concepts=104 failed_chunks=0

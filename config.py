@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # extraction — chunks shorter than this are skipped (titles, headers)
     extraction_min_chunk_chars: int = 50
     # drop concepts whose evidence span cannot be found in the source
+    # Switches the extraction prompt between grounded (evidence required) and
+    # a conventional ungrounded instruction — the ablation baseline.
+    extraction_grounded_prompt: bool = True
     require_evidence: bool = True
     min_concept_confidence: float = 0.0
 

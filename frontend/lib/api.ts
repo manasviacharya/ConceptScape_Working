@@ -135,3 +135,16 @@ export async function runPipeline(): Promise<void> {
     throw new Error(data.reason ?? "Could not start the pipeline.");
   }
 }
+
+
+/** Render a source position in the unit it was measured in. */
+export function formatLocation(type: string, n: number): string {
+  if (!n && n !== 0) return "";
+  if (type === "timestamp") {
+    const m = Math.floor(n / 60), s = n % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+  if (type === "slide") return `slide ${n}`;
+  if (type === "page") return `p${n}`;
+  return String(n);
+}
