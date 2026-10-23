@@ -1,0 +1,467 @@
+{
+  "_readme": [
+    "Ground truth for retrieval evaluation. Each case names a query and the",
+    "concepts a correct retriever should return.",
+    "",
+    "'relevant' uses concept NAMES, not ids. Ids are derived from the match key",
+    "and are reassigned whenever normalization changes (enabling semantic fusion",
+    "rewrites all of them), which would silently invalidate every case. Names and",
+    "aliases are resolved at evaluation time; anything unresolvable is reported",
+    "rather than scored as a miss.",
+    "",
+    "Cases are hand-written against concepts that exist in this corpus, NOT",
+    "generated from the concept text — generating queries from the same text the",
+    "concepts were embedded from would inflate semantic retrieval.",
+    "",
+    "'paraphrase' cases should share as little vocabulary as possible with the",
+    "target concept: that is what separates lexical from semantic and graph",
+    "retrieval. Add more cases freely."
+  ],
+  "cases": [
+    {
+      "id": "q01",
+      "query": "what is mini-batch SGD?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Mini-Batch SGD"
+      ]
+    },
+    {
+      "id": "q02",
+      "query": "what is a learning rate?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q03",
+      "query": "define batch size",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "batch size"
+      ]
+    },
+    {
+      "id": "q04",
+      "query": "what is stochastic gradient descent?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Stochastic Gradient Descent"
+      ]
+    },
+    {
+      "id": "q05",
+      "query": "explain hill climbing",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q06",
+      "query": "what is an epoch?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "epoch"
+      ]
+    },
+    {
+      "id": "q07",
+      "query": "what is the update rule?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Update Rule",
+        "weight update rule"
+      ]
+    },
+    {
+      "id": "q08",
+      "query": "what does mini-batch SGD require?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Mini-Batch SGD",
+        "batch size"
+      ]
+    },
+    {
+      "id": "q09",
+      "query": "what does hill climbing depend on?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q10",
+      "query": "how are batch gradient descent and the gradient related?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Batch Gradient Descent",
+        "Gradient"
+      ]
+    },
+    {
+      "id": "q11",
+      "query": "what is momentum used for in gradient descent?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Momentum-based gradient descent",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q12",
+      "query": "what is part of a genetic algorithm?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Genetic Algonithm"
+      ]
+    },
+    {
+      "id": "q13",
+      "query": "how do I stop my model from overshooting the minimum?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "learning rate",
+        "Momentum-based gradient descent",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q14",
+      "query": "how much data does each weight update look at?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "batch size",
+        "mini-batch",
+        "Mini-Batch SGD"
+      ]
+    },
+    {
+      "id": "q15",
+      "query": "how do I measure how wrong my predictions are?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "error",
+        "Loss function (mean over N = 4 samples)"
+      ]
+    },
+    {
+      "id": "q16",
+      "query": "why does training take one sample at a time sometimes?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Stochastic Gradient Descent"
+      ]
+    },
+    {
+      "id": "q17",
+      "query": "what tells the model which direction to move its weights?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Gradient",
+        "weight (parameter)"
+      ]
+    },
+    {
+      "id": "q18",
+      "query": "how does a search method climb toward a better solution?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Hill Climbing"
+      ]
+    },
+    {
+      "id": "q19",
+      "query": "what happens after the whole dataset has been seen once?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "epoch"
+      ]
+    },
+    {
+      "id": "q20",
+      "query": "what is averaged across the samples in a batch?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "average gradient over the batch",
+        "average gradient"
+      ]
+    },
+    {
+      "id": "q21",
+      "query": "what is momentum in optimisation?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Momentum",
+        "Momentum-based gradient descent"
+      ]
+    },
+    {
+      "id": "q22",
+      "query": "define a heuristic function",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Heuristic function"
+      ]
+    },
+    {
+      "id": "q23",
+      "query": "what is a local maximum?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Local Maximum"
+      ]
+    },
+    {
+      "id": "q24",
+      "query": "what is a cost function?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Cost function",
+        "Loss function (mean over N = 4 samples)"
+      ]
+    },
+    {
+      "id": "q25",
+      "query": "explain Nesterov accelerated gradient descent",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Nesterov (NAG)",
+        "Nesterov Accelerated Gradient Descent"
+      ]
+    },
+    {
+      "id": "q26",
+      "query": "what is crossover in a genetic algorithm?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Cross Over"
+      ]
+    },
+    {
+      "id": "q27",
+      "query": "what are vanishing gradients?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "Vanishing gradients"
+      ]
+    },
+    {
+      "id": "q28",
+      "query": "what is a saddle point?",
+      "type": "A",
+      "kind": "direct",
+      "relevant": [
+        "saddle point"
+      ]
+    },
+    {
+      "id": "q29",
+      "query": "what does the weight update rule depend on?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "weight update rule",
+        "learning rate",
+        "Gradient"
+      ]
+    },
+    {
+      "id": "q30",
+      "query": "what causes overshooting during training?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "overshoot",
+        "Velocity v",
+        "Momentum"
+      ]
+    },
+    {
+      "id": "q31",
+      "query": "what is a genetic algorithm made up of?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Genetic Algonithm",
+        "Initial Population",
+        "Cross Over"
+      ]
+    },
+    {
+      "id": "q32",
+      "query": "what does gradient descent produce?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Gradient Descent",
+        "Global Minimum"
+      ]
+    },
+    {
+      "id": "q33",
+      "query": "what kind of technique is hill climbing an example of?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Hill Climbing algorithm movement",
+        "Heuristic search technique"
+      ]
+    },
+    {
+      "id": "q34",
+      "query": "what does stochastic gradient descent need to work?",
+      "type": "B",
+      "kind": "relationship",
+      "relevant": [
+        "Stochastic Gradient Descent",
+        "Gradient",
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q35",
+      "query": "my training keeps getting stuck on a plateau where nothing improves",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Flat local maximum",
+        "Local Maximum"
+      ]
+    },
+    {
+      "id": "q36",
+      "query": "the signal fades away as it travels back through the layers",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Vanishing gradients"
+      ]
+    },
+    {
+      "id": "q37",
+      "query": "the numbers blow up and become impossible to work with",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Exploding gradients"
+      ]
+    },
+    {
+      "id": "q38",
+      "query": "how do I pick a good starting point before training begins?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "initialization of weights"
+      ]
+    },
+    {
+      "id": "q39",
+      "query": "the algorithm keeps rolling in the same direction it was already going",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Momentum",
+        "Velocity v"
+      ]
+    },
+    {
+      "id": "q40",
+      "query": "it peeks ahead before deciding where to step",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "look-ahead correction",
+        "look-ahead point",
+        "Nesterov (NAG)"
+      ]
+    },
+    {
+      "id": "q41",
+      "query": "how does the system decide which candidate solutions survive?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Fitness Value",
+        "Calculate fitnesp"
+      ]
+    },
+    {
+      "id": "q42",
+      "query": "the surface is flat in one direction and curved in another",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "saddle point"
+      ]
+    },
+    {
+      "id": "q43",
+      "query": "randomness helps it escape somewhere it would otherwise be trapped",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Escaping shallow local minima via noise",
+        "Stochastic Hill Climbing"
+      ]
+    },
+    {
+      "id": "q44",
+      "query": "how big a step should it take each time it adjusts?",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "learning rate"
+      ]
+    },
+    {
+      "id": "q45",
+      "query": "it always picks whichever neighbour looks best right now",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Steepest Hill Climbing",
+        "Steepest - Ascent Hill Climbing"
+      ]
+    },
+    {
+      "id": "q46",
+      "query": "the lowest point anywhere on the whole surface",
+      "type": "C",
+      "kind": "paraphrase",
+      "relevant": [
+        "Global Minimum"
+      ]
+    }
+  ]
+}

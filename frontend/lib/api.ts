@@ -1,0 +1,150 @@
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+
+export type Citation = {
+  index: number;
+  kind: "concept" | "relationship" | "chunk";
+  text: string;
+  concept_name: string;
+  filename: string;
+  page_number: number;
+  chunk_id: string;
+  relationship: string;
+};
+
+export type AskResponse = {
+  query: string;
+  query_type: "A" | "B" | "C";
+  query_type_label: string;
+  answer: string;
+  sufficient_evidence: boolean;
+  flags: string[];
+  concepts_identified: string[];
+  retriever_used: string;
+  model_used: string;
+  used_citations: number[];
+  citations: Citation[];
+};
+
+export async function ask(query: string): Promise<AskResponse> {
+  const res = await fetch(`${API_BASE}/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `Request failed (HTTP ${res.status})`);
+  }
+  return res.json();
+}
+
+// Flags come from the pipeline as machine-readable slugs. The UI explains what
+// each one means rather than showing the raw token — a reader needs to know
+// whether to trust the answer, not what the code called the problem.
+export const FLAG_LABELS: Record<string, string> = {
+  thin_evidence: "Few sources found — treat this answer with caution",
+  no_evidence_retrieved: "Nothing in the indexed material matched this question",
+  hallucinated_citation: "The model cited a source that does not exist; it was removed",
+  invalid_citation_removed: "An invalid citation reference was removed",
+  uncited_answer: "The answer made claims without citing a source",
+  partial_evidence: "The evidence only partly covers this question",
+  conflicting_sources: "Sources disagree with each other",
+  ocr_quality: "Quoted text is garbled — it came from a scanned page",
+  generation_failed: "Answer generation failed — all model providers were unavailable",
+  parse_failure: "The model response could not be parsed",
+};
+
+// --- Health / Stats ---
+export type HealthStatus = {
+  status: string;
+  artifacts: {
+    concepts: boolean;
+    relationships: boolean;
+    graph: boolean;
+    chunks: boolean;
+  };
+};
+
+export async function getHealth(): Promise<HealthStatus> {
+  const r = await fetch(`${API_BASE}/health`);
+  if (!r.ok) throw new Error("Backend unavailable");
+  return r.json();
+}
+
+// --- Upload & Pipeline API ---
+
+export type Doc = { filename: string; size_bytes: number; suffix: string };
+export type Stage = { key: string; label: string; status: string; detail: string; seconds: number };
+export type PipelineStatus = {
+  running: boolean;
+  current: string | null;
+  error: string | null;
+  stages: Stage[];
+  elapsed: number;
+};
+
+export async function listDocuments(): Promise<{ documents: string[] }> {
+  const r = await fetch(`${API_BASE}/documents`);
+  if (!r.ok) throw new Error("Failed to list documents");
+  const data = await r.json();
+  return { documents: (data.documents ?? []).map((d: Doc) => d.filename) };
+}
+
+export async function uploadDocument(file: File): Promise<void> {
+  const body = new FormData();
+  body.append("files", file);
+  const r = await fetch(`${API_BASE}/documents`, { method: "POST", body });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.detail ?? `Upload failed for ${file.name}`);
+  }
+}
+
+export async function removeDocument(filename: string): Promise<void> {
+  const r = await fetch(`${API_BASE}/documents/${encodeURIComponent(filename)}`, { method: "DELETE" });
+  if (!r.ok) throw new Error(`Failed to remove ${filename}`);
+}
+
+export async function getStatus(): Promise<PipelineStatus> {
+  const r = await fetch(`${API_BASE}/pipeline/status`);
+  if (!r.ok) throw new Error("Failed to get pipeline status");
+  return r.json();
+}
+
+/**
+ * Fetch the concept graph from the API rather than a build-time JSON copy.
+ *
+ * A static file only changes when someone re-runs the sync script, so the graph
+ * silently showed stale data after a pipeline run. Reading the API means an
+ * upload is reflected as soon as the page is revisited.
+ */
+export async function getGraph(): Promise<{ nodes: any[]; edges: any[] }> {
+  const res = await fetch(`${API_BASE}/graph`, { cache: "no-store" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `Request failed (HTTP ${res.status})`);
+  }
+  return res.json();
+}
+
+export async function runPipeline(): Promise<void> {
+  const r = await fetch(`${API_BASE}/pipeline/run`, { method: "POST" });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.reason ?? "Could not start the pipeline.");
+  }
+}
+
+
+/** Render a source position in the unit it was measured in. */
+export function formatLocation(type: string, n: number): string {
+  if (!n && n !== 0) return "";
+  if (type === "timestamp") {
+    const m = Math.floor(n / 60), s = n % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+  if (type === "slide") return `slide ${n}`;
+  if (type === "page") return `p${n}`;
+  return String(n);
+}
