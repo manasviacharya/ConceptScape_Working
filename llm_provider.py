@@ -47,7 +47,10 @@ class LLMProvider:
         self.gemini_client = None
         self.groq_client = None
         if self.gemini_api_key and GEMINI_SDK_AVAILABLE:
-            self.gemini_client = genai.Client(api_key=self.gemini_api_key)
+            self.gemini_client = genai.Client(
+                api_key=self.gemini_api_key,
+                http_options={"retry_options": {"attempts": 1}}
+            )
             logging.info(f"LLM primary provider: Gemini ({settings.gemini_model})")
 
         if self.groq_api_key and GROQ_SDK_AVAILABLE:

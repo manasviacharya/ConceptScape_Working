@@ -16,8 +16,18 @@ data/
 .vscode/
 .idea/
 qdrant_data/
+*.db
 
 # Frontend
 frontend/node_modules/
+**/node_modules/
 frontend/.next/
 frontend/next-env.d.ts
+frontend/.pnpm-store/
+.pnpm-store/
+**/.pnpm-store/
+**/.pnpm/
+.pytest_cache/
+*.tsbuildinfo
+.DS_Store
+backups/

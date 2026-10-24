@@ -21,6 +21,19 @@ class Settings(BaseSettings):
     output_dir: str = "output"
     data_dir: str = "data"
 
+    # Product persistence/authentication. SQLite keeps local development
+    # zero-configuration; production should set a PostgreSQL URL.
+    database_url: str = "sqlite:///./conceptscape.db"
+    jwt_secret: str = ""
+    jwt_access_minutes: int = 60
+    environment: str = "development"
+    pipeline_execution_mode: str = "inline"
+    rate_limit_per_minute: int = 120
+    redis_url: str = ""
+    sentry_dsn: str = ""
+    clamav_host: str = ""
+    clamav_port: int = 3310
+
     # OCR (PaddleOCR 3.x with ONNX runtime backend)
     ocr_target_width: int = 1200
     ocr_min_confidence: float = 0.3
@@ -38,10 +51,10 @@ class Settings(BaseSettings):
     # Gemini
     gemini_model: str = "gemini-3.6-flash"
     gemini_temperature: float = 0.1
-    gemini_max_retries: int = 4
+    gemini_max_retries: int = 1
     gemini_retry_base_delay: float = 3.0
     # after this many rate-limited chunks, stop using Gemini for the run
-    gemini_rate_limit_trip_after: int = 2
+    gemini_rate_limit_trip_after: int = 1
 
     # Groq
     groq_model: str = "openai/gpt-oss-120b"
@@ -55,6 +68,8 @@ class Settings(BaseSettings):
     extraction_grounded_prompt: bool = True
     require_evidence: bool = True
     min_concept_confidence: float = 0.0
+    pedagogical_filter_enabled: bool = True
+    pedagogical_filter_keep_review: bool = True
 
     # Neo4j
     neo4j_uri: str = ""

@@ -7,6 +7,7 @@ from config import settings
 from logging_setup import configure_logging
 from normalization.normalizer import normalize
 from normalization.semantic_fusion import fuse
+from quality.significance import filter_concepts
 
 
 def main():
@@ -54,6 +55,12 @@ def main():
         "concepts": [asdict(c) for c in concepts],
         "fusion_decisions": merge_log,
     }
+    raw_concepts = output["concepts"]
+    filtered_concepts, significance_audit = filter_concepts(raw_concepts) if settings.pedagogical_filter_enabled else (raw_concepts, [])
+    with open(os.path.join(settings.data_dir, "normalized_concepts_raw.json"), "w", encoding="utf-8") as f:
+        json.dump({"subject_id": data.get("subject_id", ""), "concepts": raw_concepts, "fusion_decisions": merge_log}, f, indent=2, ensure_ascii=False)
+    output["concepts"] = filtered_concepts
+    output["significance_audit"] = significance_audit
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 

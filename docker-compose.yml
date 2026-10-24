@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: conceptscape
+      POSTGRES_USER: conceptscape
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conceptscape -d conceptscape"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      CONCEPTSCAPE_ENVIRONMENT: production
+      CONCEPTSCAPE_DATABASE_URL: postgresql+psycopg://conceptscape:${POSTGRES_PASSWORD}@postgres:5432/conceptscape
+      CONCEPTSCAPE_QDRANT_URL: http://qdrant:6333
+      CONCEPTSCAPE_PIPELINE_EXECUTION_MODE: worker
+      CONCEPTSCAPE_API_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - conceptscape_storage:/app/workspaces
+    depends_on:
+      postgres: { condition: service_healthy }
+      qdrant: { condition: service_started }
+
+  worker:
+    build: .
+    command: ["python", "worker.py"]
+    env_file: .env
+    environment:
+      CONCEPTSCAPE_ENVIRONMENT: production
+      CONCEPTSCAPE_DATABASE_URL: postgresql+psycopg://conceptscape:${POSTGRES_PASSWORD}@postgres:5432/conceptscape
+      CONCEPTSCAPE_QDRANT_URL: http://qdrant:6333
+    volumes:
+      - conceptscape_storage:/app/workspaces
+    depends_on:
+      postgres: { condition: service_healthy }
+      qdrant: { condition: service_started }
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  conceptscape_storage:

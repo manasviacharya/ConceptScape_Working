@@ -2,24 +2,48 @@ import json
 import logging
 import os
 import re
-import time
 import unicodedata
 import uuid
 from typing import List, Dict, Any, Optional, Tuple
 
 from config import settings
+from llm_provider import LLMProvider
 
-try:
-    from google import genai
-    GEMINI_SDK_AVAILABLE = True
-except ImportError:
-    GEMINI_SDK_AVAILABLE = False
 
-try:
-    from groq import Groq
-    GROQ_SDK_AVAILABLE = True
-except ImportError:
-    GROQ_SDK_AVAILABLE = False
+CONCEPT_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "concepts": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "concept_name": {"type": "STRING"},
+                    "definition": {"type": "STRING"},
+                    "evidence": {"type": "STRING"},
+                    "confidence": {"type": "NUMBER"},
+                    "keywords": {"type": "ARRAY", "items": {"type": "STRING"}},
+                    "relationships": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "target": {"type": "STRING"},
+                                "type": {"type": "STRING"},
+                            },
+                            "required": ["target", "type"],
+                        },
+                    },
+                },
+                "required": [
+                    "concept_name", "definition", "evidence", "confidence",
+                    "keywords", "relationships",
+                ],
+            },
+        }
+    },
+    "required": ["concepts"],
+}
 
 
 def _load_previous_extraction_cache() -> Tuple[dict, dict]:
@@ -75,109 +99,9 @@ def _verify_evidence(evidence: str, chunk_text: str, raw_page_text: str) -> Opti
     return None
 
 
-def _is_rate_limit(exc: Exception) -> bool:
-    msg = str(exc)
-    return "429" in msg or "RESOURCE_EXHAUSTED" in msg or "quota" in msg.lower()
-
-
 class ConceptExtractor:
     def __init__(self):
-        self.gemini_api_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
-        self.groq_api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY")
-
-        self.gemini_client = None
-        self.groq_client = None
-
-        # Circuit breaker: once Gemini has rate-limited this many times in a run,
-        # stop calling it entirely and use Groq for the remainder. Without this,
-        # a hard quota makes every chunk sit through the full retry backoff
-        # before falling back — minutes of sleeping per chunk, for nothing.
-        self._gemini_rate_limit_hits = 0
-        self._gemini_disabled = False
-
-        if self.gemini_api_key and GEMINI_SDK_AVAILABLE:
-            self.gemini_client = genai.Client(api_key=self.gemini_api_key)
-            self.primary_provider = "gemini"
-            logging.info(f"ConceptExtractor primary provider: Gemini ({settings.gemini_model})")
-
-        if self.groq_api_key and GROQ_SDK_AVAILABLE:
-            self.groq_client = Groq(api_key=self.groq_api_key)
-            if not self.gemini_client:
-                self.primary_provider = "groq"
-            logging.info(f"ConceptExtractor fallback provider: Groq ({settings.groq_model})")
-
-        if not self.gemini_client and not self.groq_client:
-            raise ValueError("Neither GEMINI_API_KEY nor GROQ_API_KEY is available with required SDK.")
-
-    def _extract_with_gemini(self, prompt: str, system_instruction: str) -> str:
-        schema = {
-            "type": "OBJECT",
-            "properties": {
-                "concepts": {
-                    "type": "ARRAY",
-                    "items": {
-                        "type": "OBJECT",
-                        "properties": {
-                            "concept_name": {"type": "STRING"},
-                            "definition": {"type": "STRING"},
-                            "evidence": {"type": "STRING"},
-                            "confidence": {"type": "NUMBER"},
-                            "keywords": {"type": "ARRAY", "items": {"type": "STRING"}},
-                            "relationships": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "target": {"type": "STRING"},
-                                        "type": {"type": "STRING"}
-                                    },
-                                    "required": ["target", "type"]
-                                }
-                            }
-                        },
-                        "required": ["concept_name", "definition", "evidence", "confidence", "keywords", "relationships"]
-                    }
-                }
-            },
-            "required": ["concepts"]
-        }
-
-        max_retries = settings.gemini_max_retries
-        delay = settings.gemini_retry_base_delay
-        for attempt in range(max_retries):
-            try:
-                response = self.gemini_client.models.generate_content(
-                    model=settings.gemini_model,
-                    contents=prompt,
-                    config={
-                        "system_instruction": system_instruction,
-                        "response_mime_type": "application/json",
-                        "response_schema": schema,
-                        "temperature": settings.gemini_temperature
-                    }
-                )
-                return response.text
-            except Exception as e:
-                err_msg = str(e)
-                if ("429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg) and attempt < max_retries - 1:
-                    logging.warning(f"Gemini API rate limit hit (429). Retrying in {delay}s... (attempt {attempt+1}/{max_retries})")
-                    time.sleep(delay)
-                    delay *= 2.0
-                else:
-                    raise e
-        raise RuntimeError("Exhausted retries for Gemini API")
-
-    def _extract_with_groq(self, prompt: str, system_instruction: str) -> str:
-        response = self.groq_client.chat.completions.create(
-            model=settings.groq_model,
-            messages=[
-                {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"},
-            temperature=settings.groq_temperature
-        )
-        return response.choices[0].message.content
+        self.llm = LLMProvider()
 
     def extract_from_chunk(self, text: str) -> Optional[Tuple[List[Dict[str, Any]], str]]:
         """
@@ -238,48 +162,17 @@ Text:
             "\"type\": \"requires|related_to|part_of\"}]}]}"
         )
 
-        result_json = None
-        model_used = ""
+        result = self.llm.call(prompt, system_instruction, CONCEPT_SCHEMA)
+        if result is None:
+            return None
 
-        if self.gemini_client and not self._gemini_disabled:
-            try:
-                result_json = self._extract_with_gemini(prompt, system_instruction)
-                model_used = settings.gemini_model
-            except Exception as e:
-                if _is_rate_limit(e):
-                    self._gemini_rate_limit_hits += 1
-                    if self._gemini_rate_limit_hits >= settings.gemini_rate_limit_trip_after:
-                        self._gemini_disabled = True
-                        logging.warning(
-                            f"Gemini rate-limited {self._gemini_rate_limit_hits} times — "
-                            f"disabling Gemini for the rest of this run, using Groq only."
-                        )
-                logging.warning(f"Gemini extraction failed ({e}). Trying fallback provider...")
-                if self.groq_client:
-                    try:
-                        result_json = self._extract_with_groq(prompt, system_instruction)
-                        model_used = settings.groq_model
-                    except Exception as ge:
-                        logging.error(f"Groq fallback extraction also failed: {ge}")
-                else:
-                    logging.error(f"Gemini extraction failed and no Groq fallback available: {e}")
-
-        elif self.groq_client:
-            try:
-                result_json = self._extract_with_groq(prompt, system_instruction)
-                model_used = settings.groq_model
-            except Exception as e:
-                logging.error(f"Groq extraction failed: {e}")
-
-        if result_json:
-            try:
-                result_data = json.loads(result_json)
-                return result_data.get("concepts", []), model_used
-            except Exception as e:
-                logging.error(f"Failed to parse LLM JSON output: {e}")
-                return None
-
-        return None
+        result_json, model_used = result
+        try:
+            result_data = json.loads(result_json)
+            return result_data.get("concepts", []), model_used
+        except (TypeError, json.JSONDecodeError) as e:
+            logging.error(f"Failed to parse concept JSON output: {e}")
+            return None
 
     def process_chunks(self, preprocessed_data: dict) -> Dict[str, Any]:
         """Consumes flat TextChunk list from preprocessed_chunks.json."""
@@ -443,6 +336,7 @@ Text:
             )
 
         return {
+            "subject_id": subject_id,
             "processed_chunks": processed_chunks,
             "concepts": all_concepts,
             "failed_chunks": failed_chunks,
