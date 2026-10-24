@@ -1,0 +1,15 @@
+{
+  "name": "conceptscape-demo-v1",
+  "documents": [
+    "Batch_GD.pptx",
+    "GA Flowchart.jpg",
+    "Gradient_Descent_Variants.pptx",
+    "gradient_descent.yt",
+    "gradient_descent.png",
+    "Hill Climbing.jpg",
+    "Hill Climbing.pdf",
+    "MiniBatch_SGD.pptx",
+    "Stochastic Gradient Descent.pptx",
+    "Understanding GA.png"
+  ]
+}

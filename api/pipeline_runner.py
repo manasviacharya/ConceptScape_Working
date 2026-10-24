@@ -57,18 +57,19 @@ class PipelineRunner:
     Only one run at a time: concurrent runs would write the same output files.
     """
 
-    def __init__(self, on_complete: Optional[Callable[[], None]] = None):
+    def __init__(self, on_complete: Optional[Callable[[str], None]] = None):
         self._lock = threading.Lock()
         self._state = RunState()
         self._thread: Optional[threading.Thread] = None
         self._on_complete = on_complete
+        self._workspace_id: Optional[str] = None
 
     @property
     def state(self) -> Dict[str, Any]:
         with self._lock:
             return self._state.to_dict()
 
-    def start(self) -> Dict[str, Any]:
+    def start(self, workspace_id: str) -> Dict[str, Any]:
         with self._lock:
             if self._state.running:
                 return {"started": False, "reason": "A pipeline run is already in progress."}
@@ -77,7 +78,8 @@ class PipelineRunner:
                 started_at=time.time(),
                 stages=[StageState(key=k, label=l) for k, l in STAGES],
             )
-        self._thread = threading.Thread(target=self._run, daemon=True)
+            self._workspace_id = workspace_id
+        self._thread = threading.Thread(target=self._run, args=(workspace_id,), daemon=True)
         self._thread.start()
         return {"started": True}
 
@@ -88,7 +90,7 @@ class PipelineRunner:
                     for k, v in kw.items():
                         setattr(s, k, v)
 
-    def _run(self) -> None:
+    def _run(self, workspace_id: str) -> None:
         # Imported here so module-level import failures cannot break API startup.
         import run_build_graph
         import run_extraction
@@ -107,6 +109,15 @@ class PipelineRunner:
             "graph": run_build_graph.main,
             "index": run_index.main,
         }
+
+        from config import settings
+        from storage.paths import ensure_workspace_paths
+
+        paths = ensure_workspace_paths(workspace_id)
+        previous_paths = (settings.documents_dir, settings.output_dir, settings.data_dir)
+        settings.documents_dir = str(paths["documents"])
+        settings.output_dir = str(paths["output"])
+        settings.data_dir = str(paths["data"])
 
         try:
             for key, _ in STAGES:
@@ -141,8 +152,9 @@ class PipelineRunner:
                 self._state.running = False
                 self._state.current = None
                 self._state.finished_at = time.time()
+            settings.documents_dir, settings.output_dir, settings.data_dir = previous_paths
             if self._on_complete:
                 try:
-                    self._on_complete()
+                    self._on_complete(workspace_id)
                 except Exception:
                     logging.exception("Post-run callback failed")

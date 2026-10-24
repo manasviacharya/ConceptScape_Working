@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, FileText, X } from "lucide-react";
-import { FLAG_LABELS, ask, type AskResponse, type Citation } from "@/lib/api";
+import { FLAG_LABELS, ask, deleteChatSession, getChatSession, listChatSessions, renameChatSession, type AskResponse, type Citation, type ChatSession } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
+import { getToken } from "@/lib/auth";
 
 type Turn = {
   query: string;
+  answer?: string;
   result?: AskResponse;
   error?: string;
   pending?: boolean;
@@ -20,16 +23,50 @@ const EXAMPLES = [
 ];
 
 export default function ChatPage() {
+  const router = useRouter();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [openCitation, setOpenCitation] = useState<Citation | null>(null);
+  const [sessionId, setSessionId] = useState<string | undefined>();
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    if (!getToken()) router.replace("/login");
+    else listChatSessions().then(setSessions).catch(() => undefined);
+  }, [router]);
+
+  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [turns]);
+
+  async function openSession(id: string) {
+    const session = await getChatSession(id);
+    setSessionId(session.id);
+    const restored: Turn[] = [];
+    for (const message of session.messages) {
+      if (message.role === "user") restored.push({ query: message.content });
+      else if (restored.length && message.metadata) restored[restored.length - 1].result = message.metadata;
+      else if (restored.length) restored[restored.length - 1].answer = message.content;
+    }
+    setTurns(restored);
+  }
+
+  async function renameSession(session: ChatSession) {
+    const title = window.prompt("Conversation name", session.title);
+    if (!title?.trim()) return;
+    await renameChatSession(session.id, title.trim());
+    setSessions(await listChatSessions());
+  }
+
+  async function removeSession(id: string) {
+    if (!window.confirm("Delete this conversation?")) return;
+    await deleteChatSession(id);
+    if (sessionId === id) { setSessionId(undefined); setTurns([]); }
+    setSessions(await listChatSessions());
+  }
 
   async function submit(query: string) {
     const q = query.trim();
@@ -39,7 +76,9 @@ export default function ChatPage() {
     setTurns((t) => [...t, { query: q, pending: true }]);
 
     try {
-      const result = await ask(q);
+      const result = await ask(q, sessionId);
+      if (result.session_id) setSessionId(result.session_id);
+      listChatSessions().then(setSessions).catch(() => undefined);
       setTurns((t) => t.map((turn, i) => (i === t.length - 1 ? { query: q, result } : turn)));
     } catch (e: any) {
       setTurns((t) =>
@@ -63,6 +102,12 @@ export default function ChatPage() {
       <Navbar />
 
       <div className="chat-inner">
+        {sessions.length > 0 && (
+          <aside style={{ width: 220, padding: "12px 8px", borderRight: "1px solid var(--border)", overflowY: "auto" }}>
+            <div className="sources-head" style={{ marginBottom: 8 }}>Conversations</div>
+            {sessions.map((session) => <div key={session.id} style={{ display: "flex", gap: 4, marginBottom: 6 }}><button className="source" style={{ flex: 1, textAlign: "left" }} onClick={() => openSession(session.id)}>{session.title}</button><button className="doc-del" onClick={() => renameSession(session)} title="Rename">✎</button><button className="doc-del" onClick={() => removeSession(session.id)} title="Delete">×</button></div>)}
+          </aside>
+        )}
         <div className="chat-scroll">
           {turns.length === 0 && (
             <motion.div 
@@ -132,6 +177,7 @@ export default function ChatPage() {
               )}
 
               {turn.result && <AnswerBlock result={turn.result} onCite={setOpenCitation} />}
+              {turn.answer && !turn.result && <div className="a"><div className="a-text">{turn.answer}</div></div>}
             </motion.div>
           ))}
           <div ref={endRef} />
@@ -244,6 +290,7 @@ function AnswerBlock({
       </div>
 
       <div className="a-text">{renderWithCitations(result.answer, byIndex, onCite)}</div>
+      <button className="btn-ghost" aria-label="Read answer aloud" onClick={() => { if (typeof window !== "undefined") { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(result.answer)); } }}>🔊 Read aloud</button>
 
       {!result.sufficient_evidence && (
         <div className="warn">

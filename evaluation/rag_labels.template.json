@@ -1,0 +1,14 @@
+{
+  "instructions": "Fill gold_citations with the citation indexes that genuinely support the answer. Set answer_supported and citation_valid after human review. Do not invent labels for unreviewed answers.",
+  "items": [
+    {
+      "query": "",
+      "answer": "",
+      "used_citations": [],
+      "gold_citations": null,
+      "answer_supported": null,
+      "citation_valid": null,
+      "note": ""
+    }
+  ]
+}

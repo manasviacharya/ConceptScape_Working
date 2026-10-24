@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import ReactFlow, { Background, Controls, type Edge, type Node, BackgroundVariant } from "reactflow";
 import { motion, AnimatePresence } from "framer-motion";
 import ConceptList from "../ConceptList";
@@ -8,6 +9,7 @@ import ConceptNode from "../ConceptNode";
 import DetailPanel from "../DetailPanel";
 import { Navbar } from "@/components/Navbar";
 import { getGraph } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 import {
   TYPE_COLORS,
   layout,
@@ -21,15 +23,24 @@ import {
 const nodeTypes = { concept: ConceptNode };
 
 export default function GraphPage() {
+  const router = useRouter();
   const [graph, setGraph] = useState<GraphExport | null>(null);
   const [error, setError] = useState("");
   const [focusId, setFocusId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [hops, setHops] = useState(1);
   const [overview, setOverview] = useState(false);
+  const [documentFilter, setDocumentFilter] = useState("");
+  const [relationFilter, setRelationFilter] = useState("");
+  const [confidence, setConfidence] = useState(0);
+  const [connectedOnly, setConnectedOnly] = useState(false);
 
   useEffect(() => {
-    getGraph()
+    if (!getToken()) {
+      router.replace("/login");
+      return;
+    }
+    getGraph({ document: documentFilter, relation_type: relationFilter, min_confidence: confidence, connected_only: connectedOnly })
       .then((g: GraphExport) => {
         setGraph(g);
         const degree = new Map<string, number>();
@@ -48,7 +59,7 @@ export default function GraphPage() {
           `Check the API is running (python run_api.py), then upload documents and run the pipeline.`
         )
       );
-  }, []);
+  }, [router, documentFilter, relationFilter, confidence, connectedOnly]);
 
   const conceptsById = useMemo(() => {
     const m: Record<string, Concept> = {};
@@ -143,6 +154,15 @@ export default function GraphPage() {
               {overview && <motion.div layoutId="seg-bg" className="seg-bg" />}
               <span style={{ position: "relative", zIndex: 1 }}>Whole Graph</span>
             </button>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: 12 }}>
+            <input aria-label="Filter graph by source document" value={documentFilter} onChange={(e) => setDocumentFilter(e.target.value)} placeholder="Filter source…" style={{ width: 150 }} />
+            <select aria-label="Filter graph by relationship type" value={relationFilter} onChange={(e) => setRelationFilter(e.target.value)}>
+              <option value="">All relations</option>
+              {usedTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+            <label style={{ fontSize: 12 }}>Confidence ≥ {confidence.toFixed(1)} <input aria-label="Minimum graph confidence" type="range" min="0" max="1" step="0.1" value={confidence} onChange={(e) => setConfidence(Number(e.target.value))} /></label>
+            <label style={{ fontSize: 12 }}><input type="checkbox" checked={connectedOnly} onChange={(e) => setConnectedOnly(e.target.checked)} /> connected</label>
           </div>
         </div>
 
