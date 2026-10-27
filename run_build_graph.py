@@ -17,7 +17,7 @@ def main():
     for path in (CONCEPTS_FILE, RELS_FILE):
         if not os.path.exists(path):
             logging.error(f"Required input not found: {path}")
-            return
+            raise FileNotFoundError(path)
 
     with open(CONCEPTS_FILE, "r", encoding="utf-8") as f:
         concepts = json.load(f).get("concepts", [])

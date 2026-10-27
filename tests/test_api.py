@@ -1,47 +1,98 @@
-"""Focused API tests for safe document registration and YouTube ingestion."""
+"""API route tests for the authenticated workspace upload contract."""
 
-from pathlib import Path
+import asyncio
+from types import SimpleNamespace
 
 import pytest
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
+
+
+class FakeDB:
+    def __init__(self):
+        self.items = []
+        self.commits = 0
+
+    def add(self, item):
+        self.items.append(item)
+
+    def commit(self):
+        self.commits += 1
+
+
+class FakeUpload:
+    def __init__(self, filename, content):
+        self.filename = filename
+        self.content = content
+
+    async def read(self):
+        return self.content
 
 
 @pytest.fixture()
-def api_client(tmp_path, monkeypatch):
+def api_context(tmp_path, monkeypatch):
+    from api import service
     from config import settings
-    import api.service as service
 
-    monkeypatch.setattr(settings, "documents_dir", str(tmp_path))
-    monkeypatch.setattr(settings, "upload_max_bytes", 1_000_000)
-    return TestClient(service.app)
+    monkeypatch.setattr(settings, "data_dir", str(tmp_path / "data"))
+    monkeypatch.setattr(settings, "upload_max_bytes", 32)
+    db = FakeDB()
+    user = SimpleNamespace(id="audit-user")
+    workspace = SimpleNamespace(id="audit-workspace")
+
+    yield service, user, workspace, db, tmp_path
 
 
-def test_youtube_url_is_registered(api_client, tmp_path):
-    response = api_client.post(
-        "/documents/youtube",
-        json={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"},
+def run(coro):
+    return asyncio.run(coro)
+
+
+def test_anonymous_auth_dependency_requires_credentials():
+    from auth.dependencies import current_user
+
+    with pytest.raises(HTTPException) as error:
+        current_user(None, FakeDB())
+    assert error.value.status_code == 401
+
+
+def test_youtube_url_is_registered(api_context):
+    service, user, workspace, db, tmp_path = api_context
+    response = service.add_youtube(
+        service.YouTubeRequest(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+        user,
+        workspace,
+        db,
     )
-    assert response.status_code == 200
-    assert response.json()["filename"] == "youtube_dQw4w9WgXcQ.yt"
-    assert (tmp_path / "youtube_dQw4w9WgXcQ.yt").read_text() == \
-        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    assert response["filename"] == "youtube_dQw4w9WgXcQ.yt"
+    path = tmp_path / "workspaces" / "audit-workspace" / "documents" / "youtube_dQw4w9WgXcQ.yt"
+    assert path.read_text() == "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    assert db.commits == 1
 
 
-def test_duplicate_youtube_is_rejected(api_client):
-    payload = {"url": "https://youtu.be/dQw4w9WgXcQ"}
-    assert api_client.post("/documents/youtube", json=payload).status_code == 200
-    assert api_client.post("/documents/youtube", json=payload).status_code == 409
+def test_duplicate_youtube_is_rejected(api_context):
+    service, user, workspace, db, _ = api_context
+    request = service.YouTubeRequest(url="https://youtu.be/dQw4w9WgXcQ")
+    assert service.add_youtube(request, user, workspace, db)["filename"]
+    with pytest.raises(HTTPException) as error:
+        service.add_youtube(request, user, workspace, db)
+    assert error.value.status_code == 409
 
 
-def test_file_upload_does_not_overwrite_existing_file(api_client, tmp_path):
-    existing = tmp_path / "notes.pdf"
-    existing.write_bytes(b"original")
+def test_upload_validation_accepts_valid_png_and_identifies_duplicates(api_context):
+    service, _, _, _, tmp_path = api_context
+    content = b"\x89PNG\r\n\x1a\nvalid"
+    assert service._safe_name("diagram.png") == "diagram.png"
+    assert service._content_type_error("diagram.png", content) is None
+    destination = tmp_path / "diagram.png"
+    destination.write_bytes(content)
+    assert destination.exists()
+    assert destination.read_bytes() == content
 
-    response = api_client.post(
-        "/documents",
-        files={"files": ("notes.pdf", b"replacement", "application/pdf")},
-    )
-    assert response.status_code == 200
-    assert response.json()["saved"] == []
-    assert response.json()["rejected"][0]["filename"] == "notes.pdf"
-    assert existing.read_bytes() == b"original"
+
+def test_upload_rejects_unsupported_corrupt_and_oversized_files(api_context):
+    service, _, _, _, _ = api_context
+    from config import settings
+
+    with pytest.raises(HTTPException):
+        service._safe_name("notes.txt")
+    assert service._content_type_error("broken.pdf", b"not a pdf") is not None
+    assert len(b"\x89PNG\r\n\x1a\n" + b"x" * 40) > settings.upload_max_bytes

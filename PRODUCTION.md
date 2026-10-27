@@ -16,6 +16,8 @@
    `CONCEPTSCAPE_CLAMAV_HOST` for malware scanning, and set
    `CONCEPTSCAPE_SENTRY_DSN` for error tracking. If unset, the app keeps a
    local rate-limit fallback and reports missing optional integrations in logs.
+   Qdrant must be reachable at `CONCEPTSCAPE_QDRANT_URL`; production compose
+   disables local Qdrant fallback and exposes the dependency in `/health`.
 7. Configure the GitHub `DEPLOY_ENABLED` repository variable and deployment
    secrets (`DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH`) to
    enable the SSH deployment job.

@@ -67,6 +67,9 @@ class Settings(BaseSettings):
     # a conventional ungrounded instruction — the ablation baseline.
     extraction_grounded_prompt: bool = True
     require_evidence: bool = True
+    # Explicit deadline-mode skips. IDs must be recorded in the extraction
+    # artifact with source metadata; skipped chunks are never treated as cached.
+    extraction_skip_chunks: list[str] = []
     min_concept_confidence: float = 0.0
     pedagogical_filter_enabled: bool = True
     pedagogical_filter_keep_review: bool = True
@@ -78,11 +81,17 @@ class Settings(BaseSettings):
     neo4j_database: str = "neo4j"
 
     # embeddings / vector store
-    embedding_model: str = "BAAI/bge-m3"
+    # Fast local asymmetric-search model. This avoids provider quotas and is
+    # much lighter than BGE-M3 for the educational English corpus.
+    embedding_model: str = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1"
+    embedding_batch_size: int = 32
     qdrant_url: str = ""            # empty -> embedded local mode (no server)
     qdrant_api_key: str = ""
     qdrant_path: str = "qdrant_data"
     qdrant_timeout: int = 120
+    qdrant_connect_retries: int = 3
+    qdrant_retry_delay: float = 2.0
+    qdrant_collection_prefix: str = "conceptscape"
     # use an embedded local Qdrant when the cloud instance is unreachable
     qdrant_allow_local_fallback: bool = True
     qdrant_upsert_batch: int = 16

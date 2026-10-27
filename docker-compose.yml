@@ -17,6 +17,11 @@ services:
     image: qdrant/qdrant:v1.12.4
     volumes:
       - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   api:
     build: .
@@ -25,6 +30,7 @@ services:
       CONCEPTSCAPE_ENVIRONMENT: production
       CONCEPTSCAPE_DATABASE_URL: postgresql+psycopg://conceptscape:${POSTGRES_PASSWORD}@postgres:5432/conceptscape
       CONCEPTSCAPE_QDRANT_URL: http://qdrant:6333
+      CONCEPTSCAPE_QDRANT_ALLOW_LOCAL_FALLBACK: "false"
       CONCEPTSCAPE_PIPELINE_EXECUTION_MODE: worker
       CONCEPTSCAPE_API_ALLOWED_ORIGINS: '["http://localhost:3000"]'
     ports:
@@ -33,7 +39,7 @@ services:
       - conceptscape_storage:/app/workspaces
     depends_on:
       postgres: { condition: service_healthy }
-      qdrant: { condition: service_started }
+      qdrant: { condition: service_healthy }
 
   worker:
     build: .
@@ -43,11 +49,12 @@ services:
       CONCEPTSCAPE_ENVIRONMENT: production
       CONCEPTSCAPE_DATABASE_URL: postgresql+psycopg://conceptscape:${POSTGRES_PASSWORD}@postgres:5432/conceptscape
       CONCEPTSCAPE_QDRANT_URL: http://qdrant:6333
+      CONCEPTSCAPE_QDRANT_ALLOW_LOCAL_FALLBACK: "false"
     volumes:
       - conceptscape_storage:/app/workspaces
     depends_on:
       postgres: { condition: service_healthy }
-      qdrant: { condition: service_started }
+      qdrant: { condition: service_healthy }
 
   frontend:
     build:

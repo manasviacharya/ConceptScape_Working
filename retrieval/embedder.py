@@ -12,11 +12,11 @@ except ImportError:
 
 class Embedder:
     """
-    BGE-M3 sentence embeddings, loaded lazily and shared for a whole run.
+    Local Sentence-Transformers embeddings, loaded lazily and shared for a run.
 
-    The model is ~2.2GB and takes seconds to load, so it is initialised on
-    first use and reused — indexing and querying in one process must not pay
-    for it twice.
+    The default model is a lightweight semantic-search model. Query and
+    document encoding are separate methods so models trained for asymmetric
+    retrieval can use their task-specific prompts when available.
     """
 
     def __init__(self, model_name: str = ""):
@@ -29,7 +29,7 @@ class Embedder:
                 "sentence-transformers is not installed. Run: pip install sentence-transformers"
             )
         if self._model is None:
-            logging.info(f"Loading embedding model: {self.model_name} (first run downloads ~2.2GB)")
+            logging.info(f"Loading embedding model: {self.model_name}")
             self._model = SentenceTransformer(self.model_name)
             logging.info(f"Embedding dimension: {self.dimension}")
         return self._model
@@ -38,20 +38,32 @@ class Embedder:
     def dimension(self) -> int:
         return self._get_model().get_sentence_embedding_dimension()
 
-    def encode(self, texts: List[str], batch_size: int = 8) -> List[List[float]]:
+    def _encode(self, texts: List[str], batch_size: int, task: str = "document") -> List[List[float]]:
         if not texts:
             return []
         model = self._get_model()
-        vectors = model.encode(
-            texts,
-            batch_size=batch_size,
-            normalize_embeddings=True,  # cosine similarity becomes a dot product
-            show_progress_bar=len(texts) > 32,
-        )
+        task_encoder = getattr(model, f"encode_{task}", None)
+        if task_encoder is not None:
+            vectors = task_encoder(texts, batch_size=batch_size,
+                                   normalize_embeddings=True,
+                                   show_progress_bar=len(texts) > 32)
+        else:
+            vectors = model.encode(texts, batch_size=batch_size,
+                                   normalize_embeddings=True,
+                                   show_progress_bar=len(texts) > 32)
         return [v.tolist() for v in vectors]
 
+    def encode(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+        return self._encode(texts, batch_size or settings.embedding_batch_size)
+
+    def encode_documents(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+        return self._encode(texts, batch_size or settings.embedding_batch_size, "document")
+
+    def encode_queries(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+        return self._encode(texts, batch_size or settings.embedding_batch_size, "query")
+
     def encode_one(self, text: str) -> List[float]:
-        return self.encode([text])[0]
+        return self.encode_queries([text])[0]
 
 
 def concept_embedding_text(concept: dict) -> str:

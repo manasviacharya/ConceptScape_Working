@@ -22,7 +22,7 @@ def main():
 
     if not os.path.exists(INPUT_FILE):
         logging.error(f"Ingestion result not found: {INPUT_FILE}")
-        return
+        raise FileNotFoundError(INPUT_FILE)
 
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         ingestion_data = json.load(f)

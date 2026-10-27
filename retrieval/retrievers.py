@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from config import settings
 from retrieval.embedder import Embedder
-from retrieval.vector_store import CHUNKS_COLLECTION, CONCEPTS_COLLECTION, VectorStore
+from retrieval.vector_store import VectorStore
 
 
 @dataclass
@@ -90,7 +90,7 @@ class KeywordRetriever:
 # ── Semantic ──────────────────────────────────────────────────────────────
 
 class SemanticRetriever:
-    """BGE-M3 nearest neighbours over the concept and chunk collections."""
+    """Sentence-Transformer nearest neighbours over concepts and chunks."""
     name = "semantic"
 
     def __init__(self, store: VectorStore, embedder: Embedder, search_chunks: bool = True):
@@ -103,7 +103,7 @@ class SemanticRetriever:
         vec = self.embedder.encode_one(query)
         out: List[RetrievalResult] = []
 
-        for hit in self.store.search(CONCEPTS_COLLECTION, vec, top_k, settings.semantic_score_threshold):
+        for hit in self.store.search(self.store.concepts_collection, vec, top_k, settings.semantic_score_threshold):
             out.append(RetrievalResult(
                 kind="concept", id=hit.get("concept_id", ""), name=hit.get("canonical_name", ""),
                 text=hit.get("definition", ""), score=float(hit["score"]), retriever=self.name,
@@ -112,7 +112,7 @@ class SemanticRetriever:
             ))
 
         if self.search_chunks:
-            for hit in self.store.search(CHUNKS_COLLECTION, vec, top_k, settings.semantic_score_threshold):
+            for hit in self.store.search(self.store.chunks_collection, vec, top_k, settings.semantic_score_threshold):
                 out.append(RetrievalResult(
                     kind="chunk", id=hit.get("chunk_id", ""), name=hit.get("filename", ""),
                     text=hit.get("text", ""), score=float(hit["score"]), retriever=self.name,
@@ -257,7 +257,7 @@ def build_retrievers(concepts, relationships, store=None, embedder=None):
     semantic = None
     if store is not None and embedder is not None:
         try:
-            if store.count(CONCEPTS_COLLECTION) > 0:
+            if store.count(store.concepts_collection) > 0:
                 semantic = SemanticRetriever(store, embedder)
             else:
                 logging.warning("Concept collection is empty — run run_index.py to enable semantic search")

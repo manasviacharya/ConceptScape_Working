@@ -14,6 +14,7 @@ def workspace_paths(workspace_id: str) -> dict[str, Path]:
         "documents": root / "documents",
         "output": root / "output",
         "data": root / "data",
+        "vectors": root / "qdrant_data",
     }
 
 

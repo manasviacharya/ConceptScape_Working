@@ -64,7 +64,10 @@ and an in-memory fallback. Graph nodes and edges retain evidence and provenance.
 ### Retrieval and RAG
 
 `retrieval/` provides keyword, semantic, graph-aware, and hybrid retrievers with
-compatible result structures. `rag/` classifies queries as concept lookup,
+compatible result structures. Semantic retrieval uses a lightweight local
+Sentence-Transformers model by default, keeping embeddings independent from
+Gemini/Groq generation quotas; the model is configurable through
+`CONCEPTSCAPE_EMBEDDING_MODEL`. `rag/` classifies queries as concept lookup,
 relationship query, or question answering; assembles evidence; generates an
 answer; and validates citation numbers before returning it.
 
@@ -116,6 +119,10 @@ Authenticated product workspaces store their documents and generated artefacts
 under `workspaces/<workspace-id>/`. Relational records are stored in
 `conceptscape.db` by default or in the configured PostgreSQL database. The
 schema is created and version-marked by `storage/migrations.py` at API startup.
+Vector collections and local vector storage are also workspace-scoped. Remote
+Qdrant uses separate `<workspace-id>_concepts` and `<workspace-id>_chunks`
+collections; local fallback is development-only and must be disabled in
+staging/production so connection failures cannot silently write ephemeral data.
 
 ## Local setup
 

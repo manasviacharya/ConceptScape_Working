@@ -18,12 +18,18 @@ def main():
 
     if not os.path.exists(INPUT_FILE):
         logging.error(f"Extracted concepts not found: {INPUT_FILE}")
-        return
+        raise FileNotFoundError(INPUT_FILE)
 
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     mentions = data.get("concepts", [])
+    failed_chunks = data.get("failed_chunks", [])
+    if failed_chunks and not mentions:
+        raise RuntimeError(
+            f"Cannot normalize: extraction failed for {len(failed_chunks)} chunk(s) "
+            "and produced no concept mentions."
+        )
     logging.info("ConceptScape Normalization starting...")
     logging.info(f"Input mentions: {len(mentions)}")
 

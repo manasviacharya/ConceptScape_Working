@@ -16,7 +16,7 @@ from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Reques
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from api.pipeline_runner import PipelineRunner
+from api.pipeline_runner import PipelineRunner, SETTINGS_LOCK
 from auth.dependencies import current_user, workspace_for_user
 from auth.schemas import LoginRequest, RegisterRequest, WorkspaceMemberRequest, WorkspaceRequest
 from auth.security import create_access_token, hash_password, verify_password
@@ -379,6 +379,7 @@ def delete_chat_session(session_id: str, workspace: Workspace = Depends(current_
 # request would make every question take tens of seconds.
 _pipelines: dict[str, Any] = {}
 _pipeline_errors: dict[str, str] = {}
+_pipeline_loaded_at: dict[str, float] = {}
 
 
 def get_pipeline(workspace_id: str):
@@ -388,13 +389,19 @@ def get_pipeline(workspace_id: str):
             from config import settings
             logging.info("Initialising RAG pipeline (first request warms the embedding model)…")
             paths = ensure_workspace_paths(workspace_id)
-            previous_paths = (settings.output_dir, settings.data_dir)
-            settings.output_dir = str(paths["output"])
-            settings.data_dir = str(paths["data"])
-            try:
-                _pipelines[workspace_id] = RAGPipeline()
-            finally:
-                settings.output_dir, settings.data_dir = previous_paths
+            previous_paths = (settings.output_dir, settings.data_dir, settings.qdrant_path,
+                              settings.qdrant_collection_prefix)
+            with SETTINGS_LOCK:
+                try:
+                    settings.output_dir = str(paths["output"])
+                    settings.data_dir = str(paths["data"])
+                    settings.qdrant_path = str(paths["vectors"])
+                    settings.qdrant_collection_prefix = f"workspace_{workspace_id}"
+                    _pipelines[workspace_id] = RAGPipeline()
+                    _pipeline_loaded_at[workspace_id] = time.time()
+                finally:
+                    (settings.output_dir, settings.data_dir, settings.qdrant_path,
+                     settings.qdrant_collection_prefix) = previous_paths
             logging.info("RAG pipeline ready")
         except Exception as e:
             _pipeline_errors[workspace_id] = str(e)
@@ -432,10 +439,25 @@ def health() -> Dict[str, Any]:
         db.close()
     except Exception:
         database_ok = False
+    qdrant_ok = True
+    qdrant_mode = "not_checked"
+    qdrant_error = None
+    try:
+        from retrieval.vector_store import VectorStore
+        vector_store = VectorStore()
+        vector_store.connect().get_collections()
+        qdrant_mode = "local_fallback" if vector_store.is_local_fallback else ("remote" if vector_store.url else "embedded_local")
+        vector_store.close()
+    except Exception as exc:
+        qdrant_ok = False
+        qdrant_mode = "unavailable"
+        qdrant_error = str(exc)[:200]
     return {
-        "status": "ok",
+        "status": "ok" if database_ok and qdrant_ok else "degraded",
         "artifacts": {k: os.path.exists(v) for k, v in files.items()},
-        "dependencies": {"database": database_ok, "storage": os.path.isdir(settings.data_dir)},
+        "dependencies": {"database": database_ok, "storage": os.path.isdir(settings.data_dir),
+                          "qdrant": qdrant_ok, "qdrant_mode": qdrant_mode,
+                          "qdrant_error": qdrant_error},
         "pipeline_loaded": bool(_pipelines),
         "pipeline_error": next(iter(_pipeline_errors.values()), None),
     }
@@ -564,12 +586,6 @@ def explain(req: ExplainRequest, user: User = Depends(current_user), workspace: 
         "source_example": "Give an example of this concept using an example explicitly present in the source evidence.",
         "compare": "Compare this concept with closely related concepts, using only retrieved evidence and clearly mark missing comparisons.",
     }
-
-
-@app.get("/metrics")
-def metrics() -> Response:
-    payload = "\n".join(f"conceptscape_{key} {value}" for key, value in _metrics.items()) + "\n"
-    return Response(payload, media_type="text/plain; version=0.0.4")
     prompt = f"{prompts[req.mode]} Concept: {concept['canonical_name']}"
     answer = get_pipeline(workspace.id).ask(prompt).to_dict()
     session = db.query(ChatSession).filter_by(id=req.session_id, workspace_id=workspace.id).first() if req.session_id else None
@@ -580,6 +596,12 @@ def metrics() -> Response:
     db.add(ChatMessage(session_id=session.id, role="assistant", content=answer.get("answer", ""), metadata_json=json.dumps(answer, ensure_ascii=False)))
     db.commit()
     return {"mode": req.mode, "concept_id": req.concept_id, "session_id": session.id, **answer}
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    payload = "\n".join(f"conceptscape_{key} {value}" for key, value in _metrics.items()) + "\n"
+    return Response(payload, media_type="text/plain; version=0.0.4")
 
 
 def _quiz_payload(data: Dict[str, Any], concept_id: str, question_type: str) -> Dict[str, Any]:
@@ -700,11 +722,15 @@ def progress_dashboard(user: User = Depends(current_user), workspace: Workspace 
 
 @app.get("/quality/report")
 def quality_report(workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
-    path = ensure_workspace_paths(workspace.id)["data"] / "quality_report.json"
-    if not path.is_file():
-        raise HTTPException(404, "No quality report exists yet. Run scripts/quality_report.py after the pipeline.")
-    with path.open(encoding="utf-8") as handle:
-        return json.load(handle)
+    data_dir = ensure_workspace_paths(workspace.id)["data"]
+    concepts_path = data_dir / "normalized_concepts.json"
+    relationships_path = data_dir / "relationships.json"
+    if not concepts_path.is_file() or not relationships_path.is_file():
+        raise HTTPException(404, "No normalized graph data exists yet. Run the pipeline first.")
+    from quality.report import build_quality_report_from_dir
+    report = build_quality_report_from_dir(data_dir)
+    (data_dir / "quality_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    return report
 
 
 @app.get("/quality/reviews")
@@ -845,6 +871,7 @@ def _invalidate_pipeline(workspace_id: str) -> None:
     """Drop the cached RAG pipeline so the next question sees the new corpus."""
     _pipelines.pop(workspace_id, None)
     _pipeline_errors.pop(workspace_id, None)
+    _pipeline_loaded_at.pop(workspace_id, None)
     logging.info("Pipeline cache invalidated — next question reloads the corpus")
 
 
@@ -982,6 +1009,12 @@ async def replace_document(filename: str, file: UploadFile = File(...), workspac
     content = await file.read()
     if len(content) > settings.upload_max_bytes:
         raise HTTPException(413, "Replacement document exceeds the upload limit")
+    mismatch = _content_type_error(name, content)
+    if mismatch:
+        raise HTTPException(400, mismatch)
+    malware = _malware_error(content)
+    if malware:
+        raise HTTPException(400, malware)
     archive_dir = paths["documents"] / ".versions" / name
     archive_dir.mkdir(parents=True, exist_ok=True)
     old_version = record.version
@@ -1142,6 +1175,9 @@ def pipeline_status(workspace: Workspace = Depends(current_workspace)) -> Dict[s
         if job:
             state["job_id"] = job.id
             state["job_status"] = job.status
+            if job.status == "completed" and job.finished_at:
+                if _pipeline_loaded_at.get(workspace.id, 0.0) < job.finished_at.timestamp():
+                    _invalidate_pipeline(workspace.id)
     finally:
         db.close()
     return state

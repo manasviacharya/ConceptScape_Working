@@ -6,6 +6,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.venv/
+venv/
+env/
 
 # Data and Outputs
 # documents/
@@ -16,17 +19,21 @@ data/
 .vscode/
 .idea/
 qdrant_data/
+partial_qdrant_data/
 *.db
 
 # Frontend
 frontend/node_modules/
 **/node_modules/
+**/node_modules/**
 frontend/.next/
+**/.next/
 frontend/next-env.d.ts
 frontend/.pnpm-store/
 .pnpm-store/
 **/.pnpm-store/
 **/.pnpm/
+**/.pnpm/**
 .pytest_cache/
 *.tsbuildinfo
 .DS_Store

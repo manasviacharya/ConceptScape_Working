@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from api.pipeline_runner import PipelineRunner
 from config import settings
 from storage.database import SessionLocal, init_db
-from storage.models import PipelineJob
+from storage.models import DocumentRecord, PipelineJob
 
 
 def finish(job_id: str, workspace_id: str, state: dict) -> None:
@@ -17,6 +17,17 @@ def finish(job_id: str, workspace_id: str, state: dict) -> None:
             job.current = state.get("current")
             job.error = state.get("error")
             job.finished_at = datetime.now(timezone.utc)
+            if job.status == "completed":
+                db.query(DocumentRecord).filter_by(workspace_id=workspace_id).update(
+                    {DocumentRecord.status: "processed", DocumentRecord.error: None,
+                     DocumentRecord.processed_at: job.finished_at},
+                    synchronize_session=False,
+                )
+            else:
+                db.query(DocumentRecord).filter_by(workspace_id=workspace_id, status="queued").update(
+                    {DocumentRecord.status: "error", DocumentRecord.error: job.error},
+                    synchronize_session=False,
+                )
             db.commit()
     finally:
         db.close()

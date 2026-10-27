@@ -6,7 +6,7 @@ import os
 from config import settings
 from logging_setup import configure_logging
 from retrieval.embedder import Embedder, concept_embedding_text
-from retrieval.vector_store import CHUNKS_COLLECTION, CONCEPTS_COLLECTION, VectorStore
+from retrieval.vector_store import VectorStore
 
 
 def _point_id(s: str) -> int:
@@ -24,7 +24,7 @@ def main():
     for path in (CONCEPTS_FILE, CHUNKS_FILE):
         if not os.path.exists(path):
             logging.error(f"Required input not found: {path}")
-            return
+            raise FileNotFoundError(path)
 
     with open(CONCEPTS_FILE, encoding="utf-8") as f:
         concepts = json.load(f)["concepts"]
@@ -41,11 +41,11 @@ def main():
         dim = embedder.dimension
 
         # ── concepts ──────────────────────────────────────────────────────
-        store.recreate(CONCEPTS_COLLECTION, dim)
+        store.recreate(store.concepts_collection, dim)
         texts = [concept_embedding_text(c) for c in concepts]
-        vectors = embedder.encode(texts)
+        vectors = embedder.encode_documents(texts)
         store.upsert(
-            CONCEPTS_COLLECTION,
+            store.concepts_collection,
             ids=[_point_id(c["concept_id"]) for c in concepts],
             vectors=vectors,
             payloads=[{
@@ -65,10 +65,10 @@ def main():
 
         # ── chunks ────────────────────────────────────────────────────────
         usable = [c for c in chunks if c.get("text", "").strip()]
-        store.recreate(CHUNKS_COLLECTION, dim)
-        vectors = embedder.encode([c["text"] for c in usable])
+        store.recreate(store.chunks_collection, dim)
+        vectors = embedder.encode_documents([c["text"] for c in usable])
         store.upsert(
-            CHUNKS_COLLECTION,
+            store.chunks_collection,
             ids=[_point_id(c["chunk_id"]) for c in usable],
             vectors=vectors,
             payloads=[{
@@ -87,8 +87,8 @@ def main():
         logging.info("=" * 50)
         logging.info(f"Model      : {settings.embedding_model} (dim={dim})")
         logging.info(f"Backend    : {settings.qdrant_url or 'embedded at ./' + settings.qdrant_path}")
-        logging.info(f"concepts   : {store.count(CONCEPTS_COLLECTION)} points")
-        logging.info(f"chunks     : {store.count(CHUNKS_COLLECTION)} points")
+        logging.info(f"concepts   : {store.count(store.concepts_collection)} points")
+        logging.info(f"chunks     : {store.count(store.chunks_collection)} points")
     finally:
         store.close()
 

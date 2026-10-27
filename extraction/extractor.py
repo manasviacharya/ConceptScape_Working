@@ -179,7 +179,10 @@ Text:
         all_concepts = []
         processed_chunks: Dict[str, str] = {}
         failed_chunks: List[str] = []
+        skipped_chunks: List[Dict[str, Any]] = []
         subject_id = preprocessed_data.get("subject_id")
+        explicit_skips = set(settings.extraction_skip_chunks)
+        seen_chunk_ids = set()
 
         prev_processed, prev_concepts = _load_previous_extraction_cache()
 
@@ -195,6 +198,24 @@ Text:
                 continue
 
             chunk_id = chunk.get("chunk_id", "")
+            if chunk_id:
+                seen_chunk_ids.add(chunk_id)
+
+            if chunk_id in explicit_skips:
+                skipped_chunks.append({
+                    "chunk_id": chunk_id,
+                    "resource_id": chunk.get("resource_id", ""),
+                    "filename": chunk.get("filename", ""),
+                    "source_type": chunk.get("source_type", ""),
+                    "location_type": chunk.get("location_type", ""),
+                    "location_number": chunk.get("location_number", 0),
+                    "content_hash": chunk.get("content_hash", ""),
+                    "reason": "explicitly skipped after provider failure",
+                })
+                logging.warning(
+                    f"SKIP (explicit provider-failure decision): chunk {chunk_id}"
+                )
+                continue
 
             # Chunks this short are slide titles and section headers
             # ("Introduction", "THANK YOU"). They carry no extractable concept,
@@ -335,10 +356,18 @@ Text:
                 f"Re-run to retry only these."
             )
 
+        unknown_skips = explicit_skips - seen_chunk_ids
+        if unknown_skips:
+            raise ValueError(
+                "Configured extraction skips do not exist in the chunk manifest: "
+                + ", ".join(sorted(unknown_skips))
+            )
+
         return {
             "subject_id": subject_id,
             "processed_chunks": processed_chunks,
             "concepts": all_concepts,
             "failed_chunks": failed_chunks,
+            "skipped_chunks": skipped_chunks,
             "dropped_concepts": dropped_concepts,
         }

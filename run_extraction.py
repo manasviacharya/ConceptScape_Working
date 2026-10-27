@@ -14,7 +14,7 @@ def main():
 
     if not os.path.exists(INPUT_FILE):
         logging.error(f"Input file not found: {INPUT_FILE}")
-        return
+        raise FileNotFoundError(INPUT_FILE)
 
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         preprocessed_data = json.load(f)
@@ -27,7 +27,7 @@ def main():
     except ValueError as e:
         logging.error(str(e))
         logging.info("Please create a .env file with CONCEPTSCAPE_GEMINI_API_KEY")
-        return
+        raise
 
     result = extractor.process_chunks(preprocessed_data)
     all_concepts = result["concepts"]
@@ -50,6 +50,13 @@ def main():
     logging.info(f"  Images: {image_concepts}")
     logging.info(f"  Total: {len(all_concepts)}")
     logging.info(f"\nOutput saved to: {OUTPUT_FILE}")
+
+    failed_chunks = result.get("failed_chunks", [])
+    if failed_chunks:
+        raise RuntimeError(
+            f"Concept extraction failed for {len(failed_chunks)} chunk(s); "
+            "downstream stages were not run."
+        )
 
 if __name__ == "__main__":
     main()

@@ -23,7 +23,7 @@ def main():
     for path in (CHUNKS_FILE, CONCEPTS_FILE):
         if not os.path.exists(path):
             logging.error(f"Required input not found: {path}")
-            return
+            raise FileNotFoundError(path)
 
     with open(CHUNKS_FILE, "r", encoding="utf-8") as f:
         chunks_data = json.load(f)

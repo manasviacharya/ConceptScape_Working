@@ -212,7 +212,7 @@ export default function UploadPage() {
           )}
           {docs.filter((doc) => doc.filename.toLowerCase().includes(search.toLowerCase())).map((doc, i) => (
             <motion.div 
-              key={doc}
+              key={doc.filename}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}

@@ -17,6 +17,9 @@ def main():
     logging.info(f"Documents folder: {settings.documents_dir}/")
     logging.info(f"Subject: {SUBJECT_ID}")
 
+    if not os.path.isdir(settings.documents_dir):
+        raise FileNotFoundError(f"Documents folder not found: {settings.documents_dir}")
+
     dispatcher = IngestionDispatcher()
     result, failed_files = dispatcher.run(settings.documents_dir, SUBJECT_ID)
 

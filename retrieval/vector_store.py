@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Any, Dict, List, Optional
 
 from config import settings
@@ -32,6 +33,9 @@ class VectorStore:
         self.url = url or settings.qdrant_url
         self.api_key = api_key or settings.qdrant_api_key
         self.path = path or settings.qdrant_path
+        prefix = settings.qdrant_collection_prefix.strip() or "conceptscape"
+        self.concepts_collection = f"{prefix}_concepts"
+        self.chunks_collection = f"{prefix}_chunks"
         self.is_local_fallback = False
         self._client: Optional["QdrantClient"] = None
 
@@ -48,36 +52,39 @@ class VectorStore:
 
     def _connect_remote(self) -> "QdrantClient":
         """
-        Connect to Qdrant Cloud, falling back from port 6333 to 443.
+        Connect to a remote Qdrant endpoint with bounded startup retries.
 
-        The client appends :6333 to a bare cloud URL, but many managed networks
-        (campus, hotel, corporate wifi) allow only 80/443 outbound — the symptom
-        is a connection timeout that looks like a slow cluster rather than a
-        blocked port. Qdrant Cloud serves the same API on 443, so trying it
-        second turns an outage into a slower first connection.
+        Explicit ports are respected. A bare host is tried on Qdrant's normal
+        6333 port and then HTTPS 443, which covers both local Compose and
+        hosted deployments.
         """
         base = self.url.rstrip("/")
-        candidates = [base] if ":" in base.split("//", 1)[-1] else [base, f"{base}:443"]
+        host_part = base.split("//", 1)[-1].split("/", 1)[0]
+        has_port = host_part.rsplit(":", 1)[-1].isdigit() if ":" in host_part else False
+        candidates = [base] if has_port else [f"{base}:6333", f"{base}:443"]
 
         last_error = None
         for candidate in candidates:
-            try:
-                logging.info(f"Connecting to Qdrant at {candidate}")
-                client = QdrantClient(
-                    url=candidate,
-                    api_key=self.api_key or None,
-                    timeout=settings.qdrant_timeout,
-                )
-                client.get_collections()  # force a real round trip
-                return client
-            except Exception as e:
-                last_error = e
-                logging.warning(f"Qdrant unreachable at {candidate}: {type(e).__name__}")
+            for attempt in range(1, settings.qdrant_connect_retries + 1):
+                try:
+                    logging.info(f"Connecting to Qdrant at {candidate} (attempt {attempt})")
+                    client = QdrantClient(
+                        url=candidate,
+                        api_key=self.api_key or None,
+                        timeout=settings.qdrant_timeout,
+                    )
+                    client.get_collections()  # force a real round trip
+                    logging.info("Qdrant connection verified")
+                    return client
+                except Exception as e:
+                    last_error = e
+                    logging.warning(f"Qdrant unreachable at {candidate}: {type(e).__name__}")
+                    if attempt < settings.qdrant_connect_retries:
+                        time.sleep(settings.qdrant_retry_delay)
 
-        # Neither port worked. Rather than lose semantic retrieval entirely,
-        # fall back to an embedded local Qdrant — the same reasoning as the
-        # in-memory graph store: a demo must not depend on a network that
-        # blocks non-standard ports.
+        # Local fallback is useful for development, but production must disable
+        # it so a connection problem cannot silently write vectors somewhere
+        # ephemeral and make the remote index appear empty.
         if settings.qdrant_allow_local_fallback:
             logging.warning(
                 f"Qdrant Cloud unreachable ({type(last_error).__name__}) — "

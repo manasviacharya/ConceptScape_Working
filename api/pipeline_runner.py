@@ -18,6 +18,11 @@ STAGES: List[tuple] = [
     ("index", "Embedding and indexing for search"),
 ]
 
+# The legacy pipeline scripts read their directories from the process-global
+# settings object. Serialize path-scoped runs so two workspaces cannot swap
+# those values while another run is executing.
+SETTINGS_LOCK = threading.Lock()
+
 
 @dataclass
 class StageState:
@@ -114,10 +119,14 @@ class PipelineRunner:
         from storage.paths import ensure_workspace_paths
 
         paths = ensure_workspace_paths(workspace_id)
-        previous_paths = (settings.documents_dir, settings.output_dir, settings.data_dir)
+        previous_paths = (settings.documents_dir, settings.output_dir, settings.data_dir,
+                          settings.qdrant_path, settings.qdrant_collection_prefix)
+        SETTINGS_LOCK.acquire()
         settings.documents_dir = str(paths["documents"])
         settings.output_dir = str(paths["output"])
         settings.data_dir = str(paths["data"])
+        settings.qdrant_path = str(paths["vectors"])
+        settings.qdrant_collection_prefix = f"workspace_{workspace_id}"
 
         try:
             for key, _ in STAGES:
@@ -152,7 +161,9 @@ class PipelineRunner:
                 self._state.running = False
                 self._state.current = None
                 self._state.finished_at = time.time()
-            settings.documents_dir, settings.output_dir, settings.data_dir = previous_paths
+            (settings.documents_dir, settings.output_dir, settings.data_dir,
+             settings.qdrant_path, settings.qdrant_collection_prefix) = previous_paths
+            SETTINGS_LOCK.release()
             if self._on_complete:
                 try:
                     self._on_complete(workspace_id)
