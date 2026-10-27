@@ -23,6 +23,7 @@ def test_missing_stage_input_raises(monkeypatch, tmp_path, module_name):
 
 def test_failed_extraction_does_not_advance_to_normalization(monkeypatch, tmp_path):
     import json
+
     import run_extraction
     from config import settings
 
@@ -47,8 +48,8 @@ def test_failed_extraction_does_not_advance_to_normalization(monkeypatch, tmp_pa
 
 
 def test_explicit_skip_preserves_success_and_records_failure_reason(monkeypatch, tmp_path):
-    from extraction.extractor import ConceptExtractor
     from config import settings
+    from extraction.extractor import ConceptExtractor
 
     monkeypatch.setattr(settings, "data_dir", str(tmp_path / "data"))
     monkeypatch.setattr(settings, "extraction_skip_chunks", ["c2"])

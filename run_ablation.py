@@ -14,15 +14,12 @@ import json
 import logging
 import os
 
-from config import settings
-from logging_setup import configure_logging
 from evaluation.ablation import VARIANTS, measure, run_variant, variant_dir
+from logging_setup import configure_logging
 
 
 def retrievers_factory(concepts, relationships):
-    from retrieval.embedder import Embedder
     from retrieval.retrievers import build_retrievers
-    from retrieval.vector_store import VectorStore
     # Semantic retrieval is deliberately omitted: the vector index is built from
     # the baseline's concepts, so reusing it across variants would score each
     # variant against another's embeddings. Keyword and graph read the variant's
@@ -50,11 +47,11 @@ def table(rows):
         for k, _, w in cols:
             v = r.get(k, "")
             if k == "variant":
-                line += f"{str(v):<{w}}"
+                line += f"{v!s:<{w}}"
             elif isinstance(v, float):
                 line += f"{v:>{w}.3f}"
             else:
-                line += f"{str(v):>{w}}"
+                line += f"{v!s:>{w}}"
         print(line)
 
 
@@ -75,7 +72,11 @@ def main():
 
     output_dir = ""
     if args.subset:
-        from evaluation.ablation import SUBSET_DOCUMENTS, SUBSET_OUTPUT_DIR, build_subset
+        from evaluation.ablation import (
+            SUBSET_DOCUMENTS,
+            SUBSET_OUTPUT_DIR,
+            build_subset,
+        )
         build_subset()
         output_dir = SUBSET_OUTPUT_DIR
         print(f"Subset: {', '.join(SUBSET_DOCUMENTS)}")
@@ -109,9 +110,14 @@ def main():
         for r in rows:
             if r["variant"] == "full":
                 continue
-            d = lambda k: r[k] - base[k]
-            print(f"{r['variant']:<26}{d('concepts'):>+11}{d('relationships'):>+9}"
-                  f"{d('unverifiable_retained'):>+14}")
+            def delta(key: str, row=r) -> int:
+                # row is bound as a default so the closure captures this
+                # iteration's row rather than whatever r holds when it is
+                # finally called.
+                return row[key] - base[key]
+
+            print(f"{r['variant']:<26}{delta('concepts'):>+11}{delta('relationships'):>+9}"
+                  f"{delta('unverifiable_retained'):>+14}")
 
     with open(args.json_out, "w", encoding="utf-8") as f:
         json.dump(rows, f, indent=2, ensure_ascii=False)

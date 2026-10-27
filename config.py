@@ -1,4 +1,3 @@
-from typing import Optional
 
 from dotenv import find_dotenv
 from pydantic_settings import BaseSettings
@@ -13,8 +12,8 @@ class Settings(BaseSettings):
     }
 
     # secrets
-    gemini_api_key: Optional[str] = None
-    groq_api_key: Optional[str] = None
+    gemini_api_key: str | None = None
+    groq_api_key: str | None = None
 
     # paths
     documents_dir: str = "documents"
@@ -51,10 +50,10 @@ class Settings(BaseSettings):
     # Gemini
     gemini_model: str = "gemini-3.6-flash"
     gemini_temperature: float = 0.1
-    gemini_max_retries: int = 1
-    gemini_retry_base_delay: float = 3.0
+    gemini_max_retries: int = 3
+    gemini_retry_base_delay: float = 2.0
     # after this many rate-limited chunks, stop using Gemini for the run
-    gemini_rate_limit_trip_after: int = 1
+    gemini_rate_limit_trip_after: int = 4
 
     # Groq
     groq_model: str = "openai/gpt-oss-120b"
@@ -62,6 +61,20 @@ class Settings(BaseSettings):
 
     # extraction — chunks shorter than this are skipped (titles, headers)
     extraction_min_chunk_chars: int = 50
+
+    # Concurrency for the model-calling stages. These calls are independent and
+    # network-bound, so issuing them in parallel is what keeps a full pipeline
+    # run in the tens of seconds rather than the tens of minutes. Set to 1 for
+    # strictly sequential behaviour when a provider is rate-limiting.
+    # Free provider tiers cap requests (Gemini) and tokens (Groq) per minute,
+    # and a burst of concurrent calls hits both. Three workers is the setting
+    # that goes fastest without spending the run on 429s; raise it on a paid
+    # tier, drop it to 1 to go strictly sequential.
+    extraction_max_workers: int = 3
+    relationships_max_workers: int = 3
+    # How long every worker pauses after any provider reports a rate limit.
+    # Sized to outlast a per-minute window rather than to retry inside it.
+    rate_limit_cooldown_seconds: float = 20.0
     # drop concepts whose evidence span cannot be found in the source
     # Switches the extraction prompt between grounded (evidence required) and
     # a conventional ungrounded instruction — the ablation baseline.
@@ -70,7 +83,12 @@ class Settings(BaseSettings):
     # Explicit deadline-mode skips. IDs must be recorded in the extraction
     # artifact with source metadata; skipped chunks are never treated as cached.
     extraction_skip_chunks: list[str] = []
-    min_concept_confidence: float = 0.0
+    # The extraction prompt asks the model to score how well-supported each
+    # concept is, and that score was previously discarded entirely. A modest
+    # floor removes the weakest mentions without touching the evidence gate,
+    # which answers a different question (is it present) from this one (is it
+    # worth keeping). Set to 0.0 to reproduce the unfiltered baseline.
+    min_concept_confidence: float = 0.5
     pedagogical_filter_enabled: bool = True
     pedagogical_filter_keep_review: bool = True
 
@@ -115,6 +133,10 @@ class Settings(BaseSettings):
     rag_evidence_per_concept: int = 2
     rag_chunk_char_limit: int = 600
     rag_thin_evidence_threshold: int = 3
+    # How long a failed RAG initialisation is remembered before it is retried.
+    # Caching the failure avoids re-paying a slow import on every request;
+    # expiring it is what lets the service recover without a restart.
+    rag_init_retry_seconds: int = 30
 
     # fall back to the in-memory graph when Neo4j cannot be reached
     graph_allow_memory_fallback: bool = True

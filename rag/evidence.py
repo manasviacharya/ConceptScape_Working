@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 from config import settings
 from rag.models import Citation
@@ -6,10 +5,10 @@ from rag.models import Citation
 
 def assemble(
     results,
-    concepts_by_id: Dict[str, dict],
-    relationships: List[dict],
+    concepts_by_id: dict[str, dict],
+    relationships: list[dict],
     max_items: int = None,
-) -> List[Citation]:
+) -> list[Citation]:
     """
     Turn retrieval hits into numbered, source-attributed evidence.
 
@@ -27,7 +26,7 @@ def assemble(
     context needed to use it correctly.
     """
     max_items = max_items or settings.rag_max_citations
-    citations: List[Citation] = []
+    citations: list[Citation] = []
     seen_texts = set()
     retrieved_ids = {r.id for r in results if r.kind == "concept"}
 
@@ -37,6 +36,46 @@ def assemble(
             return
         seen_texts.add(key)
         citations.append(Citation(index=len(citations) + 1, kind=kind, text=text.strip(), **kw))
+
+    def provenance(record: dict, fallback) -> dict:
+        """
+        Citation fields for one span, taken from the span's own record.
+
+        A fused concept unions filenames and page_numbers over every merged
+        mention, so indexing those lists attributes a span to whichever source
+        sorted first rather than the one it was read from. The per-span record
+        is the only thing that knows. The fallback is used for pre-migration
+        artifacts that predate these records, where the first source is still
+        the best available guess.
+        """
+        if record:
+            return {
+                "filename": record.get("filename", ""),
+                "page_number": record.get("location_number", 0) or 0,
+                "location_type": record.get("location_type", ""),
+                "chunk_id": record.get("chunk_id", ""),
+            }
+        return {
+            "filename": (fallback.filenames or [""])[0],
+            "page_number": (fallback.page_numbers or [0])[0],
+            "location_type": _location_type_for(fallback),
+            "chunk_id": (fallback.chunk_ids or [""])[0],
+        }
+
+    def _location_type_for(result) -> str:
+        """
+        Position type for a result that has no per-span record.
+
+        Chunks carry theirs directly. A concept spanning several sources may
+        mix pages and slides, so a type is only claimed when every location
+        agrees — otherwise the position is rendered bare rather than labelled
+        wrongly.
+        """
+        extra = result.extra or {}
+        if extra.get("location_type"):
+            return extra["location_type"]
+        types = {loc.get("type") for loc in extra.get("locations", []) if loc.get("type")}
+        return types.pop() if len(types) == 1 else ""
 
     # ── 1. one definition per retrieved concept ───────────────────────────
     # Definitions come first so every retrieved concept is represented before
@@ -49,9 +88,7 @@ def assemble(
         if definition:
             add("concept", definition,
                 concept_name=r.name,
-                filename=(r.filenames or [""])[0],
-                page_number=(r.page_numbers or [0])[0],
-                chunk_id=(r.chunk_ids or [""])[0])
+                **provenance(concept.get("definition_source") or {}, r))
 
     # ── 2. relationships between retrieved concepts ───────────────────────
     # Deliberately ahead of extra per-concept evidence spans. Definitions alone
@@ -68,7 +105,8 @@ def assemble(
             add("relationship", ev.get("text", ""),
                 relationship=label,
                 filename=ev.get("filename", ""),
-                page_number=ev.get("location_number", 0),
+                page_number=ev.get("location_number", 0) or 0,
+                location_type=ev.get("location_type", ""),
                 chunk_id=ev.get("chunk_id", ""))
 
     # ── 3. remaining per-concept evidence spans ───────────────────────────
@@ -76,14 +114,18 @@ def assemble(
         if r.kind != "concept" or len(citations) >= max_items:
             continue
         concept = concepts_by_id.get(r.id, {})
-        for span in (concept.get("evidence") or [])[:settings.rag_evidence_per_concept]:
+        # Prefer the records, which pair each span with the source it was read
+        # from. Bare strings are the pre-migration shape and keep the old
+        # first-source behaviour rather than failing.
+        records = concept.get("evidence_records") or [
+            {"text": span} for span in (concept.get("evidence") or [])
+        ]
+        for record in records[:settings.rag_evidence_per_concept]:
             if len(citations) >= max_items:
                 break
-            add("concept", span,
+            add("concept", record.get("text", ""),
                 concept_name=r.name,
-                filename=(r.filenames or [""])[0],
-                page_number=(r.page_numbers or [0])[0],
-                chunk_id=(r.chunk_ids or [""])[0])
+                **provenance(record if record.get("filename") else {}, r))
 
     # ── chunks ────────────────────────────────────────────────────────────
     for r in results:
@@ -92,12 +134,13 @@ def assemble(
         add("chunk", r.text[:settings.rag_chunk_char_limit],
             filename=(r.filenames or [""])[0],
             page_number=(r.page_numbers or [0])[0],
+            location_type=_location_type_for(r),
             chunk_id=r.id)
 
     return citations
 
 
-def format_for_prompt(citations: List[Citation]) -> str:
+def format_for_prompt(citations: list[Citation]) -> str:
     lines = []
     for c in citations:
         if c.kind == "relationship":

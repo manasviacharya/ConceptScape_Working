@@ -10,8 +10,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from retrieval.retrievers import (GraphRetriever, HybridRetriever, KeywordRetriever,
-                                  RetrievalResult)
+from retrieval.retrievers import (
+    GraphRetriever,
+    HybridRetriever,
+    KeywordRetriever,
+    RetrievalResult,
+)
 
 results = []
 

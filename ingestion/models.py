@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 
 @dataclass
 class ContentChunk:
@@ -10,7 +11,7 @@ class ContentChunk:
     text: str
     content_hash: str = ""
     extraction_method: str = ""
-    ocr_regions: Optional[List[Dict[str, Any]]] = None
+    ocr_regions: list[dict[str, Any]] | None = None
 
 @dataclass
 class IngestedResource:
@@ -18,11 +19,11 @@ class IngestedResource:
     resource_type: str
     filename: str
     subject_id: str
-    content: List[ContentChunk]
+    content: list[ContentChunk]
     content_hash: str = ""
 
 @dataclass
 class IngestionResult:
     subject_id: str
-    resources: List[IngestedResource]
+    resources: list[IngestedResource]
     ingestion_timestamp: str

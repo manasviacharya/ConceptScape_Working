@@ -1,11 +1,16 @@
+import concurrent.futures
 import json
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
 
 from config import settings
 from llm_provider import LLMProvider
-from relationships.common import make_relationship_id, norm, verify_evidence
+from relationships.common import (
+    make_relationship_id,
+    norm,
+    verify_evidence,
+    vocabulary_guidance,
+)
 from relationships.models import EvidenceRecord, Relationship
 
 CROSS_CHUNK_SCHEMA = {
@@ -45,10 +50,10 @@ class CrossChunkLinker:
     source text and nothing else.
     """
 
-    def __init__(self, llm: Optional[LLMProvider] = None):
+    def __init__(self, llm: LLMProvider | None = None):
         self.llm = llm or LLMProvider()
 
-    def _build_context(self, concepts: List[dict], chunks: Dict[str, dict]) -> str:
+    def _build_context(self, concepts: list[dict], chunks: dict[str, dict]) -> str:
         blocks = []
         for c in concepts:
             passages = []
@@ -67,8 +72,8 @@ class CrossChunkLinker:
             blocks.append(block)
         return "\n".join(blocks)
 
-    def _prompt(self, filename: str, context: str, existing: List[str]) -> str:
-        vocab = ", ".join(settings.relationship_types)
+    def _prompt(self, filename: str, context: str, existing: list[str]) -> str:
+        vocab = vocabulary_guidance(settings.relationship_types)
         already = "\n".join(f"- {e}" for e in existing) if existing else "(none yet)"
         return f"""
 Below are concepts extracted from a single document ("{filename}"), each with
@@ -83,7 +88,8 @@ CONCEPTS AND THEIR SOURCE PASSAGES:
 RELATIONSHIPS ALREADY FOUND (do not repeat these):
 {already}
 
-ALLOWED RELATIONSHIP TYPES:
+ALLOWED RELATIONSHIP TYPES (the meaning of each type in this schema is given —
+follow it, not the everyday sense of the word):
 {vocab}
 
 RULES — all mandatory:
@@ -108,12 +114,12 @@ RULES — all mandatory:
         self,
         resource_id: str,
         filename: str,
-        concepts: List[dict],
-        chunks: Dict[str, dict],
-        existing_pairs: List[str],
-        name_to_id: Dict[str, str],
-        id_to_name: Dict[str, str],
-    ) -> Optional[Tuple[List[Relationship], Dict[str, int]]]:
+        concepts: list[dict],
+        chunks: dict[str, dict],
+        existing_pairs: list[str],
+        name_to_id: dict[str, str],
+        id_to_name: dict[str, str],
+    ) -> tuple[list[Relationship], dict[str, int]] | None:
         """Returns (relationships, drop_counts), or None if every provider failed."""
         if len(concepts) < 2:
             return [], {}
@@ -137,11 +143,38 @@ RULES — all mandatory:
                 f"{len(batches)} batches of <={limit} (with {len(anchors)} anchors)"
             )
 
+            # Batches are independent — each is handed the same existing_pairs
+            # snapshot and none reads another's output — so they are issued
+            # concurrently and merged below in batch order, leaving the result
+            # identical to a serial run.
+            workers = max(1, min(settings.relationships_max_workers, len(batches)))
+            batch_results: dict[int, tuple | None] = {}
+            if workers == 1:
+                for i, batch in enumerate(batches, 1):
+                    batch_results[i] = self.link_document(
+                        resource_id, filename, batch, chunks, existing_pairs,
+                        name_to_id, id_to_name,
+                    )
+            else:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = {
+                        pool.submit(
+                            self.link_document, resource_id, filename, batch, chunks,
+                            existing_pairs, name_to_id, id_to_name,
+                        ): i
+                        for i, batch in enumerate(batches, 1)
+                    }
+                    for future in concurrent.futures.as_completed(futures):
+                        i = futures[future]
+                        try:
+                            batch_results[i] = future.result()
+                        except Exception:
+                            logging.exception(f"  batch {i}/{len(batches)} raised")
+                            batch_results[i] = None
+
             all_rels, all_drops, any_ok = [], {}, False
-            for i, batch in enumerate(batches, 1):
-                res = self.link_document(
-                    resource_id, filename, batch, chunks, existing_pairs, name_to_id, id_to_name
-                )
+            for i in range(1, len(batches) + 1):
+                res = batch_results.get(i)
                 if res is None:
                     logging.warning(f"  batch {i}/{len(batches)} failed")
                     continue
@@ -185,7 +218,7 @@ RULES — all mandatory:
 
         chunk_meta = {cid: chunks[cid] for cid in doc_chunk_ids if cid in chunks}
         drops = {"unverified": 0, "unknown": 0, "selfloop": 0, "badtype": 0}
-        out: List[Relationship] = []
+        out: list[Relationship] = []
 
         for r in rels:
             rtype = (r.get("type") or "").strip().lower()
@@ -230,6 +263,7 @@ RULES — all mandatory:
                     chunk_id=verified_in or "",
                     filename=meta.get("filename", filename),
                     location_number=meta.get("location_number", 0),
+                    location_type=meta.get("location_type", ""),
                     confidence=conf,
                     model_used=model_used,
                     scope="cross_chunk",
@@ -239,7 +273,7 @@ RULES — all mandatory:
         return out, drops
 
 
-def group_concepts_by_document(concepts: List[dict]) -> Dict[str, List[dict]]:
+def group_concepts_by_document(concepts: list[dict]) -> dict[str, list[dict]]:
     """
     Index concepts by document.
 
@@ -247,7 +281,7 @@ def group_concepts_by_document(concepts: List[dict]) -> Dict[str, List[dict]]:
     appears under each — the cross-chunk pass reasons about one document at a
     time and needs every concept present in that document.
     """
-    by_doc: Dict[str, List[dict]] = defaultdict(list)
+    by_doc: dict[str, list[dict]] = defaultdict(list)
     for c in concepts:
         for rid in (c.get("resource_ids") or []):
             by_doc[rid].append(c)

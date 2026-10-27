@@ -1,12 +1,12 @@
 import re
-from typing import Any, Dict, Iterable, Tuple
+from collections.abc import Iterable
+from typing import Any
 
-
-_LABEL_WORDS = re.compile(r"\b(table|figure|slide|step|iteration|epoch|row|column|output|input)\b", re.I)
+_LABEL_WORDS = re.compile(r"\b(table|figure|slide|step|iteration|epoch|row|column|output|input)\b", re.IGNORECASE)
 _NUMBER_FRAGMENT = re.compile(r"(?:^|\s)[-+]?\d+(?:\.\d+)?(?:%|\b)")
 
 
-def significance_assessment(concept: Dict[str, Any]) -> Dict[str, Any]:
+def significance_assessment(concept: dict[str, Any]) -> dict[str, Any]:
     """Score pedagogical value without changing or discarding provenance."""
     name = str(concept.get("canonical_name") or "").strip()
     definition = str(concept.get("definition") or "").strip()
@@ -34,7 +34,7 @@ def significance_assessment(concept: Dict[str, Any]) -> Dict[str, Any]:
     return {"significance_score": score, "significance_status": status, "significance_reasons": reasons}
 
 
-def filter_concepts(concepts: Iterable[Dict[str, Any]]) -> Tuple[list[Dict[str, Any]], list[Dict[str, Any]]]:
+def filter_concepts(concepts: Iterable[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     kept, audit = [], []
     for concept in concepts:
         decision = significance_assessment(concept)

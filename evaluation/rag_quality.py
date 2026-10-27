@@ -1,8 +1,9 @@
 """Metrics for human-labelled grounded-answer/citation review sheets."""
-from typing import Any, Dict, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 
-def score_answers(rows: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+def score_answers(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
     rows = [row for row in rows if row.get("gold_citations") is not None]
     if not rows:
         return {"labelled": 0, "citation_precision": None, "citation_recall": None, "citation_f1": None, "grounded_rate": None}

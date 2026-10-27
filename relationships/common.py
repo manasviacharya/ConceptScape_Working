@@ -1,7 +1,8 @@
 import hashlib
 import re
 import unicodedata
-from typing import Any, Dict, Iterable, List, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from relationships.models import EvidenceRecord, Relationship
 
@@ -11,7 +12,7 @@ def norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().casefold()
 
 
-def verify_evidence(evidence: str, sources: Iterable[str]) -> Optional[str]:
+def verify_evidence(evidence: str, sources: Iterable[str]) -> str | None:
     """
     Return the label of the first source containing the span, else None.
 
@@ -40,7 +41,7 @@ def make_relationship_id(source_id: str, rtype: str, target_id: str) -> str:
     return f"rel_{digest}"
 
 
-def merge_relationships(rels: List[Relationship]) -> List[Relationship]:
+def merge_relationships(rels: list[Relationship]) -> list[Relationship]:
     """
     Collapse duplicates onto (source, type, target), unioning their evidence.
 
@@ -49,7 +50,7 @@ def merge_relationships(rels: List[Relationship]) -> List[Relationship]:
     parallel edges — otherwise the graph double-counts and provenance
     fragments.
     """
-    merged: Dict[str, Relationship] = {}
+    merged: dict[str, Relationship] = {}
     for r in rels:
         key = relationship_key(r.source_concept_id, r.type, r.target_concept_id)
         if key not in merged:
@@ -64,7 +65,7 @@ def merge_relationships(rels: List[Relationship]) -> List[Relationship]:
     return list(merged.values())
 
 
-def relationship_to_dict(r: Relationship) -> Dict[str, Any]:
+def relationship_to_dict(r: Relationship) -> dict[str, Any]:
     return {
         "relationship_id": r.relationship_id,
         "source_concept_id": r.source_concept_id,
@@ -80,7 +81,7 @@ def relationship_to_dict(r: Relationship) -> Dict[str, Any]:
     }
 
 
-def relationship_from_dict(d: Dict[str, Any]) -> Relationship:
+def relationship_from_dict(d: dict[str, Any]) -> Relationship:
     return Relationship(
         relationship_id=d["relationship_id"],
         source_concept_id=d["source_concept_id"],
@@ -91,3 +92,45 @@ def relationship_from_dict(d: Dict[str, Any]) -> Relationship:
         resource_id=d.get("resource_id", ""),
         evidence=[EvidenceRecord(**e) for e in d.get("evidence", [])],
     )
+
+
+# What each type in the controlled vocabulary actually means.
+#
+# The prompt previously listed only the type names. A model given a bare label
+# falls back on the everyday sense of the word, which is why the two types
+# furthest from their ordinary meaning in this schema — part_of, which is
+# structural composition rather than loose association, and causes, which
+# requires a stated causal claim rather than a correlation — were the two that
+# scored zero precision. Spelling out the distinctions, with the confusions to
+# avoid, is the cheapest available correction.
+RELATIONSHIP_SEMANTICS = {
+    "requires": "The source cannot be applied or computed without the target. "
+                "Use for hard dependencies the text states.",
+    "prerequisite_of": "The target should be learned before the source. "
+                       "Pedagogical ordering, not computational dependency.",
+    "depends_on": "The source's behaviour is conditioned by the target — "
+                  "changing the target changes how the source behaves.",
+    "part_of": "The source is a COMPONENT of the target: the target is a whole "
+               "and the source is one of the pieces it is made of. Do NOT use "
+               "this for 'is a kind of' (that is example_of), nor for two "
+               "topics merely taught together.",
+    "related_to": "A real association the text states, which fits none of the "
+                  "stronger types. Use only as a last resort.",
+    "produces": "The source yields the target as an output or result.",
+    "causes": "The source BRINGS ABOUT the target. The text must state the "
+              "causal link — 'a large learning rate causes divergence'. Do NOT "
+              "use this for things that merely occur together, follow one "
+              "another in a procedure, or are listed in the same section.",
+    "used_for": "The source is applied in order to achieve the target.",
+    "example_of": "The source is a specific instance or special case of the "
+                  "target (Mini-Batch SGD is an example_of Gradient Descent).",
+}
+
+
+def vocabulary_guidance(types) -> str:
+    """Render the allowed types with their meanings, for the extraction prompt."""
+    lines = []
+    for t in types:
+        meaning = RELATIONSHIP_SEMANTICS.get(t)
+        lines.append(f"- {t}: {meaning}" if meaning else f"- {t}")
+    return "\n".join(lines)

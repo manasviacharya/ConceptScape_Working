@@ -1,6 +1,5 @@
 import re
 import unicodedata
-from typing import List, Optional
 
 from config import settings
 
@@ -8,8 +7,8 @@ from config import settings
 def clean_text(
     text: str,
     extraction_method: str = "",
-    all_page_texts: Optional[List[str]] = None,
-    page_index: Optional[int] = None,
+    all_page_texts: list[str] | None = None,
+    page_index: int | None = None,
 ) -> str:
     if not text:
         return text
@@ -62,7 +61,7 @@ def _dehyphenate(text: str) -> str:
 
 
 def _remove_headers_footers(
-    text: str, all_page_texts: List[str], page_index: int
+    text: str, all_page_texts: list[str], page_index: int
 ) -> str:
     total_pages = len(all_page_texts)
     threshold = int(total_pages * settings.header_footer_min_page_ratio)

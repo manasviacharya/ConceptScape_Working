@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict, deque
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from graph.graph_store import BaseGraphStore
 
@@ -23,9 +23,9 @@ class InMemoryGraphStore(BaseGraphStore):
     """
 
     def __init__(self):
-        self._concepts: Dict[str, Dict[str, Any]] = {}
-        self._edges: List[Dict[str, Any]] = []
-        self._adj: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self._concepts: dict[str, dict[str, Any]] = {}
+        self._edges: list[dict[str, Any]] = []
+        self._adj: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     # ── lifecycle ────────────────────────────────────────────────────────
 
@@ -45,12 +45,12 @@ class InMemoryGraphStore(BaseGraphStore):
 
     # ── loading ──────────────────────────────────────────────────────────
 
-    def upsert_concepts(self, concepts: List[Dict[str, Any]]) -> int:
+    def upsert_concepts(self, concepts: list[dict[str, Any]]) -> int:
         for c in concepts:
             self._concepts[c["concept_id"]] = dict(c)
         return len(concepts)
 
-    def upsert_relationships(self, relationships: List[Dict[str, Any]]) -> int:
+    def upsert_relationships(self, relationships: list[dict[str, Any]]) -> int:
         added = 0
         for r in relationships:
             src, tgt = r.get("source_concept_id"), r.get("target_concept_id")
@@ -83,7 +83,7 @@ class InMemoryGraphStore(BaseGraphStore):
 
     # ── queries ──────────────────────────────────────────────────────────
 
-    def get_concept(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_concept(self, name: str) -> dict[str, Any] | None:
         needle = (name or "").casefold()
         for c in self._concepts.values():
             if c.get("canonical_name", "").casefold() == needle:
@@ -93,7 +93,7 @@ class InMemoryGraphStore(BaseGraphStore):
                 return c
         return None
 
-    def get_neighbors(self, concept_id: str) -> List[Dict[str, Any]]:
+    def get_neighbors(self, concept_id: str) -> list[dict[str, Any]]:
         return [
             {
                 "concept": self._concepts[e["other"]],
@@ -105,7 +105,7 @@ class InMemoryGraphStore(BaseGraphStore):
             if e["other"] in self._concepts
         ]
 
-    def get_subgraph(self, concept_id: str, hops: int = 2) -> Dict[str, Any]:
+    def get_subgraph(self, concept_id: str, hops: int = 2) -> dict[str, Any]:
         if concept_id not in self._concepts:
             return {"nodes": [], "edges": []}
         seen = {concept_id}
@@ -124,12 +124,12 @@ class InMemoryGraphStore(BaseGraphStore):
         ]
         return {"nodes": [self._concepts[i] for i in seen], "edges": edges}
 
-    def shortest_path(self, source_id: str, target_id: str) -> List[Dict[str, Any]]:
+    def shortest_path(self, source_id: str, target_id: str) -> list[dict[str, Any]]:
         if source_id not in self._concepts or target_id not in self._concepts:
             return []
         # Breadth-first search: edges are unweighted, so BFS gives the shortest
         # path and stops as soon as the target is reached.
-        prev: Dict[str, tuple] = {source_id: (None, None)}
+        prev: dict[str, tuple] = {source_id: (None, None)}
         queue = deque([source_id])
         while queue:
             cur = queue.popleft()
@@ -151,13 +151,13 @@ class InMemoryGraphStore(BaseGraphStore):
             node = parent
         return [{"names": list(reversed(names)), "types": list(reversed(types))}]
 
-    def concepts_by_document(self, filename: str) -> List[Dict[str, Any]]:
+    def concepts_by_document(self, filename: str) -> list[dict[str, Any]]:
         return sorted(
             (c for c in self._concepts.values() if filename in c.get("filenames", [])),
             key=lambda c: c.get("canonical_name", ""),
         )
 
-    def most_connected(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def most_connected(self, limit: int = 10) -> list[dict[str, Any]]:
         rows = [
             {
                 "name": c.get("canonical_name", ""),
@@ -170,11 +170,11 @@ class InMemoryGraphStore(BaseGraphStore):
         rows.sort(key=lambda r: (-r["degree"], -r["occurrences"]))
         return rows[: int(limit)]
 
-    def export_graph(self) -> Dict[str, Any]:
+    def export_graph(self) -> dict[str, Any]:
         return {"nodes": list(self._concepts.values()), "edges": list(self._edges)}
 
-    def stats(self) -> Dict[str, Any]:
-        by_type: Dict[str, int] = defaultdict(int)
+    def stats(self) -> dict[str, Any]:
+        by_type: dict[str, int] = defaultdict(int)
         for e in self._edges:
             by_type[e["type"]] += 1
         isolated = sum(1 for cid in self._concepts if not self._adj.get(cid))

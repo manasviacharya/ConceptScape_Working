@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from config import settings
 
@@ -25,11 +25,11 @@ def _fusion_text(concept) -> str:
     return " — ".join(p for p in parts if p)
 
 
-def _word_seq(s: str) -> List[str]:
+def _word_seq(s: str) -> list[str]:
     return [t for t in re.split(r"[^\w]+", (s or "").casefold()) if t]
 
 
-def _expand_initialisms(short: List[str], long: List[str]) -> List[str]:
+def _expand_initialisms(short: list[str], long: list[str]) -> list[str]:
     """
     Replace an initialism in `short` with the words it abbreviates in `long`.
 
@@ -38,7 +38,7 @@ def _expand_initialisms(short: List[str], long: List[str]) -> List[str]:
     compared rather than from a hardcoded dictionary, so it cannot invent an
     expansion the corpus does not support.
     """
-    out: List[str] = []
+    out: list[str] = []
     for tok in short:
         if not (2 <= len(tok) <= 6 and tok.isalpha()):
             out.append(tok)
@@ -53,7 +53,7 @@ def _expand_initialisms(short: List[str], long: List[str]) -> List[str]:
     return out
 
 
-def _compatible(a, b) -> Tuple[bool, str]:
+def _compatible(a, b) -> tuple[bool, str]:
     """
     Guards applied before any merge, regardless of similarity.
 
@@ -100,10 +100,10 @@ _DISCRIMINATORS = {
 
 
 def fuse(
-    concepts: List[Any],
+    concepts: list[Any],
     embedder=None,
-    threshold: Optional[float] = None,
-) -> Tuple[List[Any], List[Dict[str, Any]]]:
+    threshold: float | None = None,
+) -> tuple[list[Any], list[dict[str, Any]]]:
     """
     Merge concepts that are semantically the same but lexically different.
 
@@ -143,8 +143,8 @@ def fuse(
         if ri != rj:
             parent[max(ri, rj)] = min(ri, rj)
 
-    merge_log: List[Dict[str, Any]] = []
-    rejected: List[Dict[str, Any]] = []
+    merge_log: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
 
     for i in range(len(concepts)):
         for j in range(i + 1, len(concepts)):
@@ -170,7 +170,7 @@ def fuse(
     for m in merge_log:
         logging.info(f"  MERGE ({m['similarity']}): {m['a']!r} + {m['b']!r} — {m['reason']}")
 
-    groups: Dict[int, List[int]] = {}
+    groups: dict[int, list[int]] = {}
     for i in range(len(concepts)):
         groups.setdefault(find(i), []).append(i)
 
@@ -185,7 +185,7 @@ def fuse(
     return fused, decisions
 
 
-def _merge_group(group: List[Any]) -> Any:
+def _merge_group(group: list[Any]) -> Any:
     """
     Combine concepts into one, keeping every source.
 
@@ -198,7 +198,7 @@ def _merge_group(group: List[Any]) -> Any:
 
     primary = max(group, key=lambda c: (c.occurrence_count, len(c.canonical_name)))
 
-    def union_list(attr: str) -> List[Any]:
+    def union_list(attr: str) -> list[Any]:
         seen, out = set(), []
         for c in group:
             for v in getattr(c, attr, []) or []:
@@ -207,9 +207,31 @@ def _merge_group(group: List[Any]) -> Any:
                     out.append(v)
         return out
 
+    def union_dicts(attr: str, key_fields: tuple) -> list:
+        """
+        Union dict-valued provenance across the merged group.
+
+        union_list dedupes through a set, which dicts cannot enter. Dropping
+        these instead would mean a semantically fused concept kept only the
+        primary's provenance — so a span merged in from another deck would be
+        cited against the primary's file.
+        """
+        seen, out = set(), []
+        for concept in group:
+            for item in getattr(concept, attr, None) or []:
+                identity = tuple(item.get(f) for f in key_fields)
+                if identity in seen:
+                    continue
+                seen.add(identity)
+                out.append(item)
+        return out
+
     names = union_list("aliases") or [c.canonical_name for c in group]
     total = sum(c.occurrence_count for c in group)
     weighted = sum(c.mean_confidence * c.occurrence_count for c in group)
+    merged_evidence_records = union_dicts(
+        "evidence_records", ("text", "filename", "location_number")
+    )
 
     return replace(
         primary,
@@ -220,7 +242,9 @@ def _merge_group(group: List[Any]) -> Any:
         chunk_ids=union_list("chunk_ids"),
         filenames=union_list("filenames"),
         page_numbers=sorted(set(union_list("page_numbers"))),
-        evidence=union_list("evidence"),
+        locations=union_dicts("locations", ("type", "number", "filename")),
+        evidence=[r["text"] for r in merged_evidence_records] or union_list("evidence"),
+        evidence_records=merged_evidence_records,
         resource_ids=sorted(set(union_list("resource_ids"))),
         models_used=sorted(set(union_list("models_used"))),
         occurrence_count=total,

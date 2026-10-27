@@ -1,26 +1,25 @@
 import hashlib
 import logging
 from pathlib import Path
-from typing import Optional
 
 import cv2
-import numpy as np
 import fitz  # PyMuPDF
+import numpy as np
 
-from ingestion.base_parser import BaseParser
-from ingestion.models import IngestedResource, ContentChunk
-from ingestion.ocr_engine import PaddleOCREngine
 from config import settings
+from ingestion.base_parser import BaseParser
+from ingestion.models import ContentChunk, IngestedResource
+from ingestion.ocr_engine import PaddleOCREngine
 
 
 class PDFParser(BaseParser):
-    def __init__(self, ocr_engine: Optional[PaddleOCREngine] = None):
+    def __init__(self, ocr_engine: PaddleOCREngine | None = None):
         self.ocr_engine = ocr_engine or PaddleOCREngine()
 
     def can_handle(self, filepath: Path) -> bool:
         return filepath.suffix.lower() == ".pdf"
 
-    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> Optional[IngestedResource]:
+    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> IngestedResource | None:
         try:
             with fitz.open(filepath) as doc:
                 total_pages = len(doc)

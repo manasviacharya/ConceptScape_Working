@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -20,6 +19,12 @@ class EvidenceRecord:
     confidence: float
     model_used: str
     scope: str                     # "chunk" | "cross_chunk"
+    # "page" | "slide" | "timestamp". location_number alone cannot say whether
+    # 12 means page 12, slide 12, or 12 seconds into a recording, so a citation
+    # built from it has to guess — and a guessed "p12" for a deck points the
+    # reader at a page that does not exist. Defaulted so relationships written
+    # before this field was added still load.
+    location_type: str = ""
 
 
 @dataclass
@@ -41,7 +46,7 @@ class Relationship:
     target_name: str
     type: str
     resource_id: str
-    evidence: List[EvidenceRecord] = field(default_factory=list)
+    evidence: list[EvidenceRecord] = field(default_factory=list)
 
     @property
     def occurrence_count(self) -> int:
@@ -54,7 +59,7 @@ class Relationship:
         return round(sum(e.confidence for e in self.evidence) / len(self.evidence), 3)
 
     @property
-    def chunk_ids(self) -> List[str]:
+    def chunk_ids(self) -> list[str]:
         seen, out = set(), []
         for e in self.evidence:
             if e.chunk_id and e.chunk_id not in seen:

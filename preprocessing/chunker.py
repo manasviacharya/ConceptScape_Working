@@ -1,14 +1,13 @@
 import hashlib
 import logging
 from dataclasses import replace
-from typing import List
 
 from config import settings
 from preprocessing.models import TextChunk
 
 
 def chunk_page(
-    sentences: List[str],
+    sentences: list[str],
     raw_page_text: str,
     parent_chunk_id: str,
     resource_id: str,
@@ -17,7 +16,7 @@ def chunk_page(
     extraction_method: str,
     location_type: str,
     location_number: int,
-) -> List[TextChunk]:
+) -> list[TextChunk]:
     if not sentences:
         return []
 
@@ -25,12 +24,12 @@ def chunk_page(
     overlap_chars = settings.chunk_overlap_chars
     min_chars = settings.chunk_min_chars
 
-    chunks: List[TextChunk] = []
-    current_sents: List[str] = []
+    chunks: list[TextChunk] = []
+    current_sents: list[str] = []
     current_len = 0
     chunk_index = 0
 
-    def _make_chunk(sents: List[str], idx: int) -> TextChunk:
+    def _make_chunk(sents: list[str], idx: int) -> TextChunk:
         text = " ".join(sents)
         return TextChunk(
             chunk_id=f"{parent_chunk_id}_c{idx:03d}",
@@ -77,7 +76,7 @@ def chunk_page(
             chunk_index += 1
 
             # Overlap: carry trailing whole sentences from the previous chunk
-            overlap_sents: List[str] = []
+            overlap_sents: list[str] = []
             overlap_len = 0
             for j in range(len(current_sents) - 1, -1, -1):
                 s = current_sents[j]

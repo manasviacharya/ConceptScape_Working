@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Any
 
 import cv2
 import numpy as np
@@ -23,7 +23,7 @@ class PaddleOCREngine:
         self.language = settings.ocr_language
         self.min_confidence = settings.ocr_min_confidence
         self.target_width = settings.ocr_target_width
-        self._ocr: Optional["PaddleOCR"] = None
+        self._ocr: PaddleOCR | None = None
 
     def _get_ocr(self) -> "PaddleOCR":
         if not PADDLEOCR_AVAILABLE:
@@ -37,7 +37,7 @@ class PaddleOCREngine:
             )
         return self._ocr
 
-    def _resize_if_needed(self, img: np.ndarray) -> Tuple[np.ndarray, float]:
+    def _resize_if_needed(self, img: np.ndarray) -> tuple[np.ndarray, float]:
         orig_h, orig_w = img.shape[:2]
         if orig_w <= self.target_width:
             return img, 1.0
@@ -48,7 +48,7 @@ class PaddleOCREngine:
         scale = orig_w / new_w
         return resized, scale
 
-    def run(self, img: np.ndarray) -> Tuple[str, List[Dict[str, Any]]]:
+    def run(self, img: np.ndarray) -> tuple[str, list[dict[str, Any]]]:
         resized, scale = self._resize_if_needed(img)
         ocr = self._get_ocr()
 
@@ -62,8 +62,8 @@ class PaddleOCREngine:
         scores = r.get("rec_scores", [])
         polys = r.get("dt_polys", [])
 
-        regions: List[Dict[str, Any]] = []
-        text_lines: List[str] = []
+        regions: list[dict[str, Any]] = []
+        text_lines: list[str] = []
 
         for i, text in enumerate(texts):
             clean_text = str(text).strip()

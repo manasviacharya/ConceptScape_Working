@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 # Query taxonomy. Routing differs per type because the evidence that answers a
 # "what is X" question is not the evidence that answers "what does X require".
@@ -17,7 +17,7 @@ QUERY_TYPES = {
 @dataclass
 class QueryUnderstanding:
     query_type: str
-    concepts: List[str] = field(default_factory=list)
+    concepts: list[str] = field(default_factory=list)
     reasoning: str = ""
     model_used: str = ""
 
@@ -38,12 +38,22 @@ class Citation:
     page_number: int = 0
     chunk_id: str = ""
     relationship: str = ""          # "A -requires-> B" for relationship evidence
+    # "page" | "slide" | "timestamp" | "". Without it a position cannot be
+    # rendered honestly: slide 12 of a deck printed as "p12" tells the reader
+    # to look at a page that does not exist, and 57 seconds into a video is not
+    # page 57.
+    location_type: str = ""
 
     def label(self) -> str:
         where = self.filename or "?"
-        if self.page_number:
-            where += f" p{self.page_number}"
-        return where
+        if not self.page_number:
+            return where
+        if self.location_type == "slide":
+            return f"{where} slide {self.page_number}"
+        if self.location_type == "timestamp":
+            seconds = int(self.page_number)
+            return f"{where} @{seconds // 60}:{seconds % 60:02d}"
+        return f"{where} p{self.page_number}"
 
 
 @dataclass
@@ -51,15 +61,15 @@ class Answer:
     query: str
     query_type: str
     answer: str
-    citations: List[Citation] = field(default_factory=list)
-    used_citations: List[int] = field(default_factory=list)
+    citations: list[Citation] = field(default_factory=list)
+    used_citations: list[int] = field(default_factory=list)
     sufficient_evidence: bool = True
-    flags: List[str] = field(default_factory=list)
-    concepts_identified: List[str] = field(default_factory=list)
+    flags: list[str] = field(default_factory=list)
+    concepts_identified: list[str] = field(default_factory=list)
     model_used: str = ""
     retriever_used: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "query": self.query,
             "query_type": self.query_type,

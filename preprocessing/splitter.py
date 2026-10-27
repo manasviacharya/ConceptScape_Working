@@ -1,13 +1,11 @@
 import logging
-from typing import List
 
 import pysbd
-
 
 _segmenter = pysbd.Segmenter(language="en", clean=False)
 
 
-def split_sentences(text: str) -> List[str]:
+def split_sentences(text: str) -> list[str]:
     if not text.strip():
         return []
 

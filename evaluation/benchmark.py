@@ -1,15 +1,20 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from config import settings
-from evaluation.metrics import hit_at_k, precision_at_k, recall_at_k, reciprocal_rank, summarise
+from evaluation.metrics import (
+    hit_at_k,
+    precision_at_k,
+    recall_at_k,
+    reciprocal_rank,
+    summarise,
+)
 
 RETRIEVER_ORDER = ["keyword", "semantic", "graph", "hybrid"]
 
 
-def load_cases(path: Optional[str] = None) -> List[Dict[str, Any]]:
+def load_cases(path: str | None = None) -> list[dict[str, Any]]:
     path = path or os.path.join("evaluation", "queries.json")
     with open(path, encoding="utf-8") as f:
         return json.load(f).get("cases", [])
@@ -20,8 +25,8 @@ def _norm(s: str) -> str:
 
 
 def resolve_cases(
-    cases: List[Dict[str, Any]], concepts: List[Dict[str, Any]]
-) -> tuple[List[Dict[str, Any]], List[str]]:
+    cases: list[dict[str, Any]], concepts: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], list[str]]:
     """
     Turn ground-truth entries into concept_ids, accepting names or ids.
 
@@ -33,7 +38,7 @@ def resolve_cases(
     fixture. Ids are still accepted so existing cases keep working.
     """
     by_id = {c["concept_id"] for c in concepts}
-    by_name: Dict[str, str] = {}
+    by_name: dict[str, str] = {}
     for c in concepts:
         by_name.setdefault(_norm(c.get("canonical_name", "")), c["concept_id"])
         for alias in c.get("aliases", []):
@@ -56,11 +61,11 @@ def resolve_cases(
 
 
 def evaluate(
-    retrievers: Dict[str, Any],
-    cases: List[Dict[str, Any]],
-    k_values: List[int] = None,
+    retrievers: dict[str, Any],
+    cases: list[dict[str, Any]],
+    k_values: list[int] = None,
     top_k: int = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Run every retriever over every case and score the rankings.
 
@@ -71,7 +76,7 @@ def evaluate(
     k_values = k_values or [1, 3, 5]
     top_k = top_k or max(k_values) * 2
 
-    per_retriever: Dict[str, Any] = {}
+    per_retriever: dict[str, Any] = {}
 
     for name in RETRIEVER_ORDER:
         retriever = retrievers.get(name)
@@ -90,7 +95,7 @@ def evaluate(
             ranked = [r.id for r in results if r.kind == "concept"]
             relevant = case.get("relevant", [])
 
-            scores: Dict[str, float] = {}
+            scores: dict[str, float] = {}
             for k in k_values:
                 scores[f"P@{k}"] = precision_at_k(ranked, relevant, k)
                 scores[f"R@{k}"] = recall_at_k(ranked, relevant, k)
@@ -112,7 +117,7 @@ def evaluate(
 
     # A per-kind breakdown is where the interesting result lives: lexical
     # matching does fine on direct lookups and collapses on paraphrases.
-    by_kind: Dict[str, Dict[str, Dict[str, float]]] = {}
+    by_kind: dict[str, dict[str, dict[str, float]]] = {}
     for kind in sorted({c.get("kind", "") for c in cases}):
         ids = {c["id"] for c in cases if c.get("kind") == kind}
         by_kind[kind] = {

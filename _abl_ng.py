@@ -1,7 +1,11 @@
-import json, os, logging
+import json
+import logging
+import os
+
+import run_extraction
+import run_normalization
+from evaluation.ablation import variant_dir, variant_settings
 from logging_setup import configure_logging
-from evaluation.ablation import variant_settings, variant_dir
-import run_extraction, run_normalization
 
 configure_logging(); logging.getLogger().setLevel(logging.INFO)
 name = "no_grounding"

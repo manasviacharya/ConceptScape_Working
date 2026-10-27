@@ -1,19 +1,19 @@
 import hashlib
 import logging
 from pathlib import Path
-from typing import Optional
 
 from pptx import Presentation
 from pptx.exc import PackageNotFoundError
 
 from ingestion.base_parser import BaseParser
-from ingestion.models import IngestedResource, ContentChunk
+from ingestion.models import ContentChunk, IngestedResource
+
 
 class PPTParser(BaseParser):
     def can_handle(self, filepath: Path) -> bool:
         return filepath.suffix.lower() in [".ppt", ".pptx"]
 
-    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> Optional[IngestedResource]:
+    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> IngestedResource | None:
         try:
             prs = Presentation(filepath)
             chunks = []

@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from typing import List, Optional, Tuple
 
 from llm_provider import LLMProvider
 from rag.evidence import format_for_prompt
@@ -38,11 +37,11 @@ class AnswerGenerator:
     citations exist is a fabrication signal, and is flagged rather than trusted.
     """
 
-    def __init__(self, llm: Optional[LLMProvider] = None):
+    def __init__(self, llm: LLMProvider | None = None):
         self.llm = llm or LLMProvider()
 
     def generate(self, query: str, query_type: str,
-                 citations: List[Citation]) -> Tuple[dict, str]:
+                 citations: list[Citation]) -> tuple[dict, str]:
         if not citations:
             return {
                 "answer": "I could not find anything in the indexed material that "
@@ -105,7 +104,7 @@ RULES — all mandatory:
 
         return self._validate(data, citations), model_used
 
-    def _validate(self, data: dict, citations: List[Citation]) -> dict:
+    def _validate(self, data: dict, citations: list[Citation]) -> dict:
         valid = {c.index for c in citations}
         flags = [str(f) for f in (data.get("flags") or [])]
 
@@ -117,10 +116,36 @@ RULES — all mandatory:
         # Numbers cited inline but never supplied are the more dangerous case:
         # the answer text looks sourced while pointing at nothing.
         answer = data.get("answer", "")
-        inline = {int(n) for n in re.findall(r"\[(\d+)\]", answer)}
-        if inline - valid:
+        # Models group citations as "[1,8]" and "[1, 8]" as readily as "[1][8]".
+        # Matching only the single-number form left grouped citations entirely
+        # unvalidated, and made a well-cited answer look uncited.
+        inline = {
+            int(n)
+            for group in re.findall(r"\[((?:\s*\d+\s*,)*\s*\d+\s*)\]", answer)
+            for n in group.split(",")
+        }
+        invalid = inline - valid
+        if invalid:
             flags.append("hallucinated_citation")
-            logging.warning(f"Answer cited non-existent evidence: {sorted(inline - valid)}")
+            logging.warning(f"Answer cited non-existent evidence: {sorted(invalid)}")
+            # Flagging alone leaves "[7]" sitting in the prose, where it reads
+            # as a real source and invites the reader to go looking for it.
+            # The marker is removed so the sentence stands on its own and is
+            # visibly uncited, which is the honest rendering of a claim that
+            # has no evidence behind it.
+            def _keep_valid(match: "re.Match") -> str:
+                kept = [n.strip() for n in match.group(1).split(",")
+                        if int(n) not in invalid]
+                # Drop the bracket entirely when nothing valid remains, so the
+                # sentence reads as the uncited claim it actually is.
+                return f"[{','.join(kept)}]" if kept else ""
+
+            answer = re.sub(
+                r"\s*\[((?:\s*\d+\s*,)*\s*\d+\s*)\]",
+                lambda m: (" " + _keep_valid(m)).rstrip() if _keep_valid(m) else "",
+                answer,
+            )
+            inline &= valid
         # A refusal legitimately has nothing to cite, so only an answer that
         # claims to be grounded is suspicious for carrying no citations.
         if answer and not inline and data.get("sufficient_evidence"):

@@ -1,14 +1,14 @@
+import concurrent.futures
 import json
 import logging
 import os
 import re
 import unicodedata
 import uuid
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any
 
 from config import settings
 from llm_provider import LLMProvider
-
 
 CONCEPT_SCHEMA = {
     "type": "OBJECT",
@@ -46,7 +46,7 @@ CONCEPT_SCHEMA = {
 }
 
 
-def _load_previous_extraction_cache() -> Tuple[dict, dict]:
+def _load_previous_extraction_cache() -> tuple[dict, dict]:
     """Returns (processed_chunks, concepts_by_chunk) from previous output."""
     cache_path = os.path.join(settings.data_dir, "extracted_concepts.json")
     if not os.path.exists(cache_path):
@@ -55,7 +55,7 @@ def _load_previous_extraction_cache() -> Tuple[dict, dict]:
         with open(cache_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         processed = data.get("processed_chunks", {})
-        concepts_by_chunk: Dict[str, list] = {}
+        concepts_by_chunk: dict[str, list] = {}
         for concept in data.get("concepts", []):
             src = concept.get("source_reference", {})
             chunk_id = src.get("chunk_id")
@@ -80,7 +80,7 @@ def _norm_for_match(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().casefold()
 
 
-def _verify_evidence(evidence: str, chunk_text: str, raw_page_text: str) -> Optional[str]:
+def _verify_evidence(evidence: str, chunk_text: str, raw_page_text: str) -> str | None:
     """
     Returns "text" / "raw_page_text" if the span occurs in that source, else None.
 
@@ -103,7 +103,7 @@ class ConceptExtractor:
     def __init__(self):
         self.llm = LLMProvider()
 
-    def extract_from_chunk(self, text: str) -> Optional[Tuple[List[Dict[str, Any]], str]]:
+    def extract_from_chunk(self, text: str) -> tuple[list[dict[str, Any]], str] | None:
         """
         Returns (concepts, model_used), or None if every provider failed.
 
@@ -174,12 +174,81 @@ Text:
             logging.error(f"Failed to parse concept JSON output: {e}")
             return None
 
-    def process_chunks(self, preprocessed_data: dict) -> Dict[str, Any]:
+    def _pending_chunks(self, preprocessed_data: dict, prev_processed: dict,
+                        explicit_skips: set) -> list[tuple[int, str]]:
+        """
+        (index, text) for the chunks that actually need a model call.
+
+        Mirrors the skip and cache conditions in process_chunks exactly — a
+        chunk filtered here must be filtered there too, or its result would be
+        looked up and found missing. Keyed by position rather than chunk_id,
+        which is not guaranteed to be non-empty or unique.
+        """
+        pending: list[tuple[int, str]] = []
+        for index, chunk in enumerate(preprocessed_data.get("chunks", [])):
+            text = chunk.get("text", "").strip()
+            if not text:
+                continue
+            chunk_id = chunk.get("chunk_id", "")
+            if chunk_id in explicit_skips:
+                continue
+            if len(text) < settings.extraction_min_chunk_chars:
+                continue
+            content_hash = chunk.get("content_hash", "")
+            if chunk_id and content_hash and prev_processed.get(chunk_id) == content_hash:
+                continue
+            pending.append((index, text))
+        return pending
+
+    def _extract_pending_concurrently(
+        self, preprocessed_data: dict, prev_processed: dict, explicit_skips: set
+    ) -> dict[int, tuple[list[dict[str, Any]], str] | None]:
+        """
+        Issue every outstanding extraction call, concurrently where allowed.
+
+        These calls are independent and spend nearly all their time waiting on
+        the network, so running them one at a time makes the stage cost
+        (chunks x latency) when it could cost (chunks / workers x latency).
+        Results are keyed by chunk position and consumed below in the original
+        order, so the output is identical to a serial run regardless of which
+        call returns first.
+
+        Set extraction_max_workers to 1 for strictly sequential behaviour,
+        which is what to do when a provider is rate-limiting.
+        """
+        pending = self._pending_chunks(preprocessed_data, prev_processed, explicit_skips)
+        results: dict[int, tuple[list[dict[str, Any]], str] | None] = {}
+        if not pending:
+            return results
+
+        workers = max(1, min(settings.extraction_max_workers, len(pending)))
+        logging.info(f"Extracting {len(pending)} chunk(s) using {workers} worker(s)")
+
+        if workers == 1:
+            for index, text in pending:
+                results[index] = self.extract_from_chunk(text)
+            return results
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(self.extract_from_chunk, text): index for index, text in pending}
+            for future in concurrent.futures.as_completed(futures):
+                index = futures[future]
+                try:
+                    results[index] = future.result()
+                except Exception:
+                    # None is the "failed, do not cache, retry later" contract
+                    # extract_from_chunk already uses, so a worker that raises
+                    # degrades to a retryable chunk rather than killing the run.
+                    logging.exception(f"Extraction raised for chunk at position {index}")
+                    results[index] = None
+        return results
+
+    def process_chunks(self, preprocessed_data: dict) -> dict[str, Any]:
         """Consumes flat TextChunk list from preprocessed_chunks.json."""
         all_concepts = []
-        processed_chunks: Dict[str, str] = {}
-        failed_chunks: List[str] = []
-        skipped_chunks: List[Dict[str, Any]] = []
+        processed_chunks: dict[str, str] = {}
+        failed_chunks: list[str] = []
+        skipped_chunks: list[dict[str, Any]] = []
         subject_id = preprocessed_data.get("subject_id")
         explicit_skips = set(settings.extraction_skip_chunks)
         seen_chunk_ids = set()
@@ -188,11 +257,15 @@ Text:
 
         skipped_short = 0
         dropped_unverified = 0
-        dropped_concepts: List[Dict[str, Any]] = []
+        dropped_concepts: list[dict[str, Any]] = []
         dropped_low_conf = 0
         total_returned = 0
 
-        for chunk in preprocessed_data.get("chunks", []):
+        llm_results = self._extract_pending_concurrently(
+            preprocessed_data, prev_processed, explicit_skips
+        )
+
+        for index, chunk in enumerate(preprocessed_data.get("chunks", [])):
             text = chunk.get("text", "").strip()
             if not text:
                 continue
@@ -244,7 +317,7 @@ Text:
             logging.info(f"CACHE MISS (extracting): chunk {chunk_id}")
             logging.info(f"Processing {source_type.upper()} {location_type} {location_number} ({filename})")
 
-            result = self.extract_from_chunk(text)
+            result = llm_results.get(index)
             if result is None:
                 failed_chunks.append(chunk_id)
                 logging.error(f"EXTRACTION FAILED: chunk {chunk_id} — not cached, re-run to retry")

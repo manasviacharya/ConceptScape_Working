@@ -11,9 +11,8 @@ import json
 import logging
 import os
 
-from config import settings
-from logging_setup import configure_logging
 from evaluation.benchmark import RETRIEVER_ORDER, evaluate, load_cases, resolve_cases
+from logging_setup import configure_logging
 from retrieval.embedder import Embedder
 from retrieval.retrievers import build_retrievers, load_corpus
 from retrieval.vector_store import VectorStore

@@ -5,7 +5,7 @@ import re
 import unicodedata
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
 from retrieval.embedder import Embedder
@@ -27,11 +27,11 @@ class RetrievalResult:
     text: str
     score: float
     retriever: str
-    filenames: List[str] = field(default_factory=list)
-    page_numbers: List[int] = field(default_factory=list)
-    chunk_ids: List[str] = field(default_factory=list)
-    evidence: List[str] = field(default_factory=list)
-    extra: Dict[str, Any] = field(default_factory=dict)
+    filenames: list[str] = field(default_factory=list)
+    page_numbers: list[int] = field(default_factory=list)
+    chunk_ids: list[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 def _norm(s: str) -> str:
@@ -39,7 +39,7 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().casefold()
 
 
-def _tokens(s: str) -> List[str]:
+def _tokens(s: str) -> list[str]:
     return [t for t in re.split(r"[^\w]+", _norm(s)) if len(t) > 2]
 
 
@@ -55,10 +55,10 @@ class KeywordRetriever:
     """
     name = "keyword"
 
-    def __init__(self, concepts: List[dict]):
+    def __init__(self, concepts: list[dict]):
         self.concepts = concepts
 
-    def retrieve(self, query: str, top_k: int = None) -> List[RetrievalResult]:
+    def retrieve(self, query: str, top_k: int = None) -> list[RetrievalResult]:
         top_k = top_k or settings.retrieval_top_k
         q, qt = _norm(query), set(_tokens(query))
         scored = []
@@ -98,10 +98,10 @@ class SemanticRetriever:
         self.embedder = embedder
         self.search_chunks = search_chunks
 
-    def retrieve(self, query: str, top_k: int = None) -> List[RetrievalResult]:
+    def retrieve(self, query: str, top_k: int = None) -> list[RetrievalResult]:
         top_k = top_k or settings.retrieval_top_k
         vec = self.embedder.encode_one(query)
-        out: List[RetrievalResult] = []
+        out: list[RetrievalResult] = []
 
         for hit in self.store.search(self.store.concepts_collection, vec, top_k, settings.semantic_score_threshold):
             out.append(RetrievalResult(
@@ -119,6 +119,9 @@ class SemanticRetriever:
                     filenames=[hit.get("filename", "")],
                     page_numbers=[hit["location_number"]] if hit.get("location_number") else [],
                     chunk_ids=[hit.get("chunk_id", "")],
+                    # Carried so the citation can say "slide 4" rather than
+                    # printing every position as a page number.
+                    extra={"location_type": hit.get("location_type", "")},
                 ))
 
         out.sort(key=lambda r: -r.score)
@@ -138,21 +141,21 @@ class GraphRetriever:
     """
     name = "graph"
 
-    def __init__(self, concepts: List[dict], relationships: List[dict], seed_retriever):
+    def __init__(self, concepts: list[dict], relationships: list[dict], seed_retriever):
         self.by_id = {c["concept_id"]: c for c in concepts}
         self.seed_retriever = seed_retriever
-        self.adjacency: Dict[str, List[dict]] = defaultdict(list)
+        self.adjacency: dict[str, list[dict]] = defaultdict(list)
         for r in relationships:
             self.adjacency[r["source_concept_id"]].append({**r, "direction": "outgoing"})
             self.adjacency[r["target_concept_id"]].append({**r, "direction": "incoming"})
 
-    def retrieve(self, query: str, top_k: int = None, hops: int = 1) -> List[RetrievalResult]:
+    def retrieve(self, query: str, top_k: int = None, hops: int = 1) -> list[RetrievalResult]:
         top_k = top_k or settings.retrieval_top_k
         seeds = [r for r in self.seed_retriever.retrieve(query, top_k) if r.kind == "concept"]
         if not seeds:
             return []
 
-        results: Dict[str, RetrievalResult] = {}
+        results: dict[str, RetrievalResult] = {}
         for s in seeds[:3]:
             if s.id in self.by_id:
                 results[s.id] = _concept_result(self.by_id[s.id], s.score, self.name)
@@ -200,11 +203,11 @@ class HybridRetriever:
         if semantic: self.retrievers.append((semantic, settings.weight_semantic))
         if graph: self.retrievers.append((graph, settings.weight_graph))
 
-    def retrieve(self, query: str, top_k: int = None) -> List[RetrievalResult]:
+    def retrieve(self, query: str, top_k: int = None) -> list[RetrievalResult]:
         top_k = top_k or settings.retrieval_top_k
-        fused: Dict[str, RetrievalResult] = {}
-        scores: Dict[str, float] = defaultdict(float)
-        sources: Dict[str, List[str]] = defaultdict(list)
+        fused: dict[str, RetrievalResult] = {}
+        scores: dict[str, float] = defaultdict(float)
+        sources: dict[str, list[str]] = defaultdict(list)
 
         for retriever, weight in self.retrievers:
             try:

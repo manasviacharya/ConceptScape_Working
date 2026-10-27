@@ -5,10 +5,9 @@ from dataclasses import asdict
 
 from config import settings
 from logging_setup import configure_logging
+from preprocessing.chunker import chunk_page
 from preprocessing.cleaner import clean_text
 from preprocessing.splitter import split_sentences
-from preprocessing.chunker import chunk_page
-from preprocessing.models import TextChunk
 
 
 def main():

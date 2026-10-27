@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from typing import List, Optional
 
 from llm_provider import LLMProvider
 from rag.models import TYPE_A, TYPE_B, TYPE_C, QueryUnderstanding
@@ -39,7 +38,7 @@ class QueryUnderstander:
     "how do I stop overshooting" onto "Learning Rate" without embeddings.
     """
 
-    def __init__(self, concept_names: List[str], llm: Optional[LLMProvider] = None):
+    def __init__(self, concept_names: list[str], llm: LLMProvider | None = None):
         self.concept_names = concept_names
         self.llm = llm or LLMProvider()
 

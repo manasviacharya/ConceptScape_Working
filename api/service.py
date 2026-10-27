@@ -1,39 +1,80 @@
+import hashlib
+import io
 import json
 import logging
 import os
-import hashlib
 import shutil
 import time
 import zipfile
-import io
 from collections import defaultdict
-from fastapi.responses import FileResponse, Response
-from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from api.pipeline_runner import PipelineRunner, SETTINGS_LOCK
+from api.pipeline_runner import SETTINGS_LOCK, PipelineRunner
 from auth.dependencies import current_user, workspace_for_user
-from auth.schemas import LoginRequest, RegisterRequest, WorkspaceMemberRequest, WorkspaceRequest
+from auth.schemas import (
+    LoginRequest,
+    RegisterRequest,
+    WorkspaceMemberRequest,
+    WorkspaceRequest,
+)
 from auth.security import create_access_token, hash_password, verify_password
 from config import settings
 from ingestion.youtube_parser import extract_video_id
 from logging_setup import configure_logging
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import text
-from sqlalchemy.orm import Session
 from storage.database import SessionLocal, get_db, init_db
-from storage.models import (ChatMessage, ChatSession, ConceptProgress, DocumentRecord, DocumentVersion,
-                            LearningPathProgress, PipelineJob, QuizAttempt, ReviewAudit, ReviewItem, AuditLog, User, Workspace)
+from storage.models import (
+    AuditLog,
+    ChatMessage,
+    ChatSession,
+    ConceptProgress,
+    DocumentRecord,
+    DocumentVersion,
+    LearningPathProgress,
+    PipelineJob,
+    QuizAttempt,
+    ReviewAudit,
+    ReviewItem,
+    User,
+    Workspace,
+)
 from storage.paths import ensure_workspace_paths
 
 configure_logging()
 
-app = FastAPI(title="ConceptScape API", version="1.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Startup work, run once before the service accepts traffic.
+
+    A lifespan handler rather than @app.on_event("startup"), which is
+    deprecated in current FastAPI and removed in the next major version.
+    """
+    _startup_checks_and_migrations()
+    yield
+
+
+app = FastAPI(title="ConceptScape API", version="1.0", lifespan=lifespan)
 _rate_buckets: dict[str, list[float]] = defaultdict(list)
 _metrics = {"requests_total": 0, "errors_total": 0, "pipeline_jobs_total": 0}
 _redis_limiter = None
@@ -91,8 +132,7 @@ async def security_and_metrics(request: Request, call_next):
     return response
 
 
-@app.on_event("startup")
-def create_product_tables() -> None:
+def _startup_checks_and_migrations() -> None:
     if settings.environment in {"staging", "production"}:
         if not settings.jwt_secret or settings.jwt_secret.startswith("generate-") or settings.jwt_secret.startswith("REPLACE"):
             raise RuntimeError("A real CONCEPTSCAPE_JWT_SECRET is required outside development")
@@ -122,8 +162,8 @@ app.add_middleware(
 
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=1000)
-    top_k: Optional[int] = None
-    session_id: Optional[str] = None
+    top_k: int | None = None
+    session_id: str | None = None
 
 
 class YouTubeRequest(BaseModel):
@@ -137,7 +177,7 @@ class ChatRenameRequest(BaseModel):
 class ExplainRequest(BaseModel):
     concept_id: str = Field(..., min_length=1, max_length=160)
     mode: str = Field(..., pattern="^(simple|step_by_step|source_example|compare)$")
-    session_id: Optional[str] = None
+    session_id: str | None = None
 
 
 class ProgressRequest(BaseModel):
@@ -157,12 +197,12 @@ class QuizAttemptRequest(BaseModel):
 
 class ReviewRequest(BaseModel):
     status: str = Field(..., pattern="^(pending|approved|rejected|edited)$")
-    note: Optional[str] = Field(default=None, max_length=2000)
-    edited: Optional[Dict[str, Any]] = None
+    note: str | None = Field(default=None, max_length=2000)
+    edited: dict[str, Any] | None = None
 
 
 @app.post("/auth/register")
-def register(req: RegisterRequest, db: Session = Depends(get_db)) -> Dict[str, Any]:
+def register(req: RegisterRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     email = req.email.strip().casefold()
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status.HTTP_409_CONFLICT, "An account with this email already exists")
@@ -185,7 +225,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)) -> Dict[str, A
 
 
 @app.post("/auth/login")
-def login(req: LoginRequest, db: Session = Depends(get_db)) -> Dict[str, Any]:
+def login(req: LoginRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     user = db.query(User).filter(User.email == req.email.strip().casefold()).first()
     if user is None or not verify_password(req.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid email or password")
@@ -196,7 +236,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)) -> Dict[str, Any]:
 
 
 @app.get("/auth/me")
-def me(user: User = Depends(current_user)) -> Dict[str, Any]:
+def me(user: User = Depends(current_user)) -> dict[str, Any]:
     return {"id": user.id, "email": user.email, "display_name": user.display_name}
 
 
@@ -205,7 +245,7 @@ def create_workspace(
     req: WorkspaceRequest,
     user: User = Depends(current_user),
     db: Session = Depends(get_db),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     workspace = Workspace(name=req.name.strip(), created_by=user.id)
     workspace.members.append(user)
     db.add(workspace)
@@ -215,14 +255,14 @@ def create_workspace(
 
 
 @app.get("/workspaces")
-def list_workspaces(user: User = Depends(current_user)) -> Dict[str, Any]:
+def list_workspaces(user: User = Depends(current_user)) -> dict[str, Any]:
     return {"workspaces": [{"id": w.id, "name": w.name, "role": "owner" if w.created_by == user.id else "member"}
                             for w in user.workspaces]}
 
 
 @app.patch("/workspaces/{workspace_id}")
 def rename_workspace(workspace_id: str, req: WorkspaceRequest,
-                     user: User = Depends(current_user), db: Session = Depends(get_db)) -> Dict[str, Any]:
+                     user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict[str, Any]:
     workspace = workspace_for_user(workspace_id, user, db)
     _require_owner(workspace, user)
     workspace.name = req.name.strip()
@@ -232,7 +272,7 @@ def rename_workspace(workspace_id: str, req: WorkspaceRequest,
 
 
 @app.delete("/workspaces/{workspace_id}")
-def delete_workspace(workspace_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def delete_workspace(workspace_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict[str, Any]:
     workspace = workspace_for_user(workspace_id, user, db)
     _require_owner(workspace, user)
     workspace_root = ensure_workspace_paths(workspace.id)["root"]
@@ -261,13 +301,13 @@ def _require_owner(workspace: Workspace, user: User) -> None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the workspace owner can manage members")
 
 
-def _audit(db: Session, workspace_id: str, user_id: str | None, action: str, target_type: str, target_id: str, metadata: Optional[dict] = None) -> None:
+def _audit(db: Session, workspace_id: str, user_id: str | None, action: str, target_type: str, target_id: str, metadata: dict | None = None) -> None:
     db.add(AuditLog(workspace_id=workspace_id, user_id=user_id, action=action, target_type=target_type,
                     target_id=target_id, metadata_json=json.dumps(metadata or {}, ensure_ascii=False)))
 
 
 @app.get("/audit")
-def audit_logs(limit: int = Query(default=100, ge=1, le=500), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def audit_logs(limit: int = Query(default=100, ge=1, le=500), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     rows = db.query(AuditLog).filter_by(workspace_id=workspace.id).order_by(AuditLog.created_at.desc()).limit(limit).all()
     return {"events": [{"action": row.action, "target_type": row.target_type, "target_id": row.target_id,
                         "user_id": row.user_id, "metadata": json.loads(row.metadata_json) if row.metadata_json else {},
@@ -275,7 +315,7 @@ def audit_logs(limit: int = Query(default=100, ge=1, le=500), workspace: Workspa
 
 
 @app.get("/admin/overview")
-def admin_overview(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def admin_overview(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     _require_owner(workspace, user)
     jobs = db.query(PipelineJob).filter_by(workspace_id=workspace.id).order_by(PipelineJob.created_at.desc()).limit(20).all()
     documents = db.query(DocumentRecord).filter_by(workspace_id=workspace.id).all()
@@ -287,7 +327,7 @@ def admin_overview(user: User = Depends(current_user), workspace: Workspace = De
 
 
 @app.get("/workspaces/{workspace_id}/members")
-def list_workspace_members(workspace_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def list_workspace_members(workspace_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict[str, Any]:
     workspace = workspace_for_user(workspace_id, user, db)
     return {"members": [{"id": member.id, "email": member.email, "display_name": member.display_name,
                          "role": "owner" if member.id == workspace.created_by else "member"}
@@ -296,7 +336,7 @@ def list_workspace_members(workspace_id: str, user: User = Depends(current_user)
 
 @app.post("/workspaces/{workspace_id}/members")
 def add_workspace_member(workspace_id: str, req: WorkspaceMemberRequest,
-                         user: User = Depends(current_user), db: Session = Depends(get_db)) -> Dict[str, Any]:
+                         user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict[str, Any]:
     workspace = workspace_for_user(workspace_id, user, db)
     _require_owner(workspace, user)
     member = db.query(User).filter(User.email == req.email.strip().casefold()).first()
@@ -312,7 +352,7 @@ def add_workspace_member(workspace_id: str, req: WorkspaceMemberRequest,
 
 @app.delete("/workspaces/{workspace_id}/members/{member_id}")
 def remove_workspace_member(workspace_id: str, member_id: str,
-                            user: User = Depends(current_user), db: Session = Depends(get_db)) -> Dict[str, Any]:
+                            user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict[str, Any]:
     workspace = workspace_for_user(workspace_id, user, db)
     _require_owner(workspace, user)
     if member_id == workspace.created_by:
@@ -327,13 +367,13 @@ def remove_workspace_member(workspace_id: str, member_id: str,
 
 
 @app.get("/chat/sessions")
-def list_chat_sessions(workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def list_chat_sessions(workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     return {"sessions": [{"id": s.id, "title": s.title, "created_at": s.created_at.isoformat()}
                          for s in sorted(workspace.chat_sessions, key=lambda item: item.created_at, reverse=True)]}
 
 
 @app.post("/chat/sessions")
-def create_chat_session(workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def create_chat_session(workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     session = ChatSession(workspace_id=workspace.id)
     db.add(session)
     db.commit()
@@ -342,7 +382,7 @@ def create_chat_session(workspace: Workspace = Depends(current_workspace), db: S
 
 
 @app.get("/chat/sessions/{session_id}")
-def get_chat_session(session_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def get_chat_session(session_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     session = db.query(ChatSession).filter_by(id=session_id, workspace_id=workspace.id).first()
     if session is None:
         raise HTTPException(404, "Chat session not found")
@@ -355,7 +395,7 @@ def get_chat_session(session_id: str, workspace: Workspace = Depends(current_wor
 
 @app.patch("/chat/sessions/{session_id}")
 def rename_chat_session(session_id: str, req: ChatRenameRequest,
-                        workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+                        workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     session = db.query(ChatSession).filter_by(id=session_id, workspace_id=workspace.id).first()
     if session is None:
         raise HTTPException(404, "Chat session not found")
@@ -365,7 +405,7 @@ def rename_chat_session(session_id: str, req: ChatRenameRequest,
 
 
 @app.delete("/chat/sessions/{session_id}")
-def delete_chat_session(session_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def delete_chat_session(session_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     session = db.query(ChatSession).filter_by(id=session_id, workspace_id=workspace.id).first()
     if session is None:
         raise HTTPException(404, "Chat session not found")
@@ -380,13 +420,25 @@ def delete_chat_session(session_id: str, workspace: Workspace = Depends(current_
 _pipelines: dict[str, Any] = {}
 _pipeline_errors: dict[str, str] = {}
 _pipeline_loaded_at: dict[str, float] = {}
+_pipeline_failed_at: dict[str, float] = {}
 
 
 def get_pipeline(workspace_id: str):
+    # A failed initialisation used to be cached forever, so one failure — a
+    # corpus that had not been generated yet, a provider blip — made every
+    # later question return 503 until the process restarted. Failures now
+    # expire, so the pipeline recovers on its own once the cause is gone.
+    failed_at = _pipeline_failed_at.get(workspace_id)
+    if failed_at and time.time() - failed_at >= settings.rag_init_retry_seconds:
+        _pipeline_errors.pop(workspace_id, None)
+        _pipeline_failed_at.pop(workspace_id, None)
+
     if workspace_id not in _pipelines and workspace_id not in _pipeline_errors:
         try:
+            # settings is imported at module scope; re-importing it here made it
+            # a function-local, so any reference before this line — such as the
+            # retry check above — raised UnboundLocalError instead of running.
             from rag.pipeline import RAGPipeline
-            from config import settings
             logging.info("Initialising RAG pipeline (first request warms the embedding model)…")
             paths = ensure_workspace_paths(workspace_id)
             previous_paths = (settings.output_dir, settings.data_dir, settings.qdrant_path,
@@ -405,13 +457,22 @@ def get_pipeline(workspace_id: str):
             logging.info("RAG pipeline ready")
         except Exception as e:
             _pipeline_errors[workspace_id] = str(e)
-            logging.error(f"Could not initialise RAG pipeline: {e}")
+            _pipeline_failed_at[workspace_id] = time.time()
+            logging.exception("Could not initialise RAG pipeline")
     if workspace_id not in _pipelines:
-        raise HTTPException(503, "RAG pipeline unavailable. Check the pipeline status and provider configuration.")
+        # The specific failure is what makes this actionable. Without it the
+        # caller cannot tell "no corpus yet" from "no API key" from "vector
+        # store unreachable", which are three different fixes.
+        reason = _pipeline_errors.get(workspace_id, "unknown error")
+        raise HTTPException(
+            503,
+            f"RAG pipeline unavailable: {reason}. "
+            f"Run the pipeline for this workspace and check provider configuration.",
+        )
     return _pipelines[workspace_id]
 
 
-def _load(path: str) -> Dict[str, Any]:
+def _load(path: str) -> dict[str, Any]:
     if not os.path.exists(path):
         raise HTTPException(
             404,
@@ -424,7 +485,7 @@ def _load(path: str) -> Dict[str, Any]:
 
 
 @app.get("/health")
-def health() -> Dict[str, Any]:
+def health() -> dict[str, Any]:
     """Reports which artefacts exist, so the UI can explain what is missing."""
     files = {
         "concepts": os.path.join(settings.data_dir, "normalized_concepts.json"),
@@ -466,7 +527,7 @@ def health() -> Dict[str, Any]:
 @app.get("/graph")
 def graph(document: str | None = Query(default=None), relation_type: str | None = Query(default=None),
           min_confidence: float = Query(default=0.0, ge=0.0, le=1.0), connected_only: bool = False,
-          source: str | None = Query(default=None), workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+          source: str | None = Query(default=None), workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     paths = ensure_workspace_paths(workspace.id)
     data = _load(str(paths["data"] / "graph_export.json"))
     edges = data.get("edges", [])
@@ -488,12 +549,12 @@ def graph(document: str | None = Query(default=None), relation_type: str | None 
     return {"nodes": nodes, "edges": edges}
 
 
-def _graph_data(workspace: Workspace) -> Dict[str, Any]:
+def _graph_data(workspace: Workspace) -> dict[str, Any]:
     return _load(str(ensure_workspace_paths(workspace.id)["data"] / "graph_export.json"))
 
 
 @app.get("/graph/neighbors/{concept_id}")
-def graph_neighbors(concept_id: str, hops: int = Query(default=1, ge=1, le=5), workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def graph_neighbors(concept_id: str, hops: int = Query(default=1, ge=1, le=5), workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     data = _graph_data(workspace)
     keep = {concept_id}
     for _ in range(hops):
@@ -504,7 +565,7 @@ def graph_neighbors(concept_id: str, hops: int = Query(default=1, ge=1, le=5), w
 
 
 @app.get("/graph/paths")
-def graph_paths(source_id: str, target_id: str, max_hops: int = Query(default=4, ge=1, le=8), workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def graph_paths(source_id: str, target_id: str, max_hops: int = Query(default=4, ge=1, le=8), workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     data = _graph_data(workspace)
     adjacency: dict[str, list[tuple[str, dict]]] = {}
     for edge in data.get("edges", []):
@@ -526,7 +587,7 @@ def graph_paths(source_id: str, target_id: str, max_hops: int = Query(default=4,
 
 
 @app.get("/graph/prerequisites/{concept_id}")
-def graph_prerequisites(concept_id: str, workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def graph_prerequisites(concept_id: str, workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     data = _graph_data(workspace)
     keep = {concept_id}
     changed = True
@@ -540,12 +601,12 @@ def graph_prerequisites(concept_id: str, workspace: Workspace = Depends(current_
             "edges": [e for e in data.get("edges", []) if e.get("source_concept_id") in keep and e.get("target_concept_id") in keep]}
 
 
-def _learning_graph(workspace: Workspace) -> Dict[str, Any]:
+def _learning_graph(workspace: Workspace) -> dict[str, Any]:
     return _graph_data(workspace)
 
 
 @app.get("/learning-paths/{concept_id}")
-def learning_path(concept_id: str, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def learning_path(concept_id: str, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     data = _learning_graph(workspace)
     nodes = {n["concept_id"]: n for n in data.get("nodes", [])}
     if concept_id not in nodes:
@@ -575,7 +636,7 @@ def learning_path(concept_id: str, user: User = Depends(current_user), workspace
 
 
 @app.post("/explain")
-def explain(req: ExplainRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def explain(req: ExplainRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     data = _learning_graph(workspace)
     concept = next((n for n in data.get("nodes", []) if n.get("concept_id") == req.concept_id), None)
     if concept is None or not concept.get("evidence"):
@@ -604,7 +665,7 @@ def metrics() -> Response:
     return Response(payload, media_type="text/plain; version=0.0.4")
 
 
-def _quiz_payload(data: Dict[str, Any], concept_id: str, question_type: str) -> Dict[str, Any]:
+def _quiz_payload(data: dict[str, Any], concept_id: str, question_type: str) -> dict[str, Any]:
     concept = next((n for n in data.get("nodes", []) if n.get("concept_id") == concept_id), None)
     if not concept or not concept.get("evidence"):
         raise HTTPException(422, "Quiz generation requires verified concept evidence")
@@ -635,14 +696,14 @@ def _quiz_payload(data: Dict[str, Any], concept_id: str, question_type: str) -> 
 
 
 @app.get("/quiz/{concept_id}")
-def generate_quiz(concept_id: str, question_type: str = "multiple_choice", workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def generate_quiz(concept_id: str, question_type: str = "multiple_choice", workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     if question_type not in {"multiple_choice", "short_answer", "relationship"}:
         raise HTTPException(400, "Unsupported question type")
     return _quiz_payload(_learning_graph(workspace), concept_id, question_type)
 
 
 @app.post("/quiz/attempts")
-def submit_quiz_attempt(req: QuizAttemptRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def submit_quiz_attempt(req: QuizAttemptRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     payload = _quiz_payload(_learning_graph(workspace), req.concept_id, req.question_type)
     if req.question_type == "short_answer":
         answer = req.answer.casefold()
@@ -669,7 +730,7 @@ def submit_quiz_attempt(req: QuizAttemptRequest, user: User = Depends(current_us
 
 
 @app.post("/progress/concepts/{concept_id}")
-def update_concept_progress(concept_id: str, req: ProgressRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def update_concept_progress(concept_id: str, req: ProgressRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     if not any(n.get("concept_id") == concept_id for n in _learning_graph(workspace).get("nodes", [])):
         raise HTTPException(404, "Concept not found")
     progress = db.query(ConceptProgress).filter_by(workspace_id=workspace.id, user_id=user.id, concept_id=concept_id).first()
@@ -680,13 +741,13 @@ def update_concept_progress(concept_id: str, req: ProgressRequest, user: User = 
     progress.confidence = req.confidence
     progress.view_count += 1
     progress.needs_review = req.status == "revisit"
-    progress.last_viewed_at = datetime.now(timezone.utc)
+    progress.last_viewed_at = datetime.now(UTC)
     db.commit()
     return {"concept_id": concept_id, "status": progress.status, "confidence": progress.confidence}
 
 
 @app.post("/progress/paths/{concept_id}")
-def update_path_progress(concept_id: str, req: PathProgressRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def update_path_progress(concept_id: str, req: PathProgressRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     progress = db.query(LearningPathProgress).filter_by(workspace_id=workspace.id, user_id=user.id, concept_id=concept_id).first()
     if progress is None:
         progress = LearningPathProgress(workspace_id=workspace.id, user_id=user.id, concept_id=concept_id)
@@ -697,7 +758,7 @@ def update_path_progress(concept_id: str, req: PathProgressRequest, user: User =
 
 
 @app.get("/progress")
-def progress_dashboard(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def progress_dashboard(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     items = db.query(ConceptProgress).filter_by(workspace_id=workspace.id, user_id=user.id).all()
     attempts = db.query(QuizAttempt).filter_by(workspace_id=workspace.id, user_id=user.id).all()
     graph_nodes = {node["concept_id"]: node for node in _learning_graph(workspace).get("nodes", [])}
@@ -721,7 +782,7 @@ def progress_dashboard(user: User = Depends(current_user), workspace: Workspace 
 
 
 @app.get("/quality/report")
-def quality_report(workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def quality_report(workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     data_dir = ensure_workspace_paths(workspace.id)["data"]
     concepts_path = data_dir / "normalized_concepts.json"
     relationships_path = data_dir / "relationships.json"
@@ -734,7 +795,7 @@ def quality_report(workspace: Workspace = Depends(current_workspace)) -> Dict[st
 
 
 @app.get("/quality/reviews")
-def list_quality_reviews(workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def list_quality_reviews(workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     items = db.query(ReviewItem).filter_by(workspace_id=workspace.id).order_by(ReviewItem.updated_at.desc()).all()
     return {"reviews": [{"id": item.id, "target_type": item.target_type, "target_id": item.target_id,
                           "status": item.status, "note": item.note, "edited": json.loads(item.edited_json) if item.edited_json else None,
@@ -743,7 +804,7 @@ def list_quality_reviews(workspace: Workspace = Depends(current_workspace), db: 
 
 @app.patch("/quality/reviews/{target_type}/{target_id}")
 def update_quality_review(target_type: str, target_id: str, req: ReviewRequest,
-                          user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+                          user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     if target_type not in {"concept", "relationship"}:
         raise HTTPException(400, "Unsupported review target type")
     data = _learning_graph(workspace)
@@ -766,7 +827,7 @@ def update_quality_review(target_type: str, target_id: str, req: ReviewRequest,
 
 
 @app.get("/quality/reviews/{target_type}/{target_id}/audit")
-def quality_review_audit(target_type: str, target_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def quality_review_audit(target_type: str, target_id: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     item = db.query(ReviewItem).filter_by(workspace_id=workspace.id, target_type=target_type, target_id=target_id).first()
     if item is None:
         return {"audit": []}
@@ -777,10 +838,10 @@ def quality_review_audit(target_type: str, target_id: str, workspace: Workspace 
 
 
 @app.get("/concepts")
-def concepts(q: str = "", limit: int = 200, workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def concepts(q: str = "", limit: int = 200, workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     paths = ensure_workspace_paths(workspace.id)
     data = _load(str(paths["data"] / "normalized_concepts.json"))
-    items: List[dict] = data.get("concepts", [])
+    items: list[dict] = data.get("concepts", [])
     if q:
         needle = q.casefold()
         items = [
@@ -793,7 +854,7 @@ def concepts(q: str = "", limit: int = 200, workspace: Workspace = Depends(curre
 
 
 @app.get("/concepts/{concept_id}")
-def concept_detail(concept_id: str, workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def concept_detail(concept_id: str, workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     paths = ensure_workspace_paths(workspace.id)
     data = _load(str(paths["data"] / "normalized_concepts.json"))
     concept = next((c for c in data.get("concepts", []) if c["concept_id"] == concept_id), None)
@@ -836,7 +897,7 @@ def _safe_name(filename: str) -> str:
     return name
 
 
-def _content_type_error(name: str, content: bytes) -> Optional[str]:
+def _content_type_error(name: str, content: bytes) -> str | None:
     suffix = Path(name).suffix.lower()
     valid = suffix in {".yt", ".youtube"} and extract_video_id(content.decode("utf-8", errors="ignore").strip())
     valid = valid or (suffix == ".pdf" and content.startswith(b"%PDF"))
@@ -853,7 +914,7 @@ def _content_type_error(name: str, content: bytes) -> Optional[str]:
     return None if valid else "File content does not match its extension or is not a supported document"
 
 
-def _malware_error(content: bytes) -> Optional[str]:
+def _malware_error(content: bytes) -> str | None:
     if not settings.clamav_host:
         return None
     try:
@@ -872,6 +933,7 @@ def _invalidate_pipeline(workspace_id: str) -> None:
     _pipelines.pop(workspace_id, None)
     _pipeline_errors.pop(workspace_id, None)
     _pipeline_loaded_at.pop(workspace_id, None)
+    _pipeline_failed_at.pop(workspace_id, None)
     logging.info("Pipeline cache invalidated — next question reloads the corpus")
 
 
@@ -891,11 +953,11 @@ def _finish_latest_job(workspace_id: str) -> None:
             job.status = "failed" if state.get("error") else "completed"
             job.current = state.get("current")
             job.error = state.get("error")
-            job.finished_at = datetime.now(timezone.utc)
+            job.finished_at = datetime.now(UTC)
             if job.status == "completed":
                 db.query(DocumentRecord).filter_by(workspace_id=workspace_id).update(
                     {DocumentRecord.status: "processed", DocumentRecord.error: None,
-                     DocumentRecord.processed_at: datetime.now(timezone.utc)},
+                     DocumentRecord.processed_at: datetime.now(UTC)},
                     synchronize_session=False,
                 )
             else:
@@ -917,7 +979,7 @@ def get_runner(workspace_id: str) -> PipelineRunner:
 
 
 @app.get("/documents")
-def documents(q: str = "", status_filter: str | None = None, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def documents(q: str = "", status_filter: str | None = None, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     d = ensure_workspace_paths(workspace.id)["documents"]
     if not d.is_dir():
         return {"documents": []}
@@ -941,7 +1003,7 @@ def documents(q: str = "", status_filter: str | None = None, workspace: Workspac
 
 
 @app.post("/documents")
-async def upload(files: List[UploadFile] = File(...), user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+async def upload(files: list[UploadFile] = File(...), user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     d = ensure_workspace_paths(workspace.id)["documents"]
     d.mkdir(parents=True, exist_ok=True)
 
@@ -996,7 +1058,7 @@ async def upload(files: List[UploadFile] = File(...), user: User = Depends(curre
 
 
 @app.put("/documents/{filename}")
-async def replace_document(filename: str, file: UploadFile = File(...), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+async def replace_document(filename: str, file: UploadFile = File(...), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     name = _safe_name(filename)
     replacement_name = _safe_name(file.filename or name)
     if replacement_name != name:
@@ -1035,7 +1097,7 @@ async def replace_document(filename: str, file: UploadFile = File(...), workspac
 
 
 @app.post("/documents/{filename}/reprocess")
-def reprocess_document(filename: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def reprocess_document(filename: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     name = _safe_name(filename)
     record = db.query(DocumentRecord).filter_by(workspace_id=workspace.id, filename=name).first()
     if record is None:
@@ -1048,7 +1110,7 @@ def reprocess_document(filename: str, workspace: Workspace = Depends(current_wor
 
 
 @app.get("/documents/{filename}/versions")
-def document_versions(filename: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def document_versions(filename: str, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     name = _safe_name(filename)
     record = db.query(DocumentRecord).filter_by(workspace_id=workspace.id, filename=name).first()
     if record is None:
@@ -1061,7 +1123,7 @@ def document_versions(filename: str, workspace: Workspace = Depends(current_work
 
 
 @app.post("/documents/{filename}/versions/{version}/restore")
-def restore_document_version(filename: str, version: int, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def restore_document_version(filename: str, version: int, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     name = _safe_name(filename)
     record = db.query(DocumentRecord).filter_by(workspace_id=workspace.id, filename=name).first()
     if record is None:
@@ -1099,7 +1161,7 @@ def preview_document(filename: str, workspace: Workspace = Depends(current_works
 
 
 @app.post("/documents/youtube")
-def add_youtube(req: YouTubeRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def add_youtube(req: YouTubeRequest, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     """Register a YouTube URL as a document for the existing transcript parser."""
     video_id = extract_video_id(req.url)
     if not video_id:
@@ -1126,7 +1188,7 @@ def add_youtube(req: YouTubeRequest, user: User = Depends(current_user), workspa
 
 
 @app.delete("/documents/{filename}")
-def delete_document(filename: str, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def delete_document(filename: str, user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     name = _safe_name(filename)
     path = ensure_workspace_paths(workspace.id)["documents"] / name
     if not path.is_file():
@@ -1142,8 +1204,8 @@ def delete_document(filename: str, user: User = Depends(current_user), workspace
 
 
 @app.post("/pipeline/run")
-def pipeline_run(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
-    job = PipelineJob(workspace_id=workspace.id, status="queued", started_at=datetime.now(timezone.utc))
+def pipeline_run(user: User = Depends(current_user), workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
+    job = PipelineJob(workspace_id=workspace.id, status="queued", started_at=datetime.now(UTC))
     db.add(job)
     db.flush()
     _metrics["pipeline_jobs_total"] += 1
@@ -1157,7 +1219,7 @@ def pipeline_run(user: User = Depends(current_user), workspace: Workspace = Depe
     if not result.get("started"):
         job.status = "rejected"
         job.error = result.get("reason")
-        job.finished_at = datetime.now(timezone.utc)
+        job.finished_at = datetime.now(UTC)
         db.commit()
         return result
     job.status = "running"
@@ -1166,7 +1228,7 @@ def pipeline_run(user: User = Depends(current_user), workspace: Workspace = Depe
 
 
 @app.get("/pipeline/status")
-def pipeline_status(workspace: Workspace = Depends(current_workspace)) -> Dict[str, Any]:
+def pipeline_status(workspace: Workspace = Depends(current_workspace)) -> dict[str, Any]:
     state = get_runner(workspace.id).state
     db = SessionLocal()
     try:
@@ -1184,7 +1246,7 @@ def pipeline_status(workspace: Workspace = Depends(current_workspace)) -> Dict[s
 
 
 @app.post("/ask")
-def ask(req: AskRequest, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> Dict[str, Any]:
+def ask(req: AskRequest, workspace: Workspace = Depends(current_workspace), db: Session = Depends(get_db)) -> dict[str, Any]:
     pipeline = get_pipeline(workspace.id)
     try:
         answer = pipeline.ask(req.query, req.top_k).to_dict()
@@ -1207,4 +1269,4 @@ def ask(req: AskRequest, workspace: Workspace = Depends(current_workspace), db: 
         raise
     except Exception as e:
         logging.exception("Question failed")
-        raise HTTPException(500, f"Question failed: {e}")
+        raise HTTPException(500, f"Question failed: {e}") from e

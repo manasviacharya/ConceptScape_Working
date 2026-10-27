@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import shutil
-from typing import Any, Dict, List
+from typing import Any
 
 from config import settings
 
@@ -10,7 +10,7 @@ from config import settings
 # ones that change what the LLM is asked or what is kept from its answer — those
 # must re-run extraction and cost quota. The rest only change post-processing and
 # are free, because they reuse the baseline's extracted mentions.
-VARIANTS: List[Dict[str, Any]] = [
+VARIANTS: list[dict[str, Any]] = [
     {
         "name": "full",
         "label": "Full system",
@@ -47,11 +47,11 @@ VARIANTS: List[Dict[str, Any]] = [
 class variant_settings:
     """Apply config overrides for the duration of one variant, then restore."""
 
-    def __init__(self, overrides: Dict[str, Any], data_dir: str, output_dir: str = ""):
+    def __init__(self, overrides: dict[str, Any], data_dir: str, output_dir: str = ""):
         self.overrides = {**overrides, "data_dir": data_dir}
         if output_dir:
             self.overrides["output_dir"] = output_dir
-        self.previous: Dict[str, Any] = {}
+        self.previous: dict[str, Any] = {}
 
     def __enter__(self):
         for k, v in self.overrides.items():
@@ -104,7 +104,7 @@ def build_subset(documents=None) -> str:
     return out
 
 
-def run_variant(variant: Dict[str, Any], reuse_extraction_from: str = "",
+def run_variant(variant: dict[str, Any], reuse_extraction_from: str = "",
                 output_dir: str = "") -> None:
     """
     Run the stages a variant needs, writing into its own data directory.
@@ -163,7 +163,7 @@ def run_variant(variant: Dict[str, Any], reuse_extraction_from: str = "",
         run_relationships.main()
 
 
-def measure(name: str, retrievers_factory) -> Dict[str, Any]:
+def measure(name: str, retrievers_factory) -> dict[str, Any]:
     """Collect the numbers that go in the paper's ablation table."""
     from evaluation.benchmark import evaluate, load_cases, resolve_cases
 

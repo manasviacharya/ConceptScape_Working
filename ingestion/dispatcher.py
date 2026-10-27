@@ -2,19 +2,17 @@ import hashlib
 import json
 import logging
 import os
-from pathlib import Path
-from typing import List, Tuple
-from dataclasses import asdict
 from datetime import datetime
+from pathlib import Path
 
+from config import settings
 from ingestion.base_parser import BaseParser
+from ingestion.image_parser import ImageParser
+from ingestion.models import ContentChunk, IngestedResource, IngestionResult
 from ingestion.ocr_engine import PaddleOCREngine
 from ingestion.pdf_parser import PDFParser
 from ingestion.ppt_parser import PPTParser
 from ingestion.youtube_parser import YouTubeParser
-from ingestion.image_parser import ImageParser
-from ingestion.models import IngestionResult, IngestedResource, ContentChunk
-from config import settings
 
 
 def _compute_file_hash(filepath: Path) -> str:
@@ -70,7 +68,7 @@ def _reconstruct_resource(resource_dict: dict) -> IngestedResource:
 class IngestionDispatcher:
     def __init__(self):
         ocr_engine = PaddleOCREngine()
-        self.parsers: List[BaseParser] = [
+        self.parsers: list[BaseParser] = [
             PDFParser(ocr_engine=ocr_engine),
             PPTParser(),
             ImageParser(ocr_engine=ocr_engine),
@@ -87,7 +85,7 @@ class IngestionDispatcher:
         digest = hashlib.sha256(filepath.name.encode("utf-8")).hexdigest()[:8]
         return f"{prefix}_{digest}"
 
-    def run(self, documents_dir: str, subject_id: str) -> Tuple[IngestionResult, List[Tuple[str, str]]]:
+    def run(self, documents_dir: str, subject_id: str) -> tuple[IngestionResult, list[tuple[str, str]]]:
         doc_dir = Path(documents_dir)
         if not doc_dir.exists() or not doc_dir.is_dir():
             logging.error(f"Documents directory not found: {documents_dir}")
@@ -106,7 +104,7 @@ class IngestionDispatcher:
 
         previous_cache = _load_previous_ingestion_cache()
         ingested_resources = []
-        failed_files: List[Tuple[str, str]] = []
+        failed_files: list[tuple[str, str]] = []
 
         for filepath in supported_files:
             file_hash = _compute_file_hash(filepath)

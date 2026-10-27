@@ -3,8 +3,9 @@ import logging
 import os
 
 from config import settings
-from logging_setup import configure_logging
 from extraction.extractor import ConceptExtractor
+from logging_setup import configure_logging
+
 
 def main():
     configure_logging()

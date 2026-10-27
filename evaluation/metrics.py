@@ -1,4 +1,4 @@
-from typing import Dict, List, Sequence
+from collections.abc import Sequence
 
 
 def precision_at_k(retrieved: Sequence[str], relevant: Sequence[str], k: int) -> float:
@@ -43,7 +43,7 @@ def hit_at_k(retrieved: Sequence[str], relevant: Sequence[str], k: int) -> float
     return 1.0 if any(r in rel for r in list(retrieved)[:k]) else 0.0
 
 
-def summarise(per_query: List[Dict[str, float]]) -> Dict[str, float]:
+def summarise(per_query: list[dict[str, float]]) -> dict[str, float]:
     """Macro-average each metric across queries; every query weighs the same."""
     if not per_query:
         return {}

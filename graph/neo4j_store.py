@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
 from graph.graph_store import BaseGraphStore
@@ -95,10 +95,10 @@ class Neo4jGraphStore(BaseGraphStore):
         logging.info("Schema ready (constraint on concept_id, index on canonical_name)")
 
     def clear(self) -> None:
-        self._run(f"MATCH (c:Concept) DETACH DELETE c")
+        self._run("MATCH (c:Concept) DETACH DELETE c")
         logging.info("Cleared existing graph")
 
-    def upsert_concepts(self, concepts: List[Dict[str, Any]]) -> int:
+    def upsert_concepts(self, concepts: list[dict[str, Any]]) -> int:
         # MERGE on concept_id makes reloading idempotent — rebuilding the graph
         # after a re-extraction updates nodes instead of duplicating them.
         self._run(
@@ -122,7 +122,7 @@ class Neo4jGraphStore(BaseGraphStore):
         )
         return len(concepts)
 
-    def upsert_relationships(self, relationships: List[Dict[str, Any]]) -> int:
+    def upsert_relationships(self, relationships: list[dict[str, Any]]) -> int:
         # Neo4j properties must be primitives or lists of primitives, so the
         # evidence records are flattened into parallel lists. Index i of each
         # list belongs to the same evidence record.
@@ -168,7 +168,7 @@ class Neo4jGraphStore(BaseGraphStore):
 
     # ── queries ──────────────────────────────────────────────────────────
 
-    def get_concept(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_concept(self, name: str) -> dict[str, Any] | None:
         rows = self._run(
             """
             MATCH (c:Concept)
@@ -180,7 +180,7 @@ class Neo4jGraphStore(BaseGraphStore):
         )
         return dict(rows[0]["c"]) if rows else None
 
-    def get_neighbors(self, concept_id: str) -> List[Dict[str, Any]]:
+    def get_neighbors(self, concept_id: str) -> list[dict[str, Any]]:
         rows = self._run(
             f"""
             MATCH (c:Concept {{concept_id: $cid}})-[r:{_EDGE}]-(n:Concept)
@@ -199,7 +199,7 @@ class Neo4jGraphStore(BaseGraphStore):
             for r in rows
         ]
 
-    def get_subgraph(self, concept_id: str, hops: int = 2) -> Dict[str, Any]:
+    def get_subgraph(self, concept_id: str, hops: int = 2) -> dict[str, Any]:
         # hops is interpolated because Cypher does not allow a parameter inside
         # a variable-length pattern. Coerced to int first so it cannot inject.
         hops = max(1, int(hops))
@@ -222,7 +222,7 @@ class Neo4jGraphStore(BaseGraphStore):
             edges.append(rel)
         return {"nodes": list(nodes.values()), "edges": edges}
 
-    def shortest_path(self, source_id: str, target_id: str) -> List[Dict[str, Any]]:
+    def shortest_path(self, source_id: str, target_id: str) -> list[dict[str, Any]]:
         rows = self._run(
             f"""
             MATCH (a:Concept {{concept_id: $src}}), (b:Concept {{concept_id: $tgt}}),
@@ -236,14 +236,14 @@ class Neo4jGraphStore(BaseGraphStore):
             return []
         return [{"names": rows[0]["names"], "types": rows[0]["types"]}]
 
-    def concepts_by_document(self, filename: str) -> List[Dict[str, Any]]:
+    def concepts_by_document(self, filename: str) -> list[dict[str, Any]]:
         rows = self._run(
             "MATCH (c:Concept) WHERE $fn IN c.filenames RETURN c ORDER BY c.canonical_name",
             fn=filename,
         )
         return [dict(r["c"]) for r in rows]
 
-    def most_connected(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def most_connected(self, limit: int = 10) -> list[dict[str, Any]]:
         rows = self._run(
             f"""
             MATCH (c:Concept)
@@ -257,7 +257,7 @@ class Neo4jGraphStore(BaseGraphStore):
         )
         return [dict(r) for r in rows]
 
-    def export_graph(self) -> Dict[str, Any]:
+    def export_graph(self) -> dict[str, Any]:
         nodes = [dict(r["c"]) for r in self._run("MATCH (c:Concept) RETURN c")]
         edges = []
         for r in self._run(
@@ -270,7 +270,7 @@ class Neo4jGraphStore(BaseGraphStore):
             edges.append(e)
         return {"nodes": nodes, "edges": edges}
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         n = self._run("MATCH (c:Concept) RETURN count(c) AS n")[0]["n"]
         e = self._run(f"MATCH ()-[r:{_EDGE}]->() RETURN count(r) AS n")[0]["n"]
         types = {

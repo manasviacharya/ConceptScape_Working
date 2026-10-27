@@ -1,11 +1,17 @@
+import concurrent.futures
 import json
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
 from llm_provider import LLMProvider
-from relationships.common import make_relationship_id, norm, verify_evidence
+from relationships.common import (
+    make_relationship_id,
+    norm,
+    verify_evidence,
+    vocabulary_guidance,
+)
 from relationships.models import EvidenceRecord, Relationship
 
 RELATIONSHIP_SCHEMA = {
@@ -34,8 +40,8 @@ class RelationshipExtractor:
     def __init__(self):
         self.llm = LLMProvider()
 
-    def _prompt(self, text: str, concept_names: List[str]) -> str:
-        vocab = ", ".join(settings.relationship_types)
+    def _prompt(self, text: str, concept_names: list[str]) -> str:
+        vocab = vocabulary_guidance(settings.relationship_types)
         listed = "\n".join(f"- {n}" for n in concept_names)
         return f"""
 Identify relationships BETWEEN THE LISTED CONCEPTS, based only on the text below.
@@ -43,7 +49,8 @@ Identify relationships BETWEEN THE LISTED CONCEPTS, based only on the text below
 CONCEPTS (use these names exactly; do NOT introduce any others):
 {listed}
 
-ALLOWED RELATIONSHIP TYPES (use exactly one of these):
+ALLOWED RELATIONSHIP TYPES (use exactly one of these; the meaning of each
+type in this schema is given — follow it, not the everyday sense of the word):
 {vocab}
 
 RULES — all are mandatory:
@@ -66,7 +73,7 @@ Text:
 {text}
 """
 
-    def extract_from_chunk(self, text: str, concept_names: List[str]):
+    def extract_from_chunk(self, text: str, concept_names: list[str]):
         """Returns (relationships, model_used), or None if every provider failed."""
         system_instruction = (
             "You are a knowledge-graph relationship extractor. Output valid JSON: "
@@ -86,18 +93,52 @@ Text:
             logging.error(f"Failed to parse relationship JSON: {e}")
             return None
 
-    def process(self, chunks_data: dict, concepts_data: dict) -> Dict[str, Any]:
+    def _extract_concurrently(self, work: list[tuple]) -> dict[str, Any]:
+        """
+        One relationship call per chunk, issued concurrently where allowed.
+
+        Returns chunk_id -> (relationships, model_used), or None for a chunk
+        whose call failed — the same "do not cache, retry later" contract
+        extract_from_chunk uses.
+        """
+        results: dict[str, Any] = {}
+        if not work:
+            return results
+
+        workers = max(1, min(settings.relationships_max_workers, len(work)))
+        logging.info(f"Extracting relationships for {len(work)} chunk(s) using {workers} worker(s)")
+
+        if workers == 1:
+            for chunk_id, chunk, names in work:
+                results[chunk_id] = self.extract_from_chunk(chunk["text"], names)
+            return results
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(self.extract_from_chunk, chunk["text"], names): chunk_id
+                for chunk_id, chunk, names in work
+            }
+            for future in concurrent.futures.as_completed(futures):
+                chunk_id = futures[future]
+                try:
+                    results[chunk_id] = future.result()
+                except Exception:
+                    logging.exception(f"Relationship extraction raised for chunk {chunk_id}")
+                    results[chunk_id] = None
+        return results
+
+    def process(self, chunks_data: dict, concepts_data: dict) -> dict[str, Any]:
         chunks = {c["chunk_id"]: c for c in chunks_data.get("chunks", [])}
         canonical = concepts_data.get("concepts", [])
 
         # Which canonical concepts appear in which chunk, and the name -> id map
         # used to reject any endpoint the concept stage did not actually find.
-        by_chunk: Dict[str, List[dict]] = defaultdict(list)
+        by_chunk: dict[str, list[dict]] = defaultdict(list)
         for c in canonical:
             for cid in c.get("chunk_ids", []):
                 by_chunk[cid].append(c)
 
-        name_to_id: Dict[str, str] = {}
+        name_to_id: dict[str, str] = {}
         for c in canonical:
             name_to_id[norm(c["canonical_name"])] = c["concept_id"]
             for alias in c.get("aliases", []):
@@ -105,9 +146,9 @@ Text:
 
         id_to_name = {c["concept_id"]: c["canonical_name"] for c in canonical}
 
-        relationships: List[Relationship] = []
-        processed_chunks: Dict[str, str] = {}
-        failed_chunks: List[str] = []
+        relationships: list[Relationship] = []
+        processed_chunks: dict[str, str] = {}
+        failed_chunks: list[str] = []
         seen = set()
         total_returned = 0
         dropped_unverified = 0
@@ -115,15 +156,20 @@ Text:
         dropped_selfloop = 0
         dropped_badtype = 0
 
-        for chunk_id, concepts_here in sorted(by_chunk.items()):
-            chunk = chunks.get(chunk_id)
-            if chunk is None or len(concepts_here) < 2:
-                continue  # a relationship needs at least two endpoints
+        # Same reasoning as the concept stage: independent, network-bound calls,
+        # issued concurrently and consumed below in sorted chunk order so the
+        # output is identical to a serial run.
+        work = [
+            (chunk_id, chunks[chunk_id], [c["canonical_name"] for c in concepts_here])
+            for chunk_id, concepts_here in sorted(by_chunk.items())
+            if chunk_id in chunks and len(concepts_here) >= 2  # an edge needs two endpoints
+        ]
+        llm_results = self._extract_concurrently(work)
 
-            names = [c["canonical_name"] for c in concepts_here]
+        for chunk_id, chunk, names in work:
             logging.info(f"Extracting relationships: {chunk_id} ({len(names)} concepts)")
 
-            result = self.extract_from_chunk(chunk["text"], names)
+            result = llm_results.get(chunk_id)
             if result is None:
                 failed_chunks.append(chunk_id)
                 logging.error(f"RELATIONSHIP EXTRACTION FAILED: {chunk_id} — not cached, re-run to retry")
@@ -186,6 +232,7 @@ Text:
                         chunk_id=chunk_id,
                         filename=chunk.get("filename", ""),
                         location_number=chunk.get("location_number", 0),
+                        location_type=chunk.get("location_type", ""),
                         confidence=conf,
                         model_used=model_used,
                         scope="chunk",

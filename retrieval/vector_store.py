@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
 
@@ -37,7 +37,7 @@ class VectorStore:
         self.concepts_collection = f"{prefix}_concepts"
         self.chunks_collection = f"{prefix}_chunks"
         self.is_local_fallback = False
-        self._client: Optional["QdrantClient"] = None
+        self._client: QdrantClient | None = None
 
     def connect(self) -> "QdrantClient":
         if not QDRANT_AVAILABLE:
@@ -114,8 +114,8 @@ class VectorStore:
         )
         logging.info(f"Created collection '{collection}' (dim={dimension})")
 
-    def upsert(self, collection: str, ids: List[int], vectors: List[List[float]],
-               payloads: List[Dict[str, Any]]) -> int:
+    def upsert(self, collection: str, ids: list[int], vectors: list[list[float]],
+               payloads: list[dict[str, Any]]) -> int:
         client = self.connect()
         # Uploaded in batches: a single request carrying every 1024-dim vector
         # plus its payload is large enough to time out against a hosted cluster.
@@ -132,8 +132,8 @@ class VectorStore:
             )
         return len(ids)
 
-    def search(self, collection: str, vector: List[float], limit: int = 10,
-               score_threshold: float = 0.0) -> List[Dict[str, Any]]:
+    def search(self, collection: str, vector: list[float], limit: int = 10,
+               score_threshold: float = 0.0) -> list[dict[str, Any]]:
         client = self.connect()
         hits = client.query_points(
             collection_name=collection,

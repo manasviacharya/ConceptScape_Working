@@ -4,8 +4,9 @@ import os
 from dataclasses import asdict
 
 from config import settings
-from logging_setup import configure_logging
 from ingestion.dispatcher import IngestionDispatcher
+from logging_setup import configure_logging
+
 
 def main():
     configure_logging()

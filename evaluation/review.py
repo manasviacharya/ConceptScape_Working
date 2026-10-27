@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from typing import Any, Dict, List
+from typing import Any
 
 REVIEW_DIR = os.path.join("evaluation", "reviews")
 
@@ -16,7 +16,7 @@ def sheet_path(name: str) -> str:
     return os.path.join(REVIEW_DIR, f"{name}.json")
 
 
-def write_sheet(name: str, items: List[Dict[str, Any]], instructions: List[str]) -> str:
+def write_sheet(name: str, items: list[dict[str, Any]], instructions: list[str]) -> str:
     """
     Write a review sheet, preserving any verdicts already recorded.
 
@@ -26,7 +26,7 @@ def write_sheet(name: str, items: List[Dict[str, Any]], instructions: List[str])
     os.makedirs(REVIEW_DIR, exist_ok=True)
     path = sheet_path(name)
 
-    previous: Dict[str, Dict[str, Any]] = {}
+    previous: dict[str, dict[str, Any]] = {}
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             for it in json.load(f).get("items", []):
@@ -49,7 +49,7 @@ def write_sheet(name: str, items: List[Dict[str, Any]], instructions: List[str])
     return path
 
 
-def load_sheet(name: str) -> List[Dict[str, Any]]:
+def load_sheet(name: str) -> list[dict[str, Any]]:
     path = sheet_path(name)
     if not os.path.exists(path):
         raise FileNotFoundError(f"No review sheet at {path}. Run with --prepare first.")
@@ -57,7 +57,7 @@ def load_sheet(name: str) -> List[Dict[str, Any]]:
         return json.load(f).get("items", [])
 
 
-def score(items: List[Dict[str, Any]], group_by: str = "") -> Dict[str, Any]:
+def score(items: list[dict[str, Any]], group_by: str = "") -> dict[str, Any]:
     """
     Precision over judged items, optionally broken down by a field.
 
@@ -83,7 +83,7 @@ def score(items: List[Dict[str, Any]], group_by: str = "") -> Dict[str, Any]:
     }
 
     if group_by:
-        groups: Dict[str, List[Dict[str, Any]]] = {}
+        groups: dict[str, list[dict[str, Any]]] = {}
         for i in judged:
             groups.setdefault(str(i.get(group_by, "")), []).append(i)
         result["by_" + group_by] = {
@@ -93,7 +93,7 @@ def score(items: List[Dict[str, Any]], group_by: str = "") -> Dict[str, Any]:
     return result
 
 
-def print_report(title: str, result: Dict[str, Any], group_by: str = "") -> None:
+def print_report(title: str, result: dict[str, Any], group_by: str = "") -> None:
     print(f"\n{title}")
     print("-" * len(title))
     if result["pending"]:
@@ -113,7 +113,7 @@ def print_report(title: str, result: Dict[str, Any], group_by: str = "") -> None
             print(f"    {k:<22} n={v['n']:<4} precision={v['precision']}")
 
 
-def sample(items: List[Any], n: int, seed: int = 42) -> List[Any]:
+def sample(items: list[Any], n: int, seed: int = 42) -> list[Any]:
     """Reproducible sample — a fixed seed means the reported set can be re-derived."""
     if len(items) <= n:
         return list(items)

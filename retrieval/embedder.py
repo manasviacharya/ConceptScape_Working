@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 
 from config import settings
 
@@ -8,6 +7,30 @@ try:
     ST_AVAILABLE = True
 except ImportError:
     ST_AVAILABLE = False
+
+
+
+def _best_device() -> str:
+    """
+    The fastest device actually available.
+
+    SentenceTransformer defaults to CPU unless told otherwise, which leaves a
+    GPU — or Apple Silicon's MPS backend, where MiniLM runs several times
+    faster — completely unused. Falls back to CPU when torch is absent or no
+    accelerator is present, so this stays safe on a plain server.
+    """
+    try:
+        import torch
+    except ImportError:
+        return "cpu"
+    try:
+        if torch.cuda.is_available():
+            return "cuda"
+        if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+            return "mps"
+    except Exception:
+        return "cpu"
+    return "cpu"
 
 
 class Embedder:
@@ -21,7 +44,7 @@ class Embedder:
 
     def __init__(self, model_name: str = ""):
         self.model_name = model_name or settings.embedding_model
-        self._model: Optional["SentenceTransformer"] = None
+        self._model: SentenceTransformer | None = None
 
     def _get_model(self) -> "SentenceTransformer":
         if not ST_AVAILABLE:
@@ -30,7 +53,7 @@ class Embedder:
             )
         if self._model is None:
             logging.info(f"Loading embedding model: {self.model_name}")
-            self._model = SentenceTransformer(self.model_name)
+            self._model = SentenceTransformer(self.model_name, device=_best_device())
             logging.info(f"Embedding dimension: {self.dimension}")
         return self._model
 
@@ -38,7 +61,7 @@ class Embedder:
     def dimension(self) -> int:
         return self._get_model().get_sentence_embedding_dimension()
 
-    def _encode(self, texts: List[str], batch_size: int, task: str = "document") -> List[List[float]]:
+    def _encode(self, texts: list[str], batch_size: int, task: str = "document") -> list[list[float]]:
         if not texts:
             return []
         model = self._get_model()
@@ -53,16 +76,16 @@ class Embedder:
                                    show_progress_bar=len(texts) > 32)
         return [v.tolist() for v in vectors]
 
-    def encode(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+    def encode(self, texts: list[str], batch_size: int = 0) -> list[list[float]]:
         return self._encode(texts, batch_size or settings.embedding_batch_size)
 
-    def encode_documents(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+    def encode_documents(self, texts: list[str], batch_size: int = 0) -> list[list[float]]:
         return self._encode(texts, batch_size or settings.embedding_batch_size, "document")
 
-    def encode_queries(self, texts: List[str], batch_size: int = 0) -> List[List[float]]:
+    def encode_queries(self, texts: list[str], batch_size: int = 0) -> list[list[float]]:
         return self._encode(texts, batch_size or settings.embedding_batch_size, "query")
 
-    def encode_one(self, text: str) -> List[float]:
+    def encode_one(self, text: str) -> list[float]:
         return self.encode_queries([text])[0]
 
 

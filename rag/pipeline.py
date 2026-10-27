@@ -1,14 +1,13 @@
 import logging
-from typing import List, Optional
 
 from config import settings
 from rag.evidence import assemble
 from rag.generator import AnswerGenerator
-from rag.models import TYPE_A, TYPE_B, TYPE_C, Answer
+from rag.models import TYPE_A, TYPE_B, Answer
 from rag.understanding import QueryUnderstander
+from retrieval.embedder import Embedder
 from retrieval.retrievers import build_retrievers, load_corpus
 from retrieval.vector_store import VectorStore
-from retrieval.embedder import Embedder
 
 
 class RAGPipeline:
@@ -20,7 +19,7 @@ class RAGPipeline:
     question often needs raw chunk text that no concept captured.
     """
 
-    def __init__(self, store: Optional[VectorStore] = None, embedder: Optional[Embedder] = None):
+    def __init__(self, store: VectorStore | None = None, embedder: Embedder | None = None):
         self.concepts, self.relationships, _ = load_corpus()
         self.concepts_by_id = {c["concept_id"]: c for c in self.concepts}
         self.store = store if store is not None else VectorStore()

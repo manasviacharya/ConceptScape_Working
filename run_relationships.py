@@ -6,9 +6,13 @@ from collections import Counter
 
 from config import settings
 from logging_setup import configure_logging
-from relationships.common import (make_relationship_id, merge_relationships,
-                                  relationship_from_dict, relationship_key,
-                                  relationship_to_dict)
+from relationships.common import (
+    make_relationship_id,
+    merge_relationships,
+    relationship_from_dict,
+    relationship_key,
+    relationship_to_dict,
+)
 from relationships.cross_chunk import CrossChunkLinker, group_concepts_by_document
 from relationships.extractor import RelationshipExtractor
 

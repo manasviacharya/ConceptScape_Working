@@ -1,8 +1,9 @@
 """Score human-labelled include/exclude judgements honestly."""
-from typing import Any, Dict, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 
-def precision_recall_f1(items: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+def precision_recall_f1(items: Iterable[dict[str, Any]]) -> dict[str, Any]:
     judged = [item for item in items if item.get("gold") in {"include", "exclude"}]
     if not judged:
         return {"judged": 0, "precision": None, "recall": None, "f1": None}

@@ -6,7 +6,6 @@ from auth.security import decode_access_token
 from storage.database import get_db
 from storage.models import User, Workspace
 
-
 bearer = HTTPBearer(auto_error=False)
 
 

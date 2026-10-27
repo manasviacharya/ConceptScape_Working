@@ -3,7 +3,7 @@ import logging
 import re
 import unicodedata
 from collections import Counter, defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import settings
 from normalization.models import CanonicalConcept
@@ -33,7 +33,7 @@ def _fold_plural(word: str) -> str:
     return word
 
 
-def build_abbreviation_map(names: List[str]) -> Dict[str, str]:
+def build_abbreviation_map(names: list[str]) -> dict[str, str]:
     """
     Learn abbreviations from the corpus itself, e.g. "Stochastic Gradient
     Descent (SGD)" teaches SGD -> "stochastic gradient descent".
@@ -44,7 +44,7 @@ def build_abbreviation_map(names: List[str]) -> Dict[str, str]:
     "Gradient (batch)" and symbols like "Learning rate (η)", which are
     disambiguators, not abbreviations.
     """
-    mapping: Dict[str, str] = {}
+    mapping: dict[str, str] = {}
     for name in names:
         m = re.search(r"^(.*?)\s*\(([^)]{1,6})\)\s*$", name or "")
         if not m:
@@ -73,7 +73,7 @@ def _basic_key(name: str) -> str:
     return s
 
 
-def _expand_abbreviations(key: str, abbrev: Dict[str, str]) -> str:
+def _expand_abbreviations(key: str, abbrev: dict[str, str]) -> str:
     """
     Expand abbreviation tokens using the corpus-derived map.
 
@@ -106,7 +106,7 @@ def _expand_abbreviations(key: str, abbrev: Dict[str, str]) -> str:
     return key
 
 
-def match_key(name: str, abbrev: Optional[Dict[str, str]] = None) -> str:
+def match_key(name: str, abbrev: dict[str, str] | None = None) -> str:
     """
     Reduce a surface form to the key that decides whether two mentions merge.
 
@@ -119,7 +119,7 @@ def match_key(name: str, abbrev: Optional[Dict[str, str]] = None) -> str:
     return key
 
 
-def _pick_canonical_name(names: List[str]) -> str:
+def _pick_canonical_name(names: list[str]) -> str:
     """
     Most frequent surface form wins; ties break toward the longest, since the
     longer form usually carries the expansion ("... (SGD)") rather than losing it.
@@ -129,21 +129,39 @@ def _pick_canonical_name(names: List[str]) -> str:
     return max((n for n, c in counts.items() if c == top), key=len)
 
 
-def _pick_definition(mentions: List[Dict[str, Any]]) -> str:
+def _pick_definition_mention(mentions: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Highest confidence wins; ties break toward the longest definition.
 
     Definitions are never concatenated — stitching several together produces
     text that no single source ever stated, which breaks grounding.
     """
-    best = max(
+    return max(
         mentions,
         key=lambda m: (float(m.get("confidence") or 0.0), len(m.get("definition") or "")),
     )
-    return best.get("definition", "")
 
 
-def _dedupe_locations(locations: List[dict]) -> List[dict]:
+def _pick_definition(mentions: list[dict[str, Any]]) -> str:
+    return _pick_definition_mention(mentions).get("definition", "")
+
+
+def _source_of(mention: dict[str, Any]) -> dict[str, Any]:
+    """Flatten one mention's source_reference into a citable provenance record."""
+    src = mention.get("source_reference") or {}
+    number = src.get("location_number")
+    if number is None:
+        number = src.get("page_number", src.get("slide_number", src.get("timestamp_seconds")))
+    return {
+        "filename": src.get("filename", ""),
+        "location_type": src.get("location_type", ""),
+        "location_number": number if isinstance(number, int) else 0,
+        "chunk_id": src.get("chunk_id", ""),
+        "resource_id": src.get("resource_id", ""),
+    }
+
+
+def _dedupe_locations(locations: list[dict]) -> list[dict]:
     seen, out = set(), []
     for loc in locations:
         key = (loc["type"], loc["number"], loc["filename"])
@@ -153,7 +171,7 @@ def _dedupe_locations(locations: List[dict]) -> List[dict]:
     return sorted(out, key=lambda l: (l["filename"], l["number"]))
 
 
-def _dedupe(values: List[Any]) -> List[Any]:
+def _dedupe(values: list[Any]) -> list[Any]:
     seen, out = set(), []
     for v in values:
         if v not in seen and v not in ("", None):
@@ -162,7 +180,7 @@ def _dedupe(values: List[Any]) -> List[Any]:
     return out
 
 
-def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> List[CanonicalConcept]:
+def normalize(mentions: list[dict[str, Any]], cross_document: bool = None) -> list[CanonicalConcept]:
     """
     Merge mentions into canonical concepts.
 
@@ -179,7 +197,7 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
         logging.info(f"Learned {len(abbrev)} abbreviation(s) from the corpus: "
                      + ", ".join(f"{k.upper()}->{v}" for k, v in sorted(abbrev.items())))
 
-    groups: Dict[tuple, List[Dict[str, Any]]] = defaultdict(list)
+    groups: dict[tuple, list[dict[str, Any]]] = defaultdict(list)
 
     for m in mentions:
         resource_id = (m.get("source_reference") or {}).get("resource_id", "")
@@ -188,7 +206,7 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
             continue
         groups[(key,) if cross_document else (resource_id, key)].append(m)
 
-    concepts: List[CanonicalConcept] = []
+    concepts: list[CanonicalConcept] = []
 
     for group_key, group in sorted(groups.items()):
         key = group_key[-1]
@@ -214,6 +232,20 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
                     "filename": src.get("filename", ""),
                 })
 
+        # Each verified span paired with the provenance of the mention it came
+        # from. Built here, where the mention is still in hand — once the group
+        # is collapsed into unioned filename/page lists the association is
+        # unrecoverable, and a citation can only guess at which source a span
+        # belongs to.
+        evidence_records = []
+        seen_spans = set()
+        for m in group:
+            span = (m.get("evidence") or "").strip()
+            if not span or span in seen_spans:
+                continue
+            seen_spans.add(span)
+            evidence_records.append({"text": span, **_source_of(m)})
+
         resource_ids = _dedupe([(m.get("source_reference") or {}).get("resource_id", "") for m in group])
         digest = hashlib.sha256(
             (key if cross_document else f"{resource_ids[0] if resource_ids else ''}:{key}").encode("utf-8")
@@ -224,6 +256,7 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
             canonical_name=canonical,
             resource_ids=sorted(resource_ids),
             definition=_pick_definition(group),
+            definition_source=_source_of(_pick_definition_mention(group)),
             aliases=sorted(_dedupe(names)),
             keywords=sorted(_dedupe([k for m in group for k in (m.get("keywords") or [])])),
             mention_ids=[m.get("concept_id", "") for m in group],
@@ -231,7 +264,8 @@ def normalize(mentions: List[Dict[str, Any]], cross_document: bool = None) -> Li
             filenames=_dedupe([(m.get("source_reference") or {}).get("filename", "") for m in group]),
             page_numbers=sorted(set(pages)),
             locations=_dedupe_locations(locations),
-            evidence=_dedupe([m.get("evidence", "") for m in group]),
+            evidence=[r["text"] for r in evidence_records],
+            evidence_records=evidence_records,
             occurrence_count=len(group),
             mean_confidence=round(sum(confidences) / len(confidences), 3) if confidences else 0.0,
             models_used=sorted(_dedupe([m.get("model_used", "") for m in group])),

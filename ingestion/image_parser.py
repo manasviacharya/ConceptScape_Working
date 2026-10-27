@@ -1,12 +1,11 @@
 import hashlib
 import logging
 from pathlib import Path
-from typing import Optional, List, Dict, Any
 
 import cv2
 
 from ingestion.base_parser import BaseParser
-from ingestion.models import IngestedResource, ContentChunk
+from ingestion.models import ContentChunk, IngestedResource
 from ingestion.ocr_engine import PaddleOCREngine
 
 
@@ -15,7 +14,7 @@ class ImageParser(BaseParser):
 
     SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 
-    def __init__(self, ocr_engine: Optional[PaddleOCREngine] = None):
+    def __init__(self, ocr_engine: PaddleOCREngine | None = None):
         self.ocr_engine = ocr_engine or PaddleOCREngine()
 
     def can_handle(self, filepath: Path) -> bool:
@@ -26,7 +25,7 @@ class ImageParser(BaseParser):
         filepath: Path,
         resource_id: str,
         subject_id: str,
-    ) -> Optional[IngestedResource]:
+    ) -> IngestedResource | None:
         """
         Parse an image file and return an IngestedResource with OCR content.
 

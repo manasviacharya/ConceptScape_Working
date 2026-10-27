@@ -3,9 +3,9 @@ import logging
 import os
 
 from config import settings
-from logging_setup import configure_logging
 from graph.memory_store import InMemoryGraphStore
 from graph.neo4j_store import Neo4jGraphStore
+from logging_setup import configure_logging
 
 
 def main():

@@ -2,7 +2,6 @@ from sqlalchemy import inspect, text
 
 from storage.database import Base, engine
 
-
 SCHEMA_VERSION = 1
 
 

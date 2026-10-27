@@ -2,7 +2,6 @@ import hashlib
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 from config import settings
 from ingestion.base_parser import BaseParser
@@ -25,7 +24,7 @@ _ID_PATTERNS = [
 ]
 
 
-def extract_video_id(text: str) -> Optional[str]:
+def extract_video_id(text: str) -> str | None:
     text = (text or "").strip()
     for pattern in _ID_PATTERNS:
         m = pattern.search(text)
@@ -60,7 +59,7 @@ class YouTubeParser(BaseParser):
     def can_handle(self, filepath: Path) -> bool:
         return filepath.suffix.lower() in self.SUPPORTED_EXTENSIONS
 
-    def _fetch(self, video_id: str) -> Tuple[List[dict], str, bool]:
+    def _fetch(self, video_id: str) -> tuple[list[dict], str, bool]:
         """
         Returns (snippets, language_code, was_translated).
 
@@ -98,7 +97,7 @@ class YouTubeParser(BaseParser):
             f"No English transcript and none translatable (available: {available})"
         )
 
-    def _segment(self, snippets: List[dict]) -> List[Tuple[float, str]]:
+    def _segment(self, snippets: list[dict]) -> list[tuple[float, str]]:
         """
         Group snippets into segments of roughly `youtube_segment_seconds`.
 
@@ -107,9 +106,9 @@ class YouTubeParser(BaseParser):
         slide, and the segment's start time becomes its citable location.
         """
         window = settings.youtube_segment_seconds
-        segments: List[Tuple[float, str]] = []
-        start: Optional[float] = None
-        parts: List[str] = []
+        segments: list[tuple[float, str]] = []
+        start: float | None = None
+        parts: list[str] = []
 
         for s in snippets:
             text = (s.get("text") or "").replace("\n", " ").strip()
@@ -126,7 +125,7 @@ class YouTubeParser(BaseParser):
             segments.append((start, " ".join(parts)))
         return segments
 
-    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> Optional[IngestedResource]:
+    def parse(self, filepath: Path, resource_id: str, subject_id: str) -> IngestedResource | None:
         if not YT_AVAILABLE:
             logging.error("youtube-transcript-api not installed. Run: pip install youtube-transcript-api")
             return None

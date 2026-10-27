@@ -1,9 +1,8 @@
 """Database-backed pipeline worker for the production compose stack."""
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from api.pipeline_runner import PipelineRunner
-from config import settings
 from storage.database import SessionLocal, init_db
 from storage.models import DocumentRecord, PipelineJob
 
@@ -16,7 +15,7 @@ def finish(job_id: str, workspace_id: str, state: dict) -> None:
             job.status = "failed" if state.get("error") else "completed"
             job.current = state.get("current")
             job.error = state.get("error")
-            job.finished_at = datetime.now(timezone.utc)
+            job.finished_at = datetime.now(UTC)
             if job.status == "completed":
                 db.query(DocumentRecord).filter_by(workspace_id=workspace_id).update(
                     {DocumentRecord.status: "processed", DocumentRecord.error: None,
@@ -39,7 +38,7 @@ def main() -> None:
         db = SessionLocal()
         job = db.query(PipelineJob).filter_by(status="queued").order_by(PipelineJob.created_at.asc()).first()
         if job:
-            job.status = "running"; job.started_at = datetime.now(timezone.utc); db.commit()
+            job.status = "running"; job.started_at = datetime.now(UTC); db.commit()
             job_id, workspace_id = job.id, job.workspace_id
             db.close()
             runner = PipelineRunner()

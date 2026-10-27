@@ -2,13 +2,14 @@ import logging
 import threading
 import time
 import traceback
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 # Ordered pipeline stages. Each is (key, human label, callable factory) — the
 # import happens inside the callable so a broken optional dependency surfaces as
 # a failed stage rather than preventing the whole API from starting.
-STAGES: List[tuple] = [
+STAGES: list[tuple] = [
     ("ingestion", "Parsing documents (PDF/PPTX/images, OCR where needed)"),
     ("preprocessing", "Cleaning, splitting and chunking text"),
     ("extraction", "Extracting concepts with evidence"),
@@ -36,13 +37,13 @@ class StageState:
 @dataclass
 class RunState:
     running: bool = False
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
-    current: Optional[str] = None
-    error: Optional[str] = None
-    stages: List[StageState] = field(default_factory=list)
+    started_at: float | None = None
+    finished_at: float | None = None
+    current: str | None = None
+    error: str | None = None
+    stages: list[StageState] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["elapsed"] = round(
             (self.finished_at or time.time()) - self.started_at, 1
@@ -62,19 +63,19 @@ class PipelineRunner:
     Only one run at a time: concurrent runs would write the same output files.
     """
 
-    def __init__(self, on_complete: Optional[Callable[[str], None]] = None):
+    def __init__(self, on_complete: Callable[[str], None] | None = None):
         self._lock = threading.Lock()
         self._state = RunState()
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._on_complete = on_complete
-        self._workspace_id: Optional[str] = None
+        self._workspace_id: str | None = None
 
     @property
-    def state(self) -> Dict[str, Any]:
+    def state(self) -> dict[str, Any]:
         with self._lock:
             return self._state.to_dict()
 
-    def start(self, workspace_id: str) -> Dict[str, Any]:
+    def start(self, workspace_id: str) -> dict[str, Any]:
         with self._lock:
             if self._state.running:
                 return {"started": False, "reason": "A pipeline run is already in progress."}
